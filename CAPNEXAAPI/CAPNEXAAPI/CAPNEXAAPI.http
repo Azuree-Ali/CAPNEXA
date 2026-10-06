@@ -1,0 +1,6 @@
+@CAPNEXAAPI_HostAddress = http://localhost:5001
+
+GET {{CAPNEXAAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
