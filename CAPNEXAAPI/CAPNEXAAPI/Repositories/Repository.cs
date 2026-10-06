@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using PharmacyAPI.DataAccess;
+using CAPNEXAAPI.DataAccess;
 using System.Linq.Expressions;
 
-namespace PharmacyAPI.Repositories
+namespace CAPNEXAAPI.Repositories
 {
     public class Repository<T> : IRepository<T> where T : class
     {

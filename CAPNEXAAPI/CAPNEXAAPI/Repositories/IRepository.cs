@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Linq.Expressions;
 
-namespace PharmacyAPI.Repositories
+namespace CAPNEXAAPI.Repositories
 {
     public interface IRepository<T> where T : class
     {
