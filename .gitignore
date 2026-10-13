@@ -2,5 +2,21 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
+# Visual Studio / Rider
 /.vs
-/CAPNEXAAPI/.vs
+**/.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+**/bin/
+**/obj/
+
+# Scratch SQL query files
+SQLQuery*.sql
+
+# OS
+.DS_Store
+Thumbs.db

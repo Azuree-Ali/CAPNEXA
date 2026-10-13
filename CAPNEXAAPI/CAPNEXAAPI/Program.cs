@@ -23,6 +23,21 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.Lax,
+    OnAppendCookie = context =>
+    {
+        if (context.CookieName.StartsWith(".AspNetCore.Correlation.", StringComparison.OrdinalIgnoreCase))
+            context.CookieOptions.IsEssential = true;
+    }
+});
+
+app.UseCors("Frontend");
+app.UseRateLimiter();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
