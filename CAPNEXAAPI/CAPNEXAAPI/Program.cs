@@ -27,7 +27,8 @@ app.UseRouting();
 
 app.UseCookiePolicy(new CookiePolicyOptions
 {
-    MinimumSameSitePolicy = SameSiteMode.Lax,
+    // Let the auth handlers set their protocol cookies to SameSite=None when needed.
+    MinimumSameSitePolicy = SameSiteMode.Unspecified,
     OnAppendCookie = context =>
     {
         if (context.CookieName.StartsWith(".AspNetCore.Correlation.", StringComparison.OrdinalIgnoreCase))

@@ -37,9 +37,9 @@ public class ExternalAuthService : IExternalAuthService
         var user = await _userManager.FindByLoginAsync(provider, providerKey);
 
         if (user is not null)
-            return user.IsActive
+            return user.IsActive && await _userManager.IsEmailConfirmedAsync(user)
                 ? Succeed(user)
-                : Fail("account_disabled");
+                : Fail(user.IsActive ? "email_unconfirmed" : "account_disabled");
 
         var created = await CreateUserAsync(provider, providerKey, email, emailVerified, firstName, lastName, displayName);
 
@@ -130,7 +130,7 @@ public class ExternalAuthService : IExternalAuthService
     {
         // A concurrent registration may have already created and linked this login.
         var existing = await _userManager.FindByLoginAsync(provider, providerKey);
-        if (existing is not null && existing.IsActive)
+        if (existing is not null && existing.IsActive && await _userManager.IsEmailConfirmedAsync(existing))
             return (existing, null);
 
         return (null, "creation_failed");

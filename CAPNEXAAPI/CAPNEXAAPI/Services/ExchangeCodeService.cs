@@ -1,31 +1,18 @@
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.Caching.Memory;
+using System.Collections.Concurrent;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace CAPNEXAAPI.Services;
 
 public class ExchangeCodeService
 {
-    private const string Purpose = "Auth.ExchangeCode.v1";
     private static readonly TimeSpan Lifetime = TimeSpan.FromMinutes(2);
-
-    private readonly IDataProtector _protector;
-    private readonly IMemoryCache _cache;
-
-    public ExchangeCodeService(IDataProtectionProvider protectionProvider, IMemoryCache cache)
-    {
-        _protector = protectionProvider.CreateProtector(Purpose);
-        _cache = cache;
-    }
+    private readonly ConcurrentDictionary<string, ExchangeCodeEntry> _codes = new();
 
     public string Issue(string userId)
     {
-        var nonce = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
-        var payload = string.Join('|', userId, DateTimeOffset.UtcNow.ToUnixTimeSeconds(), nonce);
-        var code = _protector.Protect(payload);
-
-        _cache.Set(code, userId, Lifetime);
-
+        var code = WebEncoders.Base64UrlEncode(RandomNumberGenerator.GetBytes(32));
+        _codes[Hash(code)] = new ExchangeCodeEntry(userId, DateTimeOffset.UtcNow.Add(Lifetime));
         return code;
     }
 
@@ -33,26 +20,16 @@ public class ExchangeCodeService
     {
         userId = string.Empty;
 
-        try
-        {
-            var payload = _protector.Unprotect(code);
-            var parts = payload.Split('|');
-
-            if (parts.Length != 3 || !long.TryParse(parts[1], out var issuedAt))
-                return false;
-
-            if (DateTimeOffset.FromUnixTimeSeconds(issuedAt).Add(Lifetime) < DateTimeOffset.UtcNow)
-                return false;
-
-            if (!_cache.TryGetValue(code, out userId!))
-                return false;
-
-            _cache.Remove(code);
-            return !string.IsNullOrWhiteSpace(userId);
-        }
-        catch (CryptographicException)
-        {
+        // TryRemove is atomic: at most one concurrent request can redeem a code.
+        if (!_codes.TryRemove(Hash(code), out var entry) || entry.ExpiresAt <= DateTimeOffset.UtcNow)
             return false;
-        }
+
+        userId = entry.UserId;
+        return !string.IsNullOrWhiteSpace(userId);
     }
+
+    private static string Hash(string value)
+        => Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(value)));
+
+    private sealed record ExchangeCodeEntry(string UserId, DateTimeOffset ExpiresAt);
 }

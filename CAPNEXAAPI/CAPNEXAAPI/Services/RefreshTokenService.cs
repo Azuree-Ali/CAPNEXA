@@ -9,7 +9,7 @@ using System.Text;
 
 namespace CAPNEXAAPI.Services;
 
-public class RefreshTokenService
+public class RefreshTokenService : IRefreshTokenService
 {
     private readonly ApplicationDbContext _context;
     private readonly ITokenService _tokenService;
@@ -61,6 +61,13 @@ public class RefreshTokenService
 
         if (stored.ExpiresAtUtc <= now)
             return null;
+
+        if (!stored.User.IsActive || !stored.User.EmailConfirmed)
+        {
+            stored.RevokedAtUtc = now;
+            await _context.SaveChangesAsync();
+            return null;
+        }
 
         await using var transaction = await _context.Database.BeginTransactionAsync();
 
