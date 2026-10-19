@@ -1,0 +1,62 @@
+.login-card > *, .feature-card > div { min-width: 0; }
+.brand-content, .login-form-content, .recovery-card { overflow-wrap: anywhere; }
+.info-dialog { max-height: calc(100dvh - 32px); overflow-y: auto; }
+
+@media (max-width:1100px){.brand-panel,.login-form-panel{padding:32px}
+  .brand-panel h1{font-size:32px;line-height:40px}
+  .access-pill{font-size:10px}}
+
+@media (max-width:900px){.login-container{padding:24px 16px 40px}
+  .login-card{grid-template-columns:1fr;min-height:0}
+  .brand-panel{padding:32px}
+  .brand-panel h1{max-width:100%;font-size:28px;line-height:36px}
+  .brand-intro{margin:16px 0 24px}
+  .login-form-panel{padding:32px;gap:32px}
+  .login-form-content{max-width:440px;margin:auto}
+  .feature-list{gap:10px}
+  .feature-card{padding:12px}
+  .recovery-container{padding:40px 16px}}
+
+@media (max-width:480px){.brand-panel,.login-form-panel{padding:24px}
+  .access-pill{padding:7px 9px}
+  .recovery-card{padding:28px 22px}
+  .recovery-heading h1{font-size:25px}
+  .footer-inner{flex-direction:column;padding:20px 16px}
+  .header-inner{padding:0 16px}
+  .form-options{flex-wrap:wrap}
+}
+
+@media (max-width: 900px) {
+  .input-wrap input { font-size: 16px; }
+  .text-button, .reveal-button, .dialog-close { min-width: 44px; min-height: 44px; }
+  .reveal-button { margin-right: -8px; }
+  .site-header .capnexa-brand, .back-link, .form-options a, .checkbox-label {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .legal-links button { min-height: 44px; }
+  .footer-inner { flex-wrap: wrap; }
+}
+@media (max-width: 480px) {
+  .header-inner nav, .footer-inner nav { gap: 8px; }
+  .login-container { padding: 16px 12px 28px; }
+  .login-card { border-radius: 16px; }
+  .brand-panel, .login-form-panel { padding: 24px 20px; }
+}
+
+@media (max-width:900px) { .header-inner { padding:0 16px; } .footer-inner { padding-left:16px; padding-right:16px; } }
+@media (max-width:480px) {
+  .header-inner { padding:0 12px; }
+  .footer-inner { padding-left:12px; padding-right:12px; }
+  .capnexa-brand--header { gap:10px; }
+  .capnexa-brand--header .capnexa-brand__symbol { width:34px; height:34px; }
+  .capnexa-brand--header .capnexa-brand__wordmark { width:112px; }
+  .capnexa-brand--panel { gap:10px; }
+  .capnexa-brand--panel .capnexa-brand__symbol { width:48px; height:48px; }
+  .capnexa-brand--panel .capnexa-brand__wordmark { width:160px; }
+}
+
+@media (max-width:320px) {
+  body { min-width:0; }
+}
