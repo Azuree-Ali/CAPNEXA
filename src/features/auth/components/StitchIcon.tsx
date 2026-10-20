@@ -27,13 +27,7 @@ const icons = {
 
 type IconName = keyof typeof icons;
 
-export function StitchIcon({
-  name,
-  size = 20,
-}: {
-  name: IconName;
-  size?: number;
-}) {
+export function StitchIcon({ name, size = 20 }: { name: IconName; size?: number }) {
   const Icon = icons[name];
 
   return (

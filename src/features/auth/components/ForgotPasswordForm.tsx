@@ -10,22 +10,49 @@ export function ForgotPasswordForm() {
   const { submit, pending, error, result, clearFeedback } = usePasswordRecovery();
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const next = validateRecovery({ email }); setFieldError(next.email);
-    if (next.email) { event.currentTarget.querySelector<HTMLInputElement>("[name=email]")?.focus(); return; }
+    const next = validateRecovery({ email });
+    setFieldError(next.email);
+    if (next.email) {
+      event.currentTarget.querySelector<HTMLInputElement>("[name=email]")?.focus();
+      return;
+    }
     await submit({ email: email.trim() });
   }
-  return <form
-  onSubmit={handleSubmit}
-  noValidate
-  aria-busy={pending}
-  className="auth-form recovery-form"
->
-    <EmailField value={email} error={fieldError} disabled={pending}
-      onChange={v => { setEmail(v); setFieldError(undefined); clearFeedback(); }} />
-    <p className="recovery-notice"><CheckCircle2 size={18} aria-hidden="true" /><span>If an eligible account exists, instructions will be sent.</span></p>
-    <FormFeedback error={error} message={result?.message} />
-    <button type="submit" className="primary-button" disabled={pending}>
-      {pending ? <><LoaderCircle size={18} className="spin" />Sending request...</> : <>Send Reset Instructions<ArrowRight size={18} /></>}
-    </button>
-  </form>;
+  return (
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      aria-busy={pending}
+      className="auth-form recovery-form"
+    >
+      <EmailField
+        value={email}
+        error={fieldError}
+        disabled={pending}
+        onChange={(v) => {
+          setEmail(v);
+          setFieldError(undefined);
+          clearFeedback();
+        }}
+      />
+      <p className="recovery-notice">
+        <CheckCircle2 size={18} aria-hidden="true" />
+        <span>If an eligible account exists, instructions will be sent.</span>
+      </p>
+      <FormFeedback error={error} message={result?.message} />
+      <button type="submit" className="primary-button" disabled={pending}>
+        {pending ? (
+          <>
+            <LoaderCircle size={18} className="spin" />
+            Sending request...
+          </>
+        ) : (
+          <>
+            Send Reset Instructions
+            <ArrowRight size={18} />
+          </>
+        )}
+      </button>
+    </form>
+  );
 }
