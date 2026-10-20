@@ -36,11 +36,7 @@ export function BrandLogo({
           alt="CAPNEXA"
         />
 
-        {tagline && (
-          <span className="capnexa-brand__tagline">
-            The Connected Capstone Journey
-          </span>
-        )}
+        {tagline && <span className="capnexa-brand__tagline">The Connected Capstone Journey</span>}
       </span>
     </span>
   );

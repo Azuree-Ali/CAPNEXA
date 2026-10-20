@@ -16,7 +16,10 @@ export async function login(values: LoginValues): Promise<PreviewResult> {
     throw new Error("Backend login integration is not configured yet.");
   }
   void values; // لا نخزن ولا نسجل كلمة المرور في وضع المعاينة.
-  return { mode: "preview", message: "UI preview only. No sign-in request was sent. Backend integration is pending." };
+  return {
+    mode: "preview",
+    message: "UI preview only. No sign-in request was sent. Backend integration is pending.",
+  };
 }
 export async function requestPasswordRecovery(values: RecoveryValues): Promise<PreviewResult> {
   if (import.meta.env.VITE_AUTH_MODE !== "preview") {
@@ -27,5 +30,8 @@ export async function requestPasswordRecovery(values: RecoveryValues): Promise<P
     throw new Error("Backend password recovery integration is not configured yet.");
   }
   void values;
-  return { mode: "preview", message: "UI preview only. No email was sent. Backend integration is pending." };
+  return {
+    mode: "preview",
+    message: "UI preview only. No email was sent. Backend integration is pending.",
+  };
 }

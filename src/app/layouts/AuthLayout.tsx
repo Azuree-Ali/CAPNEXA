@@ -31,11 +31,7 @@ export function AuthLayout() {
 
   function infoButton(label: string) {
     return (
-      <button
-        type="button"
-        className="text-button"
-        onClick={() => setInfo(label)}
-      >
+      <button type="button" className="text-button" onClick={() => setInfo(label)}>
         {label}
       </button>
     );
@@ -85,27 +81,15 @@ export function AuthLayout() {
         aria-labelledby="info-title"
         onClose={() => setInfo(null)}
       >
-        <button
-          type="button"
-          className="dialog-close"
-          aria-label="Close"
-          onClick={closeDialog}
-        >
+        <button type="button" className="dialog-close" aria-label="Close" onClick={closeDialog}>
           <X size={20} aria-hidden="true" />
         </button>
 
         <h2 id="info-title">{info}</h2>
 
-        <p>
-          The university will provide the official{" "}
-          {info?.toLowerCase()} details before launch.
-        </p>
+        <p>The university will provide the official {info?.toLowerCase()} details before launch.</p>
 
-        <button
-          type="button"
-          className="primary-button"
-          onClick={closeDialog}
-        >
+        <button type="button" className="primary-button" onClick={closeDialog}>
           Close
         </button>
       </dialog>

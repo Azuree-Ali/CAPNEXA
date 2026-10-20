@@ -1,7 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { App } from "./App";
+import { App } from "@/app/App";
 
+import "../styles/tokens.css";
 import "../styles/globals.css";
 import "../styles/responsive.css";
 
