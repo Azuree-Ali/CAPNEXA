@@ -1,5 +1,6 @@
 using CAPNEXAAPI.DTOs.Request;
 using CAPNEXAAPI.Services;
+using CAPNEXAAPI.Utils;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,9 +9,9 @@ using System.Security.Claims;
 
 namespace CAPNEXAAPI.Areas.Identity.Controllers;
 
-[Area("Identity")]
+[Area(CD.IDENTITY_AREA)]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/[area]/[controller]")]
 [EnableRateLimiting("auth")]
 public sealed class AuthController : ControllerBase
 {

@@ -107,6 +107,20 @@ public class RefreshTokenService : IRefreshTokenService
         return true;
     }
 
+    public async Task RevokeAllAsync(string userId)
+    {
+        var activeTokens = await _context.RefreshTokens
+            .Where(token => token.UserId == userId && token.RevokedAtUtc == null)
+            .ToListAsync();
+
+        var revokedAt = DateTime.UtcNow;
+        foreach (var token in activeTokens)
+            token.RevokedAtUtc = revokedAt;
+
+        if (activeTokens.Count > 0)
+            await _context.SaveChangesAsync();
+    }
+
     private async Task RevokeFamilyAsync(string userId)
     {
         var activeTokens = await _context.RefreshTokens
