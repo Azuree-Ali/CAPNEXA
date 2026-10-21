@@ -305,6 +305,7 @@ public static class DependencyInjection
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IExternalAuthService, ExternalAuthService>();
+        services.AddScoped<IStudentProfileService, StudentProfileService>();
 
         services.AddHttpClient("GitHub", client => client.Timeout = TimeSpan.FromSeconds(15));
         services.AddTransient<IEmailSender, EmailSender>();
