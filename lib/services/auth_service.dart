@@ -1,6 +1,6 @@
 import 'package:capnexa/models/student.dart';
 
-enum SocialProvider { google, microsoft, github }
+enum SocialProvider { google, github }
 
 /// Authentication contract.
 /// TODO(api): implement with `POST /auth/login`, `/auth/register`,

@@ -52,13 +52,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String _name(SocialProvider p) => switch (p) {
         SocialProvider.google => 'Google',
-        SocialProvider.microsoft => 'Microsoft',
         SocialProvider.github => 'GitHub',
       };
 
   Provider _icon(SocialProvider p) => switch (p) {
         SocialProvider.google => Provider.google,
-        SocialProvider.microsoft => Provider.microsoft,
         SocialProvider.github => Provider.github,
       };
 

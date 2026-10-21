@@ -95,7 +95,7 @@ class AppIcon extends StatelessWidget {
   }
 }
 
-enum Provider { google, microsoft, github }
+enum Provider { google, github }
 
 /// Brand marks used by the social sign-in buttons (copied from the export).
 class ProviderIcon extends StatelessWidget {
@@ -114,7 +114,6 @@ class ProviderIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final data = switch (provider) {
       Provider.google => _google,
-      Provider.microsoft => _microsoft,
       Provider.github => _github,
     };
     final size = provider == Provider.github ? 18.0 : 17.0;
