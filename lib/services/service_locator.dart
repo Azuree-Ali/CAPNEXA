@@ -16,6 +16,9 @@ import 'package:capnexa/services/project_service.dart';
 import 'package:capnexa/services/similarity_service.dart';
 import 'package:capnexa/services/submission_service.dart';
 import 'package:capnexa/services/team_service.dart';
+import 'package:capnexa/core/network/api_client.dart';
+import 'package:capnexa/core/network/token_storage.dart';
+import 'package:capnexa/services/api/api_auth_service.dart';
 
 /// Minimal service locator (no extra dependency).
 ///
@@ -35,9 +38,18 @@ class ServiceLocator {
   static late NotificationService notifications;
   static late SimilarityService similarity;
   static late HomeService home;
+    /// true = بيانات وهمية، false = الباك اند الحقيقي
+  static const bool _mockAuth = true;
+
+  static late TokenStorage tokenStorage;
+  static late ApiClient apiClient;
 
   static void setup() {
-    auth = MockAuthService();
+    //auth = MockAuthService();
+    tokenStorage = TokenStorage();
+    apiClient = ApiClient(tokenStorage: tokenStorage);
+
+    auth = _mockAuth ? MockAuthService() : ApiAuthService(apiClient);
     team = MockTeamService();
     projects = MockProjectService();
     milestones = MockMilestoneService();

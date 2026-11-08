@@ -12,6 +12,7 @@ import 'package:capnexa/core/widgets/app_text_field.dart';
 import 'package:capnexa/features/auth/widgets/auth_shell.dart';
 import 'package:capnexa/services/auth_service.dart';
 import 'package:capnexa/services/service_locator.dart';
+import 'package:capnexa/core/network/api_exception.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,8 +22,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _email = TextEditingController(text: 'lina.hassan@northbridge.edu');
-  final _password = TextEditingController(text: 'Passw0rd!!');
+  final _email = TextEditingController();
+  final _password = TextEditingController();
   bool _remember = true;
   bool _busy = false;
   SocialProvider? _connecting;
@@ -34,20 +35,59 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _signIn() async {
-    if (_busy) return;
-    setState(() => _busy = true);
-    await ServiceLocator.auth.signIn(email: _email.text.trim(), password: _password.text);
-    if (!mounted) return;
-    AppNav.go(context, Routes.home);
-  }
+  // Future<void> _signIn() async {
+  //   if (_busy) return;
+  //   setState(() => _busy = true);
+  //   await ServiceLocator.auth.signIn(email: _email.text.trim(), password: _password.text);
+  //   if (!mounted) return;
+  //   AppNav.go(context, Routes.home);
+  // }
+
+  // Future<void> _social(SocialProvider provider) async {
+  //   if (_connecting != null) return;
+  //   setState(() => _connecting = provider);
+  //   await ServiceLocator.auth.signInWithProvider(provider);
+  //   if (!mounted) return;
+  //   AppNav.go(context, Routes.home);
+  // }
+    Future<void> _signIn() async {
+      if (_busy) return;
+      setState(() => _busy = true);
+      try {
+        await ServiceLocator.auth
+            .signIn(email: _email.text.trim(), password: _password.text);
+        if (!mounted) return;
+        AppNav.go(context, Routes.home);
+      } on ApiException catch (e) {
+        _showError(e.message);
+      } catch (_) {
+        _showError('Something went wrong. Please try again.');
+      } finally {
+        if (mounted) setState(() => _busy = false);
+      }
+    }
 
   Future<void> _social(SocialProvider provider) async {
     if (_connecting != null) return;
     setState(() => _connecting = provider);
-    await ServiceLocator.auth.signInWithProvider(provider);
+    try {
+      await ServiceLocator.auth.signInWithProvider(provider);
+      if (!mounted) return;
+      AppNav.go(context, Routes.home);
+    } on ApiException catch (e) {
+      _showError(e.message);
+    } catch (_) {
+      _showError('Something went wrong. Please try again.');
+    } finally {
+      if (mounted) setState(() => _connecting = null);
+    }
+  }
+
+  void _showError(String message) {
     if (!mounted) return;
-    AppNav.go(context, Routes.home);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   String _name(SocialProvider p) => switch (p) {
@@ -66,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          AuthHeading(
+          const AuthHeading(
             eyebrow: 'WELCOME BACK',
             title: 'Sign in to ${AppConstants.brandName}',
             subtitle: 'Continue managing your graduation project.',

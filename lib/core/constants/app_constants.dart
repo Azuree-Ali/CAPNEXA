@@ -8,7 +8,10 @@ class AppConstants {
   static const appVersion = '1.0.0';
 
   /// Placeholder for the future ASP.NET Core Web API.
-  static const apiBaseUrl = 'https://api.example.com/api/v1';
+  static const apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://10.0.2.2:5000/api',
+  );
 
   /// Simulated network latency used by the mock services.
   static const mockLatency = Duration(milliseconds: 350);
