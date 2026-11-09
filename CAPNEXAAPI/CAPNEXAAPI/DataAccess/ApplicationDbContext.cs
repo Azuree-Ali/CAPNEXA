@@ -59,6 +59,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Project>(entity =>
         {
             entity.Property(x => x.Title).HasMaxLength(250).IsRequired();
+            entity.Property(x => x.RejectionReason).HasMaxLength(2000);
+            entity.HasIndex(x => x.TeamId)
+                .IsUnique()
+                .HasFilter("[Status] <> 'Rejected'");
             entity.HasOne(x => x.Team).WithMany(x => x.Projects).HasForeignKey(x => x.TeamId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.Supervisor).WithMany(x => x.Projects).HasForeignKey(x => x.SupervisorId).OnDelete(DeleteBehavior.SetNull);
         });

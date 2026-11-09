@@ -308,6 +308,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IStudentProfileService, StudentProfileService>();
         services.AddScoped<ITeamService, TeamService>();
+        services.AddScoped<IProjectProposalService, ProjectProposalService>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         services.AddHttpClient("GitHub", client => client.Timeout = TimeSpan.FromSeconds(15));

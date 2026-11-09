@@ -230,9 +230,16 @@ namespace CAPNEXAAPI.DataAccess.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("SupervisorId")
                         .HasColumnType("int");
@@ -249,7 +256,9 @@ namespace CAPNEXAAPI.DataAccess.Migrations
 
                     b.HasIndex("SupervisorId");
 
-                    b.HasIndex("TeamId");
+                    b.HasIndex("TeamId")
+                        .IsUnique()
+                        .HasFilter("[Status] <> 'Rejected'");
 
                     b.ToTable("Projects");
                 });

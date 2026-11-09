@@ -66,6 +66,10 @@ All protected routes require a valid bearer token and Student role, except the e
 | GET | `/api/Student/Teams/me` | Student bearer | Read own team and members |
 | POST | `/api/Student/Teams/join` | Student bearer | Join by invite code |
 | POST | `/api/Student/Teams/leave` | Student bearer | Leave team as a non-leader |
+| GET | `/api/Student/ProjectProposals` | Student bearer | List proposal attempts for own team |
+| POST | `/api/Student/ProjectProposals` | Student bearer, team leader | Create a draft proposal |
+| PUT | `/api/Student/ProjectProposals/{projectId}` | Student bearer, team leader | Edit a draft proposal |
+| POST | `/api/Student/ProjectProposals/{projectId}/submit` | Student bearer, team leader | Submit a draft for review |
 
 ### Admin web dashboard only
 
@@ -243,6 +247,40 @@ No request body. Success: `204 No Content`. A leader receives `409 team_leader_c
 
 The database enforces one membership per student, unique invite codes, and unique student/team membership pairs. Team operations use the generic repository and do not open explicit transactions. The five-member limit is checked before each join; simultaneous join requests could race, so strict concurrency-safe capacity enforcement would require a database-level atomic counter or transaction in a later change. Leadership transfer and team deletion are not implemented yet.
 
+## Project proposals
+
+All proposal endpoints require a Student bearer token, a complete academic profile, and team membership. Every team has one active proposal at a time. Any team member can create or edit the team's draft, but only the team leader can submit it for review. All team members can view the team's proposal attempts. A rejected attempt remains in the list with its rejection reason, and any team member can create a new draft from scratch. Submitted proposals cannot be edited through the student API.
+
+### List proposal attempts
+
+`GET /api/Student/ProjectProposals`
+
+Returns `200` with an array of proposals, newest first. Each item contains `projectId`, `teamId`, `title`, `description`, `status`, `rejectionReason`, `createdAt`, and `submittedAt`. Returns `409 team_required` when the student is not on a team.
+
+### Create a proposal draft
+
+`POST /api/Student/ProjectProposals`
+
+```json
+{"title":"Campus Helper","description":"A mobile application that helps students find campus services and announcements."}
+```
+
+Title is required and must be 3–250 characters. Description is required and must be 10–4000 characters. Success is `200` with the created proposal in `Draft` status. Returns `409 active_proposal_exists` if the team already has a draft, submitted, or approved proposal.
+
+### Edit a draft
+
+`PUT /api/Student/ProjectProposals/{projectId}`
+
+Uses the same JSON body and field limits as draft creation. Success is `200` with the updated proposal. Any team member can edit a draft belonging to their team.
+
+### Submit for review
+
+`POST /api/Student/ProjectProposals/{projectId}/submit`
+
+No request body. Success is `200` with status `PendingReview` and a `submittedAt` timestamp. Only the team leader can submit a complete draft. Other team members receive `403 team_leader_required`. A rejected proposal is not edited or resubmitted; create a new proposal instead. Review decisions and setting `rejectionReason` will be provided by the proposal-review feature.
+
+Common errors: `403 profile_completion_required`, `403 account_disabled`, `403 team_leader_required`, `404 proposal_not_found`, `409 team_required`, `409 active_proposal_exists`, and `409 proposal_not_editable`.
+
 ## 5. Errors Flutter should handle
 
 - `400`: invalid request, validation failure, or profile completion issue.
@@ -279,7 +317,7 @@ Use platform secure storage for access/refresh tokens. OAuth and email confirmat
 These are planned backend features, not available endpoints in the current API. Build them in this order because each stage depends on earlier data and permissions.
 
 1. **Team management**: backend routes for create, join, leave, and member listing are implemented. Flutter must still connect its screens to these routes. Leadership transfer and team deletion are future work.
-2. **Project proposal and lifecycle**: create/edit proposal draft, submit proposal, track status, approval/rejection and reasons.
+2. **Project proposal**: draft creation/editing, submission, and listing of proposal attempts are implemented. Review decisions and rejection reasons will be completed with proposal review.
 3. **Proposal review**: web dashboard review and decision history.
 4. **Supervisor assignment**: assign supervisors to approved projects and enforce supervisor capacity.
 5. **Milestones**: create ordered milestones, due dates, status, and project progress.
