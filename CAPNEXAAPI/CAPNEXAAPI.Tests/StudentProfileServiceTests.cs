@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using CAPNEXAAPI.DataAccess;
 using CAPNEXAAPI.DTOs.Request;
 using CAPNEXAAPI.Models;
+using CAPNEXAAPI.Repositories;
 using CAPNEXAAPI.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -235,7 +236,15 @@ public sealed class StudentProfileServiceTests
             {
                 ["AppUrls:ApiBaseUrl"] = "https://localhost:7072"
             }).Build();
-            Service = new StudentProfileService(Users, Db, Email, RefreshTokens, configuration);
+            Service = new StudentProfileService(
+                Users,
+                new Repository<StudentProfile>(Db),
+                new Repository<Team>(Db),
+                new Repository<TeamMember>(Db),
+                new Repository<Project>(Db),
+                Email,
+                RefreshTokens,
+                configuration);
         }
 
         public static async Task<Fixture> CreateAsync()
@@ -308,7 +317,6 @@ public sealed class StudentProfileServiceTests
         public string? RevokedUserId { get; private set; }
         public Task<string> IssueAsync(string userId, string? jwtId = null) => throw new NotSupportedException();
         public Task<(ApplicationUser User, string AccessToken, int ExpiresInSeconds, string RefreshToken)?> RefreshAsync(string rawToken) => throw new NotSupportedException();
-        public Task<bool> RevokeAsync(string rawToken, string userId) => throw new NotSupportedException();
         public Task RevokeAllAsync(string userId) { RevokedUserId = userId; return Task.CompletedTask; }
     }
 }

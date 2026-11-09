@@ -1,101 +1,114 @@
 using System.Net;
-using CAPNEXAAPI.DataAccess;
+using System.Net.Mail;
 using CAPNEXAAPI.DTOs.Request;
 using CAPNEXAAPI.DTOs.Response;
 using CAPNEXAAPI.Models;
+using CAPNEXAAPI.Repositories;
 using CAPNEXAAPI.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.EntityFrameworkCore;
 
 namespace CAPNEXAAPI.Services;
 
 public sealed class AuthService : IAuthService
 {
     private readonly UserManager<ApplicationUser> _users;
-    private readonly ApplicationDbContext _db;
+    private readonly IRepository<StudentProfile> _studentProfiles;
     private readonly IEmailSender _emailSender;
     private readonly ITokenService _tokens;
     private readonly IRefreshTokenService _refreshTokens;
-    private readonly ExchangeCodeService _exchangeCodes;
 
     public AuthService(
         UserManager<ApplicationUser> users,
-        ApplicationDbContext db,
+        IRepository<StudentProfile> studentProfiles,
         IEmailSender emailSender,
         ITokenService tokens,
-        IRefreshTokenService refreshTokens,
-        ExchangeCodeService exchangeCodes)
+        IRefreshTokenService refreshTokens)
     {
         _users = users;
-        _db = db;
+        _studentProfiles = studentProfiles;
         _emailSender = emailSender;
         _tokens = tokens;
         _refreshTokens = refreshTokens;
-        _exchangeCodes = exchangeCodes;
     }
 
     public async Task<AuthOperationResult> RegisterAsync(RegisterDto request, string apiBaseUrl)
     {
-        if (await _users.FindByEmailAsync(request.Email) is not null)
+        var email = request.Email.Trim();
+        var studentNumber = request.StudentNumber.Trim();
+
+        if (await _users.FindByEmailAsync(email) is not null)
             return new("This email address is already in use.", Conflict: true);
 
-        if (await _db.StudentProfiles.AnyAsync(s => s.StudentNumber == request.StudentNumber))
-            return new("This university ID is already in use.", Conflict: true);
+        if (await _studentProfiles.GetOneAsync(profile => profile.StudentNumber == studentNumber) is not null)
+            return new("This student number is already in use.", Conflict: true);
 
         var user = new ApplicationUser
         {
             FirstName = request.FirstName.Trim(),
             LastName = request.LastName.Trim(),
-            Email = request.Email.Trim(),
-            UserName = request.Email.Trim()
+            Email = email,
+            UserName = email
         };
 
-        await using var transaction = await _db.Database.BeginTransactionAsync();
-        var create = await _users.CreateAsync(user, request.Password);
-        if (!create.Succeeded)
-        {
-            await transaction.RollbackAsync();
-            return new(string.Join(" ", create.Errors.Select(e => e.Description)));
-        }
+        var createResult = await _users.CreateAsync(user, request.Password);
+        if (!createResult.Succeeded)
+            return new(string.Join(" ", createResult.Errors.Select(error => error.Description)));
 
         var roleResult = await _users.AddToRoleAsync(user, CD.STUDENT_ROLE);
         if (!roleResult.Succeeded)
         {
-            await transaction.RollbackAsync();
-            return new(string.Join(" ", roleResult.Errors.Select(e => e.Description)));
+            await _users.DeleteAsync(user);
+            return new("The account could not be registered.");
         }
 
-        _db.StudentProfiles.Add(new StudentProfile
+        await _studentProfiles.CreateAsync(new StudentProfile
         {
             UserId = user.Id,
-            StudentNumber = request.StudentNumber.Trim(),
+            StudentNumber = studentNumber,
             Department = request.Department.Trim(),
             AcademicYear = request.AcademicYear.Trim()
         });
+        await _studentProfiles.CommitAsync();
 
         try
         {
-            await _db.SaveChangesAsync();
-            await transaction.CommitAsync();
+            await SendConfirmationEmailAsync(user, apiBaseUrl);
+            return new(Message: "Account created. Check your email and confirm it before logging in.");
         }
-        catch (DbUpdateException)
+        catch (SmtpException)
         {
-            await transaction.RollbackAsync();
-            _db.Entry(user).State = EntityState.Detached;
-            var profileEntry = _db.ChangeTracker.Entries<StudentProfile>()
-                .FirstOrDefault(entry => entry.Entity.UserId == user.Id);
-            if (profileEntry is not null)
-                profileEntry.State = EntityState.Detached;
-
-            if (await _db.StudentProfiles.AnyAsync(s => s.StudentNumber == request.StudentNumber))
-                return new("This university ID is already in use.", Conflict: true);
-
-            throw;
+            return new(
+                Message: "Account created, but the confirmation email was not sent. Request another confirmation email.",
+                EmailConfirmationSent: false);
         }
+        catch (InvalidOperationException)
+        {
+            return new(
+                Message: "Account created, but the confirmation email was not sent. Request another confirmation email.",
+                EmailConfirmationSent: false);
+        }
+    }
 
-        await SendConfirmationEmailAsync(user, apiBaseUrl);
-        return new(Message: "Registration completed successfully. Please check your email to activate your account.");
+    public async Task<AuthOperationResult> ResendConfirmationAsync(string email, string apiBaseUrl)
+    {
+        var user = await _users.FindByEmailAsync(email.Trim());
+        if (user is null || user.EmailConfirmed || !user.IsActive)
+            return new(Message: "If the account needs confirmation, a link will be sent.");
+
+        try
+        {
+            await SendConfirmationEmailAsync(user, apiBaseUrl);
+            return new(Message: "If the account needs confirmation, a link will be sent.");
+        }
+        catch (SmtpException)
+        {
+            return new("The confirmation email could not be sent. Try again later.", ServiceUnavailable: true);
+        }
+        catch (InvalidOperationException)
+        {
+            return new("The confirmation email could not be sent. Try again later.", ServiceUnavailable: true);
+        }
     }
 
     public async Task<bool> ConfirmEmailAsync(string userId, string token)
@@ -110,34 +123,86 @@ public sealed class AuthService : IAuthService
 
     public async Task<AuthOperationResult<AuthResponseDto>> LoginAsync(LoginDto request)
     {
-        var user = await _users.FindByEmailAsync(request.Email);
+        var user = await _users.FindByEmailAsync(request.Email.Trim());
         if (user is null || !await _users.CheckPasswordAsync(user, request.Password))
             return new(null, "Invalid email or password.", Unauthorized: true);
-        if (!user.IsActive)
-            return new(null, "Your account has been disabled.", Unauthorized: true);
-        if (!await _users.IsEmailConfirmedAsync(user))
-            return new(null, "Your account is not activated yet. Please activate your account first.");
 
-        return new(await BuildAuthResponseAsync(user), null);
+        if (!user.IsActive)
+            return new(null, "This account is disabled.", Unauthorized: true);
+
+        if (!await _users.IsEmailConfirmedAsync(user))
+            return new(null, "Confirm your email before logging in.");
+
+        return new(await CreateAuthResponseAsync(user));
     }
 
-    public async Task<AuthOperationResult<AuthResponseDto>> ExchangeAsync(ExchangeCodeDto request)
+    public async Task<AuthOperationResult<AuthResponseDto>> ExternalLoginAsync(
+        string provider,
+        string providerKey,
+        string? email,
+        bool emailVerified,
+        string? firstName,
+        string? lastName,
+        string? displayName)
     {
-        if (!_exchangeCodes.TryConsume(request.Code, out var userId))
-            return new(null, "Invalid or expired authorization code.");
+        if (string.IsNullOrWhiteSpace(providerKey))
+            return new(null, "invalid_provider_id");
 
-        var user = await _users.FindByIdAsync(userId);
-        if (user is null || !user.IsActive || !await _users.IsEmailConfirmedAsync(user))
-            return new(null, "Unable to sign in with this code.");
+        var user = await _users.FindByLoginAsync(provider, providerKey);
+        if (user is not null)
+        {
+            if (!user.IsActive)
+                return new(null, "account_disabled");
+            if (!await _users.IsEmailConfirmedAsync(user))
+                return new(null, "email_unconfirmed");
 
-        return new(await BuildAuthResponseAsync(user), null);
+            return new(await CreateAuthResponseAsync(user));
+        }
+
+        if (string.IsNullOrWhiteSpace(email))
+            return new(null, "email_required");
+        if (!emailVerified)
+            return new(null, "email_unverified");
+        if (await _users.FindByEmailAsync(email) is not null)
+            return new(null, "email_conflict");
+
+        user = new ApplicationUser
+        {
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true,
+            FirstName = FirstNameOrDefault(firstName, displayName, provider),
+            LastName = lastName ?? string.Empty,
+            IsActive = true
+        };
+
+        var createResult = await _users.CreateAsync(user);
+        if (!createResult.Succeeded)
+            return new(null, "external_account_create_failed");
+
+        var roleResult = await _users.AddToRoleAsync(user, CD.STUDENT_ROLE);
+        if (!roleResult.Succeeded)
+        {
+            await _users.DeleteAsync(user);
+            return new(null, "external_account_create_failed");
+        }
+
+        var loginResult = await _users.AddLoginAsync(user, new UserLoginInfo(provider, providerKey, provider));
+        if (!loginResult.Succeeded)
+        {
+            await _users.DeleteAsync(user);
+            return new(null, "external_account_create_failed");
+        }
+
+        // External users complete their academic profile after signing in.
+        return new(await CreateAuthResponseAsync(user));
     }
 
     public async Task<AuthOperationResult<AuthResponseDto>> RefreshAsync(RefreshTokenDto request)
     {
         var result = await _refreshTokens.RefreshAsync(request.RefreshToken);
         if (result is null)
-            return new(null, "Invalid, expired, or reused refresh token.");
+            return new(null, "Refresh token is invalid, expired, or already used.", Unauthorized: true);
 
         return new(new AuthResponseDto
         {
@@ -145,16 +210,14 @@ public sealed class AuthService : IAuthService
             ExpiresInSeconds = result.Value.ExpiresInSeconds,
             RefreshToken = result.Value.RefreshToken,
             User = await BuildUserResponseAsync(result.Value.User)
-        }, null);
+        });
     }
 
-    public Task<bool> RevokeAsync(string refreshToken, string userId)
-        => _refreshTokens.RevokeAsync(refreshToken, userId);
-
-    private async Task<AuthResponseDto> BuildAuthResponseAsync(ApplicationUser user)
+    private async Task<AuthResponseDto> CreateAuthResponseAsync(ApplicationUser user)
     {
         var (accessToken, expiresInSeconds, jwtId) = await _tokens.CreateAccessTokenAsync(user);
         var refreshToken = await _refreshTokens.IssueAsync(user.Id, jwtId);
+
         return new AuthResponseDto
         {
             AccessToken = accessToken,
@@ -177,18 +240,19 @@ public sealed class AuthService : IAuthService
     private async Task SendConfirmationEmailAsync(ApplicationUser user, string apiBaseUrl)
     {
         var token = await _users.GenerateEmailConfirmationTokenAsync(user);
-        var link = $"{apiBaseUrl.TrimEnd('/')}/api/Auth/confirm-email" +
+        var link = $"{apiBaseUrl.TrimEnd('/')}/api/Identity/Auth/confirm-email" +
                    $"?userId={WebUtility.UrlEncode(user.Id)}&token={WebUtility.UrlEncode(token)}";
-        var body = $"""
-            <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto">
-              <h2>Welcome to CAPNEXA</h2>
-              <p>Hi {WebUtility.HtmlEncode(user.FirstName)},</p>
-              <p>Thanks for registering. Please confirm your email address to activate your account.</p>
-              <p><a href="{link}" style="display:inline-block;padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px">Activate my account</a></p>
-              <p>If the button does not work, copy and paste this link into your browser:</p>
-              <p><a href="{link}">{link}</a></p>
-            </div>
-            """;
-        await _emailSender.SendEmailAsync(user.Email!, "CAPNEXA - Activate your account", body);
+        var body = $"<h2>Welcome to CAPNEXA</h2><p>Hi {WebUtility.HtmlEncode(user.FirstName)},</p>" +
+                   $"<p><a href=\"{link}\">Confirm your email and activate your account</a></p>";
+
+        await _emailSender.SendEmailAsync(user.Email!, "CAPNEXA - Confirm your email", body);
+    }
+
+    private static string FirstNameOrDefault(string? firstName, string? displayName, string provider)
+    {
+        if (!string.IsNullOrWhiteSpace(firstName))
+            return firstName;
+
+        return string.IsNullOrWhiteSpace(displayName) ? provider : displayName;
     }
 }

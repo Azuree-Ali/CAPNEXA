@@ -1,79 +1,86 @@
-# CAPNEXA Backend API Reference for Flutter
+# CAPNEXA Backend API and Flutter Integration Guide
 
-Flutter and Dio integration guide
+This guide describes the backend API as it exists in the original `CAPNEXAAPI` project and the intended Flutter flow. It separates implemented endpoints from planned features so the Flutter app does not depend on routes that do not exist yet.
 
-This document describes the HTTP endpoints implemented by the CAPNEXA ASP.NET Core backend and compares them with the Flutter UI and API layer on the repository's `flutter` branch. Admin endpoints are for the web dashboard and are excluded from Flutter integration. The API uses JSON for most requests and responses, JWT bearer authentication for protected routes, and redirects for browser based OAuth/email confirmation flows. Replace the base URL below with the host reachable from the device or emulator; `localhost` inside an Android emulator refers to the emulator itself, not the development PC.
+## 1. API basics
 
-### Profile completion behavior
+- Local API origin: `https://localhost:7072` (verify the active launch profile and `AppUrls:ApiBaseUrl`).
+- Android emulator: use the host machine address reachable from the emulator, commonly `https://10.0.2.2:7072`; the API must be reachable and the development TLS certificate trusted.
+- Send JSON with `Content-Type: application/json` and `Accept: application/json`.
+- Protected requests use `Authorization: Bearer <accessToken>`.
+- ASP.NET Core routes are case-insensitive. Paths below show their controller route shape.
+- Authentication endpoints are under `/api/Identity/Auth`, because the controller's area is `Identity`.
+- The backend uses SQL Server and EF Core. Identity and academic data are persisted there. OAuth returns the normal auth response directly to the configured Flutter callback fragment; there is no exchange-code endpoint.
 
-Email/password registration already requires student number, department, and academic year and creates the academic profile. Google/GitHub sign-up does not provide these fields, so after OAuth code exchange the student should call `GET /api/Student/Profile`. If `academicProfileComplete` is false, Flutter should collect the missing fields and call `POST /api/Student/Profile/complete` with `studentNumber`, `department`, `academicYear`, and optional `level`. The endpoint returns the updated profile. A second completion attempt returns `409` with `academic_profile_already_completed`; duplicate student numbers return `409 student_number_already_in_use`.
+## 2. Flutter sign-in and onboarding flow
 
-`Level` is optional; completion is based on student number, department, and academic year. Phone number is not part of the student profile request or response. ASP.NET Identity phone fields and database columns remain unchanged. At this backend version, profile completion is supported, but there are no other student feature endpoints in the original project to gate yet; apply a completion check to each future protected student feature route. The profile read and completion routes remain available during onboarding. Admin dashboard routes are separate.
+### Email and password registration
 
-## Flutter branch compatibility findings
+1. Flutter collects first name, last name, email, student number, department, academic year, password, and password confirmation.
+2. Flutter calls `POST /api/Identity/Auth/register`.
+3. Backend creates the Identity user, Student role, and academic profile, then sends an email-confirmation link.
+4. Flutter shows the confirmation instruction. Registration does not return tokens, so do not route to authenticated screens yet.
+5. User opens the email link. The API confirms the address and redirects to the frontend login page with `confirmed=true` or `false`.
+6. After confirmation, Flutter calls login, securely stores both tokens, then calls `GET /api/Student/Profile`.
+7. Since regular registration already includes the required academic data, `academicProfileComplete` should be true. Do not send the student through completion again.
 
-The Flutter branch currently wires `ApiAuthService` to the login, registration, and current-user calls. Other feature screens/services are mock-backed in the service locator. The auth endpoints and DTOs currently disagree with the backend, so the live integration will fail until the Flutter route paths, payloads, and parsing are aligned.
+### Google or GitHub sign-in
 
-| Flutter implementation | Backend contract | Result and required adjustment |
-|---|---|---|
-| Login path `/auth/login` | `POST /api/Auth/login` | Path mismatch. Use `/api/Auth/login`. Request fields `email` and `password` already match. |
-| Login parser accepts `token` or `accessToken` | Auth response has `accessToken`, `tokenType`, `expiresInSeconds`, `refreshToken`, and nested `user` | Access token key is supported, but Flutter must also persist the refresh token and parse nested `user`; current code calls `/me` after login. |
-| Register path `/auth/register` | `POST /api/Auth/register` | Path mismatch. Use `/api/Auth/register`. |
-| Registration JSON: `fullName`, `universityId`, `email`, `department`, `academicYear`, `password` | `firstName`, `lastName`, `email`, `studentNumber`, `department`, `academicYear`, `password`, `confirmPassword` | Rename/split `fullName`, map university ID to `studentNumber`, and send `confirmPassword`. Backend registration sends a confirmation email and returns a message; it does not issue a token. Flutter currently tries immediate sign-in and routes to home, but login must wait until email confirmation. |
-| Current user path `/auth/me`; model expects `id`, `fullName`, `universityId`, `email`, `department`, `academicYear` | No `/api/Auth/me` route exists. Student profile is `GET /api/Student/Profile`; it returns `userId`, `firstName`, `lastName`, `studentNumber`, `department`, `academicYear`, `email`, etc. | Replace path with `/api/Student/Profile` and map the actual response fields. `fullName` and `universityId` are not backend response fields. |
-| Social login throws unavailable | `GET /api/Auth/google/login`, `/api/Auth/github/login`, then one-time code exchange | OAuth is implemented server-side but Flutter UI does not yet integrate it. Use a browser/system authentication flow and `POST /api/Auth/exchange` after receiving the callback code. |
-| Flutter sends bearer token on every request when present | Backend requires bearer auth only for protected endpoints; auth login/register/exchange/refresh and OAuth entry are anonymous | Usually harmless for public requests, but ensure access token is attached to student profile and revoke calls. |
-| Dio debug interceptor logs request and response bodies | Auth responses contain access and refresh tokens | Disable or redact body logging for auth/token endpoints to avoid writing credentials to logs. |
+1. Flutter opens the provider login URL in a system browser or OAuth-capable authentication session; it is a redirect flow, not a JSON Dio call.
+2. Provider returns to the API callback. The backend creates or finds the user, assigns the Student role for new external accounts, and issues the normal auth response.
+3. API redirects to the configured Flutter callback with `#auth=<base64url-json>`; Flutter decodes it and securely stores `accessToken` and `refreshToken`.
+4. Flutter calls `GET /api/Student/Profile`. If `academicProfileComplete` is false, display the academic onboarding form.
+5. Submit `studentNumber`, `department`, `academicYear`, and optional `level` to `POST /api/Student/Profile/complete`.
+6. Backend returns the updated profile. Flutter can continue to the student app using that response.
 
-### Flutter authentication flow that matches this backend
+Required completion fields are exactly student number, department, and academic year. `Level` is optional. An incomplete student can retrieve and complete their own profile and use the account-maintenance actions in the Profile controller. The profile response is the source of truth for the onboarding decision.
 
-1. `POST /api/Auth/register` with `firstName`, `lastName`, `email`, `studentNumber`, `department`, `academicYear`, `password`, and `confirmPassword`.
-2. Show the registration message and ask the user to confirm email. Do not navigate to authenticated home or attempt login until confirmation.
-3. `POST /api/Auth/login` with email/password; securely store both `accessToken` and `refreshToken` from the returned `AuthResponse`.
-4. Call `GET /api/Student/Profile` with `Authorization: Bearer <accessToken>` and parse `StudentProfileDto`.
-5. On access-token expiry, call `POST /api/Auth/refresh` with the current refresh token, then replace both stored tokens with the rotated pair.
+## 3. Current implemented endpoints
 
-## Base URL and conventions
+### Identity and authentication
 
-Local API base URL: `https://localhost:7072` (see `AppUrls:ApiBaseUrl` and launch profile). Routes are case-insensitive in ASP.NET Core; examples use the route casing shown in the controller. Send `Content-Type: application/json` for JSON bodies. Authenticated requests use `Authorization: Bearer <accessToken>`. Dates are ISO 8601 values. Most errors are JSON objects containing `message`, or `code` and `message` for profile operations. `[ApiController]` validation failures generally return HTTP 400 with a validation-problem response.
-
-In development, interactive API documentation is available through Scalar/OpenAPI as configured by the host.
-
-## Endpoint index
-
-| Method | Path | Auth | Purpose |
+| Method | Route | Authentication | Result |
 |---|---|---|---|
-| POST | `/api/Auth/register` | No | Register a student and send email confirmation |
-| GET | `/api/Auth/confirm-email` | No | Confirm email; redirects to frontend login |
-| POST | `/api/Auth/login` | No | Password login |
-| POST | `/api/Auth/exchange` | No | Exchange one-time OAuth code for tokens |
-| POST | `/api/Auth/refresh` | No | Rotate refresh token and issue access token |
-| POST | `/api/Auth/revoke` | Bearer | Revoke caller's refresh token |
-| GET | `/api/Auth/google/login` | No | Begin Google OAuth in browser |
-| GET | `/api/Auth/github/login` | No | Begin GitHub OAuth in browser |
-| GET | `/api/Student/Profile` | Student bearer | Read own profile |
-| PUT | `/api/Student/Profile` | Student bearer | Update name and phone |
-| POST | `/api/Student/Profile/password` | Student bearer | Change or set password |
-| POST | `/api/Student/Profile/complete` | Student bearer | Complete academic profile |
-| POST | `/api/Student/Profile/email-change` | Student bearer | Request email change confirmation |
-| GET | `/api/Student/Profile/confirm-email-change` | No | Display confirmation form from email link |
-| POST | `/api/Student/Profile/confirm-email-change` | No | Submit email-change confirmation form |
-| GET | `/WeatherForecast` | No | Sample weather endpoint |
+| POST | `/api/Identity/Auth/register` | Public | Creates password account and academic profile; sends confirmation email |
+| POST | `/api/Identity/Auth/resend-confirmation` | Public | Resends the email confirmation link without disclosing whether an account exists |
+| GET | `/api/Identity/Auth/confirm-email?userId=...&token=...` | Public/browser | Confirms email and redirects to frontend login |
+| POST | `/api/Identity/Auth/login` | Public | Returns access token, refresh token, and user |
+| POST | `/api/Identity/Auth/refresh` | Public | Rotates refresh token and returns new auth response |
+| GET | `/api/Identity/Auth/google/login` | Public/browser | Starts Google OAuth |
+| GET | `/api/Identity/Auth/github/login` | Public/browser | Starts GitHub OAuth |
 
-## Web dashboard only
+### Student profile
 
-The following backend route is protected by the Admin role and is intended for the web dashboard. It is not included in the Flutter/mobile integration contract:
+All protected routes require a valid bearer token and Student role, except the email-change confirmation routes, which are public browser/form endpoints.
 
-| Method | Path | Auth | Purpose |
+| Method | Route | Authentication | Result |
 |---|---|---|---|
-| GET | `/api/Admin/Students/{userId}/profile` | Admin bearer | Read a student's profile |
+| GET | `/api/Student/Profile` | Student bearer | Returns own profile and academic completion state |
+| PUT | `/api/Student/Profile` | Student bearer | Updates first and last name |
+| POST | `/api/Student/Profile/password` | Student bearer | Changes password or adds one to confirmed external account |
+| POST | `/api/Student/Profile/complete` | Student bearer | Creates academic profile for external account |
+| POST | `/api/Student/Profile/email-change` | Student bearer | Sends confirmation link to new email |
+| GET | `/api/Student/Profile/confirm-email-change?userId=...&newEmail=...&token=...` | Public/browser | Displays confirmation form |
+| POST | `/api/Student/Profile/confirm-email-change` | Public form | Confirms email change; expects form URL encoding |
+| POST | `/api/Student/Teams` | Student bearer | Create team; creator is leader |
+| GET | `/api/Student/Teams/me` | Student bearer | Read own team and members |
+| POST | `/api/Student/Teams/join` | Student bearer | Join by invite code |
+| POST | `/api/Student/Teams/leave` | Student bearer | Leave team as a non-leader |
 
-## Authentication endpoints
+### Admin web dashboard only
+
+`GET /api/Admin/Students/{userId}/profile` requires the Admin role. This endpoint is for the web dashboard, not the Flutter student application.
+
+### Sample endpoint
+
+`GET /WeatherForecast` is scaffold/sample functionality, not a CAPNEXA business feature.
+
+## 4. Request and response details
 
 ### Register
-`POST /api/Auth/register`
 
-Request:
+`POST /api/Identity/Auth/register`
+
 ```json
 {
   "firstName": "Amina",
@@ -86,149 +93,201 @@ Request:
   "confirmPassword": "ExamplePass123!"
 }
 ```
-First/last name are 2–100 characters; email is required and max 256; student number max 50; department max 100; academic year max 20; password 8–100 characters and must match confirmation. Success: `200 {"message":"Registration completed successfully..."}`. User must confirm via email before password login. `400` validation/Identity password policy failure; `409 {"message":"...already in use."}` for duplicate email or student number.
 
-### Confirm registration email
-`GET /api/Auth/confirm-email?userId=...&token=...`
+Success is `200` with `message` and `emailConfirmationSent`. If SMTP is temporarily unavailable, the account remains created and the response has `emailConfirmationSent: false`; Flutter should show the resend-confirmation option instead of retrying registration. Duplicate email or student number returns `409`. Validation or password-policy errors return `400`.
 
-Browser/email-link endpoint. Redirects to `{FrontendBaseUrl}/login?confirmed=true|false`. Do not call from Dio expecting JSON; launch the URL in a browser or handle the redirect as appropriate.
+### Resend registration confirmation
 
-### Password login
-`POST /api/Auth/login`
+`POST /api/Identity/Auth/resend-confirmation`
+
+```json
+{"email":"amina@example.edu"}
+```
+
+Returns a generic `200` message whether or not the address belongs to an unconfirmed account. SMTP failure returns `503`; the user can try again later.
+
+### Login
+
+`POST /api/Identity/Auth/login`
+
 ```json
 {"email":"amina@example.edu","password":"ExamplePass123!"}
 ```
-Success `200` returns `AuthResponse` (shape below). `401` means invalid credentials or disabled account. `400` includes unconfirmed email or model validation failure.
 
-### Exchange OAuth code
-`POST /api/Auth/exchange`
+Success returns:
+
 ```json
-{"code":"<code-from-frontend-url-fragment>"}
+{
+  "accessToken": "<jwt>",
+  "tokenType": "Bearer",
+  "expiresInSeconds": 900,
+  "refreshToken": "<opaque-refresh-token>",
+  "user": {
+    "id": "<identity-id>",
+    "email": "amina@example.edu",
+    "firstName": "Amina",
+    "lastName": "Hassan",
+    "roles": ["Student"]
+  }
+}
 ```
-Success: `200 AuthResponse`. `400` if invalid, expired, already consumed, or user cannot sign in. Code expires after two minutes and is single use. OAuth redirects the browser to `/oauth/callback#code=...`; read the URL fragment and post it here. The API keeps JWTs out of URLs.
 
-### Refresh tokens
-`POST /api/Auth/refresh`
-```json
-{"refreshToken":"<refresh-token>"}
-```
-Success: `200 AuthResponse` with a rotated refresh token. Replace both stored tokens. `401` for invalid, expired, or reused tokens.
+Store both tokens securely. Login rejects incorrect credentials, inactive accounts, or unconfirmed email.
 
-### Revoke refresh token
-`POST /api/Auth/revoke` (Bearer required)
-```json
-{"refreshToken":"<refresh-token>"}
-```
-Success `204 No Content`; `400` when token is not found or already revoked; `401` if bearer token is missing/invalid. Revoke is scoped to the authenticated user.
+### OAuth callback and refresh
 
-### OAuth browser sign-in
-Open `GET /api/Auth/google/login` or `GET /api/Auth/github/login` in a browser/system auth session. These routes issue redirects and are not ordinary Dio JSON calls. Provider callbacks are handled by the API. On success, frontend receives the one-time code fragment and exchanges it as above. Safe frontend errors may include `email_conflict`, `email_required`, `email_unverified`, `github_profile_failed`, and `oauth_failed`. `email_conflict` means an account already exists for that email; automatic linking is intentionally disallowed. Provider app credentials and exact callback URLs must be configured server-side.
+OAuth is a browser/deep-link redirect, not a Dio JSON request. On success, the configured callback receives `#auth=<base64url-encoded-json>`. Decode it to get the same camelCase `AuthResponse` returned by password login. Remove the fragment from the visible navigation state and never log it. Set `Frontend:OAuthCallbackUrl` to the Flutter app's registered deep link; if omitted, the local web callback is used.
 
-## Student profile endpoints
+Refresh request: `POST /api/Identity/Auth/refresh` with `{"refreshToken":"<current-refresh-token>"}`. On success, replace both stored tokens; refresh tokens rotate. Invalid, expired, or reused token returns `401`.
 
-All routes below require a valid JWT with the Student role unless noted otherwise.
+### Get student profile
 
-### Get own profile
 `GET /api/Student/Profile`
 
-Success `200 StudentProfile`. Errors: `401` unauthorized; `403` disabled/not permitted; `404` user not found.
+Example response:
 
-### Update own profile
-`PUT /api/Student/Profile`
 ```json
-{"firstName":"Amina","lastName":"Hassan","phoneNumber":"+201001234567"}
+{
+  "userId": "<identity-id>",
+  "email": "amina@example.edu",
+  "emailConfirmed": true,
+  "firstName": "Amina",
+  "lastName": "Hassan",
+  "isActive": true,
+  "createdAt": "2026-11-09T12:00:00Z",
+  "academicProfileComplete": false,
+  "studentNumber": null,
+  "department": null,
+  "academicYear": null,
+  "level": null,
+  "teams": []
+}
 ```
-First/last names required, 2–100 chars. Phone optional, max 32. Success `200 StudentProfile`. Changing phone resets `phoneNumberConfirmed` to false. Errors include `400 profile_update_failed`, `401`, `403`, `404`.
 
-### Change or set password
+The example shows an external account before onboarding. Completed academic values are returned when available. Phone number is deliberately absent from student profile request and response DTOs. ASP.NET Identity's phone properties and database fields are preserved and are not modified by profile API updates.
+
+### Complete academic profile
+
+`POST /api/Student/Profile/complete`
+
+```json
+{
+  "studentNumber": "20260042",
+  "department": "Computer Science",
+  "academicYear": "Year 3",
+  "level": "Level 3"
+}
+```
+
+`level` can be omitted or null. Success is `200` with the updated student profile, including `academicProfileComplete: true`. Duplicate student number returns `409 student_number_already_in_use`. A second completion attempt returns `409 academic_profile_already_completed`; completed data is not edited through this onboarding endpoint. Invalid or missing required fields return `400`.
+
+### Update basic profile
+
+`PUT /api/Student/Profile`
+
+```json
+{"firstName":"Amina","lastName":"Hassan"}
+```
+
+Only first and last names are editable here. Academic fields are not changed through this endpoint, and phone number is not accepted by this profile API.
+
+### Password maintenance
+
 `POST /api/Student/Profile/password`
+
 ```json
 {"currentPassword":"OldPass123!","newPassword":"NewPass123!","confirmPassword":"NewPass123!"}
 ```
-For accounts that already have a password, currentPassword is required. OAuth-only users may omit it when setting their first password, but their email must be confirmed. New password length 8–100 and confirmation must match. Success `204 No Content`; tokens/refresh tokens are revoked after success, so sign in again. Errors: `400 current_password_required`, `current_password_incorrect`, `password_policy_failed`; `403 email_not_confirmed` or account disabled; `401` unauthorized.
 
-### Complete academic profile
-`POST /api/Student/Profile/complete`
+For an existing password account, `currentPassword` is required. A confirmed external account can set its first password without `currentPassword`. Success is `204`; changing password revokes refresh tokens, so sign in again. Invalid current password or password policy returns `400`.
+
+### Email change
+
+Request: `POST /api/Student/Profile/email-change` with `{"newEmail":"new@example.edu"}`. Backend emails a confirmation link; the email is not changed until confirmation. The linked page displays a form and posts URL-encoded fields `UserId`, `NewEmail`, `Token` to `/api/Student/Profile/confirm-email-change`.
+
+## Team management
+
+All team routes require a Student bearer token and a completed academic profile. Any academic year is allowed. The maximum is five members including the leader. A student may belong to one team at a time. The backend generates the invite code and sets the creator as leader; Flutter must not submit `maxMembers`, `teamId` to join, or a leader flag.
+
+### Create a team
+
+`POST /api/Student/Teams`
+
 ```json
-{"studentNumber":"20260042","department":"Computer Science","academicYear":"Year 3","level":"Level 3"}
+{"name":"Team Alpha"}
 ```
-Student number required max 50; department required max 100; academicYear required max 20; level optional max 50. Success `200 StudentProfile`. `409 academic_profile_already_completed` or `student_number_already_in_use`; `400` invalid payload; `401` or `403` as applicable.
 
-### Request email change
-`POST /api/Student/Profile/email-change`
+Success: `200 TeamDto`; the creator is added as leader. `403 profile_completion_required` if profile completion is missing; `409 student_already_in_team` if the student already belongs to a team.
+
+### Get my team
+
+`GET /api/Student/Teams/me`
+
+Success: `200 TeamDto` containing `teamId`, `name`, `teamCode`, `maxMembers`, `memberCount`, and a `members` array. Each member includes user ID, first/last name, student number, `isLeader`, and `joinedAt`. `404 team_not_found` if the student is not on a team.
+
+### Join a team
+
+`POST /api/Student/Teams/join`
+
 ```json
-{"newEmail":"amina.new@example.edu"}
+{"teamCode":"A1B2C3D4E5"}
 ```
-Success `200 {"code":"email_change_confirmation_sent","message":"..."}`. If same as current address, success uses `email_unchanged`. The new address is not applied until confirmation. `409 email_already_in_use`; `503 email_service_unavailable`; `401` unauthorized. This route is rate limited.
 
-### Show email-change confirmation page
-`GET /api/Student/Profile/confirm-email-change?userId=...&newEmail=...&token=...`
+Success: `200 TeamDto` with updated member list. Errors: `403 profile_completion_required`; `404 team_not_found`; `409 student_already_in_team` or `team_full` when the team already has five members.
 
-The email link opens a small HTML confirmation page. It is intentionally not a JSON endpoint; the page submits a form to the POST endpoint. Invalid/incomplete query returns `400` JSON `{code,message}`.
+### Leave a team
 
-### Confirm email change
-`POST /api/Student/Profile/confirm-email-change`
+`POST /api/Student/Teams/leave`
 
-The HTML form posts `application/x-www-form-urlencoded` fields `UserId`, `NewEmail`, `Token`. On success: `200 {"code":"email_change_confirmed","message":"..."}`. `400 email_change_token_invalid_or_expired` or `email_change_failed`; `404 user_not_found`; `409 email_already_in_use`; disabled account returns `403`. This is designed for browser form submission, not a typical mobile JSON call. If implementing native confirmation, send form URL-encoded content.
+No request body. Success: `204 No Content`. A leader receives `409 team_leader_cannot_leave`; leadership transfer is not in this first version. A student with no team receives `404 team_not_found`.
 
-## Sample weather endpoint
+The database enforces one membership per student, unique invite codes, and unique student/team membership pairs. Team operations use the generic repository and do not open explicit transactions. The five-member limit is checked before each join; simultaneous join requests could race, so strict concurrency-safe capacity enforcement would require a database-level atomic counter or transaction in a later change. Leadership transfer and team deletion are not implemented yet.
 
-`GET /WeatherForecast`
+## 5. Errors Flutter should handle
 
-Unauthenticated sample endpoint. Returns an array of forecasts with `date`, `temperatureC`, `temperatureF`, and `summary`. This is scaffold/sample functionality rather than a business endpoint.
+- `400`: invalid request, validation failure, or profile completion issue.
+- `401`: missing/invalid access token or failed login/refresh.
+- `403`: account disabled or insufficient role. The current original backend does not yet have additional student feature endpoints requiring an incomplete-profile gate.
+- `409`: duplicate email/student number or repeated academic-profile completion.
+- `503`: email service unavailable for email-change request.
 
-## Response models
+Auth errors generally return `{ "message": "..." }`. Profile business errors generally return `{ "code": "...", "message": "..." }`.
 
-### AuthResponse
-```json
-{
-  "accessToken":"<jwt>",
-  "tokenType":"Bearer",
-  "expiresInSeconds":3600,
-  "refreshToken":"<opaque-refresh-token>",
-  "user":{"id":"<id>","email":"amina@example.edu","firstName":"Amina","lastName":"Hassan","roles":["Student"]}
-}
-```
-Expiry is server-configured; use `expiresInSeconds` rather than hard-coding a lifetime. Store refresh tokens securely (for example, platform secure storage). Never log tokens.
+## 6. Dio integration notes
 
-### StudentProfile
-Includes `userId`, nullable `email`, `emailConfirmed`, `firstName`, `lastName`, nullable `phoneNumber`, `phoneNumberConfirmed`, `isActive`, `createdAt`, `academicProfileComplete`, nullable `studentNumber`, `department`, `academicYear`, `level`, and `teams` array. A team contains `teamId`, `name`, `teamCode`, `isLeader`, `isCreator`, nullable `joinedAt`, and `projects`. Each project contains `projectId`, `title`, `status`, `createdAt`.
-
-### Error shape
-Profile errors use `{ "code": "...", "message": "..." }`. Auth actions usually use `{ "message": "..." }`. Validation errors can use ASP.NET Core's validation-problem format. Check the status code and parse fields defensively.
-
-## Flutter and Dio setup
-
-Add Dio to `pubspec.yaml`, then create one client with the API origin as `baseUrl`. For Android emulator access to a local development API, use the host machine's emulator bridge address (commonly `10.0.2.2`) and ensure the API binds to a reachable interface and the development certificate is trusted. A physical device needs the computer's LAN IP and network access. Production should use HTTPS.
+Use one Dio client with the API origin as `baseUrl`; append full route paths above. Add an interceptor for bearer token on protected calls. Do not log auth request/response bodies because they contain credentials and tokens. On an access-token `401`, refresh once, store the rotated pair, and retry the original request once. Avoid refresh retry loops.
 
 ```dart
 final dio = Dio(BaseOptions(
-  baseUrl: 'https://10.0.2.2:7072', // Android emulator example; adjust to your setup
+  baseUrl: 'https://10.0.2.2:7072', // adjust for emulator/device/deployment
   connectTimeout: const Duration(seconds: 15),
   receiveTimeout: const Duration(seconds: 15),
   headers: {'Accept': 'application/json'},
 ));
+
+final response = await dio.get(
+  '/api/Student/Profile',
+  options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+);
+final complete = response.data['academicProfileComplete'] as bool;
 ```
 
-Attach the access token to protected requests:
-```dart
-dio.options.headers['Authorization'] = 'Bearer $accessToken';
-final response = await dio.get('/api/Student/Profile');
-```
-Prefer a Dio interceptor to add the token and handle a single refresh attempt after `401`. Avoid retry loops; refresh tokens rotate, so persist the newly returned refresh token immediately. Do not disable TLS certificate validation in production. For OAuth, use a system browser/app-auth flow with deep-link return handling rather than embedding provider secrets or attempting the full redirect flow as JSON.
+Use platform secure storage for access/refresh tokens. OAuth and email confirmation are browser/deep-link flows, not ordinary JSON requests.
 
-Example login call:
-```dart
-final response = await dio.post('/api/Auth/login', data: {
-  'email': email,
-  'password': password,
-});
-final accessToken = response.data['accessToken'] as String;
-final refreshToken = response.data['refreshToken'] as String;
-```
+## 7. Backend feature roadmap
 
-Dio reports non-2xx responses as `DioException` by default. Read `e.response?.statusCode` and `e.response?.data`; network/TLS failures may have no response. Do not treat every failure as an authentication error.
+These are planned backend features, not available endpoints in the current API. Build them in this order because each stage depends on earlier data and permissions.
 
-## Rate limiting and deployment notes
+1. **Team management**: backend routes for create, join, leave, and member listing are implemented. Flutter must still connect its screens to these routes. Leadership transfer and team deletion are future work.
+2. **Project proposal and lifecycle**: create/edit proposal draft, submit proposal, track status, approval/rejection and reasons.
+3. **Proposal review**: web dashboard review and decision history.
+4. **Supervisor assignment**: assign supervisors to approved projects and enforce supervisor capacity.
+5. **Milestones**: create ordered milestones, due dates, status, and project progress.
+6. **Submissions and file versions**: upload files to milestones, maintain versions, status, and submission history.
+7. **Review and grading**: supervisor comments, grade, revision requests, and review history.
+8. **Notifications**: list user notifications and mark read; generate events from project workflow changes.
+9. **Student dashboard summary**: aggregate team, project, milestones, deadlines, submissions, and feedback.
+10. **Similarity analysis**: process submitted documents, persist results, and return match details.
+11. **Audit history**: record and provide authorized access to important administrative/workflow events.
 
-Authentication controller endpoints are assigned the `auth` rate-limit policy; email-change request is also rate limited. Limits are deployment configuration and should be treated as possible `429 Too Many Requests`. Confirm the server API base URL and provider callback configuration for each environment. Localhost URLs must be adapted for Android emulator, iOS simulator, physical devices, and deployed environments.
+Each future student feature endpoint must check that the authenticated user has the Student role and a completed academic profile. If incomplete, return `403` with `{ "code": "profile_completion_required", "message": "Complete your academic profile before using this feature." }`. Keep profile read/completion and account-maintenance endpoints available during onboarding. Admin dashboard endpoints remain governed by Admin authorization and are not blocked by student onboarding.

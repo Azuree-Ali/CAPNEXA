@@ -498,7 +498,8 @@ namespace CAPNEXAAPI.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("StudentId")
+                        .IsUnique();
 
                     b.HasIndex("TeamId", "StudentId")
                         .IsUnique();

@@ -51,6 +51,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         });
         builder.Entity<TeamMember>(entity =>
         {
+            entity.HasIndex(x => x.StudentId).IsUnique();
             entity.HasIndex(x => new { x.TeamId, x.StudentId }).IsUnique();
             entity.HasOne(x => x.Team).WithMany(x => x.Members).HasForeignKey(x => x.TeamId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.Student).WithMany(x => x.TeamMemberships).HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);

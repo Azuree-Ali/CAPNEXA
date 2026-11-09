@@ -1,5 +1,7 @@
 using CAPNEXAAPI.DataAccess;
+using CAPNEXAAPI.DTOs.Response;
 using CAPNEXAAPI.Models;
+using CAPNEXAAPI.Repositories;
 using CAPNEXAAPI.Services;
 using CAPNEXAAPI.Utils;
 using Microsoft.AspNetCore.Authentication;
@@ -17,6 +19,7 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using static CAPNEXAAPI.EmailSettings;
 
 namespace CAPNEXAAPI;
 
@@ -84,7 +87,7 @@ public static class DependencyInjection
 
         var googleClientId = configuration["Auth:Google:ClientId"];
         var googleClientSecret = configuration["Auth:Google:ClientSecret"];
-        var googleCallbackPath = configuration["Auth:Google:CallbackPath"] ?? "/api/auth/google/callback";
+        var googleCallbackPath = configuration["Auth:Google:CallbackPath"] ?? "/api/Identity/Auth/google/callback";
 
         if (IsConfigured(googleClientId, googleClientSecret))
         {
@@ -116,7 +119,7 @@ public static class DependencyInjection
                     },
                     OnTokenValidated = async context =>
                     {
-                        var externalAuth = context.HttpContext.RequestServices.GetRequiredService<IExternalAuthService>();
+                        var auth = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
                         var principal = context.Principal;
 
                         var providerKey = principal?.FindFirstValue(ClaimTypes.NameIdentifier)
@@ -131,7 +134,7 @@ public static class DependencyInjection
                         var displayName = principal?.FindFirstValue("name")
                                           ?? principal?.FindFirstValue(ClaimTypes.Name);
 
-                        var result = await externalAuth.ProcessAsync(
+                        var result = await auth.ExternalLoginAsync(
                             "Google", providerKey ?? string.Empty, email, emailVerified,
                             firstName, lastName, displayName);
 
@@ -148,7 +151,7 @@ public static class DependencyInjection
 
         var githubClientId = configuration["Auth:GitHub:ClientId"];
         var githubClientSecret = configuration["Auth:GitHub:ClientSecret"];
-        var githubCallbackPath = configuration["Auth:GitHub:CallbackPath"] ?? "/api/auth/github/callback";
+        var githubCallbackPath = configuration["Auth:GitHub:CallbackPath"] ?? "/api/Identity/Auth/github/callback";
 
         if (IsConfigured(githubClientId, githubClientSecret))
         {
@@ -254,8 +257,8 @@ public static class DependencyInjection
 
                         var email = verifiedEmail ?? unverifiedEmail;
 
-                        var externalAuth = context.HttpContext.RequestServices.GetRequiredService<IExternalAuthService>();
-                        var result = await externalAuth.ProcessAsync(
+                        var auth = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
+                        var result = await auth.ExternalLoginAsync(
                             "GitHub", providerKey ?? string.Empty, email,
                             verifiedEmail is not null, displayName, null, displayName);
 
@@ -300,12 +303,12 @@ public static class DependencyInjection
             });
         });
 
-        services.AddSingleton<ExchangeCodeService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IExternalAuthService, ExternalAuthService>();
         services.AddScoped<IStudentProfileService, StudentProfileService>();
+        services.AddScoped<ITeamService, TeamService>();
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         services.AddHttpClient("GitHub", client => client.Timeout = TimeSpan.FromSeconds(15));
         services.AddTransient<IEmailSender, EmailSender>();
@@ -482,14 +485,17 @@ public static class DependencyInjection
         string? VerifiedEmail,
         string? AnyEmail);
 
-    private static string BuildSpaRedirect(HttpContext httpContext, ExternalLoginResult result)
+    private static string BuildSpaRedirect(HttpContext httpContext, AuthOperationResult<AuthResponseDto> result)
     {
         var configuration = httpContext.RequestServices.GetRequiredService<IConfiguration>();
         var url = GetFrontendCallbackUrl(configuration);
 
-        return result.Succeeded
-            ? $"{url}#code={Uri.EscapeDataString(result.ExchangeCode!)}"
-            : QueryHelpers.AddQueryString(url, "error", result.ErrorCode ?? "oauth_failed");
+        if (!result.Succeeded || result.Value is null)
+            return QueryHelpers.AddQueryString(url, "error", result.Error ?? "oauth_failed");
+
+        var responseJson = JsonSerializer.Serialize(result.Value, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        var responseData = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(responseJson));
+        return $"{url}#auth={responseData}";
     }
 
     private static string BuildApiCallbackUrl(HttpContext httpContext, PathString callbackPath)
@@ -515,6 +521,22 @@ public static class DependencyInjection
 
     private static string GetFrontendCallbackUrl(IConfiguration configuration)
     {
+        var configuredCallback = configuration["Frontend:OAuthCallbackUrl"];
+        if (!string.IsNullOrWhiteSpace(configuredCallback))
+        {
+            if (!Uri.TryCreate(configuredCallback, UriKind.Absolute, out var callbackUri) ||
+                string.IsNullOrEmpty(callbackUri.Host) ||
+                callbackUri.Scheme is "javascript" or "data" or "file" ||
+                !string.IsNullOrEmpty(callbackUri.UserInfo) ||
+                !string.IsNullOrEmpty(callbackUri.Query) ||
+                !string.IsNullOrEmpty(callbackUri.Fragment))
+            {
+                throw new InvalidOperationException("Frontend:OAuthCallbackUrl must be an absolute callback URL without query or fragment.");
+            }
+
+            return callbackUri.AbsoluteUri.TrimEnd('/');
+        }
+
         var frontendBase = configuration["AppUrls:FrontendBaseUrl"];
         var callbackPath = configuration["Frontend:OAuthCallbackPath"] ?? "/oauth/callback";
         if (!Uri.TryCreate(frontendBase, UriKind.Absolute, out var frontendUri) ||

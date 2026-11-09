@@ -1,34 +1,42 @@
 using System.Net;
 using System.Net.Mail;
-using CAPNEXAAPI.DataAccess;
 using CAPNEXAAPI.DTOs.Request;
 using CAPNEXAAPI.DTOs.Response;
 using CAPNEXAAPI.Models;
+using CAPNEXAAPI.Repositories;
 using CAPNEXAAPI.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
 
 namespace CAPNEXAAPI.Services;
 
 public sealed class StudentProfileService : IStudentProfileService
 {
     private readonly UserManager<ApplicationUser> _users;
-    private readonly ApplicationDbContext _db;
+    private readonly IRepository<StudentProfile> _studentProfiles;
+    private readonly IRepository<Team> _teams;
+    private readonly IRepository<TeamMember> _teamMembers;
+    private readonly IRepository<Project> _projects;
     private readonly IEmailSender _emailSender;
     private readonly IRefreshTokenService _refreshTokens;
     private readonly IConfiguration _configuration;
 
     public StudentProfileService(
         UserManager<ApplicationUser> users,
-        ApplicationDbContext db,
+        IRepository<StudentProfile> studentProfiles,
+        IRepository<Team> teams,
+        IRepository<TeamMember> teamMembers,
+        IRepository<Project> projects,
         IEmailSender emailSender,
         IRefreshTokenService refreshTokens,
         IConfiguration configuration)
     {
         _users = users;
-        _db = db;
+        _studentProfiles = studentProfiles;
+        _teams = teams;
+        _teamMembers = teamMembers;
+        _projects = projects;
         _emailSender = emailSender;
         _refreshTokens = refreshTokens;
         _configuration = configuration;
@@ -84,14 +92,12 @@ public sealed class StudentProfileService : IStudentProfileService
         if (!hasPassword && !await _users.IsEmailConfirmedAsync(user))
             return Failure<bool>(ProfileOperationError.Forbidden, "email_not_confirmed");
 
-        await using var transaction = await _db.Database.BeginTransactionAsync();
         var passwordResult = hasPassword
             ? await _users.ChangePasswordAsync(user, request.CurrentPassword!, request.NewPassword)
             : await _users.AddPasswordAsync(user, request.NewPassword);
 
         if (!passwordResult.Succeeded)
         {
-            await transaction.RollbackAsync();
             var errorCode = passwordResult.Errors.Any(error => error.Code == "PasswordMismatch")
                 ? "current_password_incorrect"
                 : "password_policy_failed";
@@ -99,7 +105,6 @@ public sealed class StudentProfileService : IStudentProfileService
         }
 
         await _refreshTokens.RevokeAllAsync(userId);
-        await transaction.CommitAsync();
         return Success(true);
     }
 
@@ -122,10 +127,10 @@ public sealed class StudentProfileService : IStudentProfileService
             string.IsNullOrWhiteSpace(academicYear))
             return Failure<StudentProfileDto>(ProfileOperationError.InvalidRequest, "required_academic_fields_missing");
 
-        if (await _db.StudentProfiles.AnyAsync(profile => profile.UserId == userId))
+        if (await _studentProfiles.GetOneAsync(profile => profile.UserId == userId) is not null)
             return Failure<StudentProfileDto>(ProfileOperationError.Conflict, "academic_profile_already_completed");
 
-        if (await _db.StudentProfiles.AnyAsync(profile => profile.StudentNumber == studentNumber))
+        if (await _studentProfiles.GetOneAsync(profile => profile.StudentNumber == studentNumber) is not null)
             return Failure<StudentProfileDto>(ProfileOperationError.Conflict, "student_number_already_in_use");
 
         var profile = new StudentProfile
@@ -137,19 +142,8 @@ public sealed class StudentProfileService : IStudentProfileService
             Level = string.IsNullOrWhiteSpace(request.Level) ? null : request.Level.Trim()
         };
 
-        _db.StudentProfiles.Add(profile);
-        try
-        {
-            await _db.SaveChangesAsync();
-        }
-        catch (DbUpdateException)
-        {
-            _db.Entry(profile).State = EntityState.Detached;
-            if (await _db.StudentProfiles.AnyAsync(item => item.StudentNumber == studentNumber))
-                return Failure<StudentProfileDto>(ProfileOperationError.Conflict, "student_number_already_in_use");
-
-            throw;
-        }
+        await _studentProfiles.CreateAsync(profile);
+        await _studentProfiles.CommitAsync();
 
         return Success(await BuildProfileAsync(user));
     }
@@ -237,25 +231,19 @@ public sealed class StudentProfileService : IStudentProfileService
         if (existingNameUser is not null && existingNameUser.Id != user.Id)
             return Failure<bool>(ProfileOperationError.Conflict, "email_already_in_use");
 
-        await using var transaction = await _db.Database.BeginTransactionAsync();
         var emailResult = await _users.ChangeEmailAsync(user, newEmail, token);
         if (!emailResult.Succeeded)
-        {
-            await transaction.RollbackAsync();
             return Failure<bool>(ProfileOperationError.InvalidRequest, "email_change_token_invalid_or_expired");
-        }
 
         var usernameResult = await _users.SetUserNameAsync(user, newEmail);
         if (!usernameResult.Succeeded)
         {
-            await transaction.RollbackAsync();
             if (usernameResult.Errors.Any(error => error.Code == "DuplicateUserName"))
                 return Failure<bool>(ProfileOperationError.Conflict, "email_already_in_use");
 
             return Failure<bool>(ProfileOperationError.InvalidRequest, "email_change_failed");
         }
 
-        await transaction.CommitAsync();
         return Success(true);
     }
 
@@ -270,22 +258,25 @@ public sealed class StudentProfileService : IStudentProfileService
 
     private async Task<StudentProfileDto> BuildProfileAsync(ApplicationUser user)
     {
-        var profile = await _db.StudentProfiles
-            .AsNoTracking()
-            .AsSplitQuery()
-            .Include(item => item.TeamMemberships)
-                .ThenInclude(membership => membership.Team)
-                    .ThenInclude(team => team.Projects)
-            .Include(item => item.CreatedTeams)
-                .ThenInclude(team => team.Projects)
-            .SingleOrDefaultAsync(item => item.UserId == user.Id);
-
+        var profile = await _studentProfiles.GetOneAsync(item => item.UserId == user.Id, IsTracking: false);
         var teams = new Dictionary<int, StudentTeamDto>();
         if (profile is not null)
         {
-            foreach (var membership in profile.TeamMemberships)
+            var memberships = await _teamMembers.GetAllAsync(item => item.StudentId == profile.Id, IsTracking: false);
+            var createdTeams = await _teams.GetAllAsync(item => item.CreatedByStudentId == profile.Id, IsTracking: false);
+            var teamIds = memberships.Select(item => item.TeamId)
+                .Concat(createdTeams.Select(item => item.Id))
+                .Distinct()
+                .ToArray();
+            var teamRecords = await _teams.GetAllAsync(item => teamIds.Contains(item.Id), IsTracking: false);
+            var teamsById = teamRecords.ToDictionary(item => item.Id);
+            var projects = await _projects.GetAllAsync(item => teamIds.Contains(item.TeamId), IsTracking: false);
+
+            foreach (var membership in memberships)
             {
-                var team = membership.Team;
+                if (!teamsById.TryGetValue(membership.TeamId, out var team))
+                    continue;
+
                 teams[team.Id] = new StudentTeamDto
                 {
                     TeamId = team.Id,
@@ -294,7 +285,7 @@ public sealed class StudentProfileService : IStudentProfileService
                     IsLeader = membership.IsLeader,
                     IsCreator = team.CreatedByStudentId == profile.Id,
                     JoinedAt = membership.JoinedAt,
-                    Projects = team.Projects.Select(project => new StudentProjectDto
+                    Projects = projects.Where(project => project.TeamId == team.Id).Select(project => new StudentProjectDto
                     {
                         ProjectId = project.Id,
                         Title = project.Title,
@@ -304,7 +295,7 @@ public sealed class StudentProfileService : IStudentProfileService
                 };
             }
 
-            foreach (var team in profile.CreatedTeams)
+            foreach (var team in createdTeams)
             {
                 if (teams.ContainsKey(team.Id))
                     continue;
@@ -315,7 +306,7 @@ public sealed class StudentProfileService : IStudentProfileService
                     Name = team.Name,
                     TeamCode = team.TeamCode,
                     IsCreator = true,
-                    Projects = team.Projects.Select(project => new StudentProjectDto
+                    Projects = projects.Where(project => project.TeamId == team.Id).Select(project => new StudentProjectDto
                     {
                         ProjectId = project.Id,
                         Title = project.Title,

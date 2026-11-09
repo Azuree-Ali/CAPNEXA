@@ -1,8 +1,7 @@
-using CAPNEXAAPI.DataAccess;
 using CAPNEXAAPI.DTOs.Response;
 using CAPNEXAAPI.Models;
+using CAPNEXAAPI.Repositories;
 using CAPNEXAAPI.Utils;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,16 +10,16 @@ namespace CAPNEXAAPI.Services;
 
 public class RefreshTokenService : IRefreshTokenService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IRepository<RefreshToken> _refreshTokens;
     private readonly ITokenService _tokenService;
     private readonly JwtSettings _settings;
 
     public RefreshTokenService(
-        ApplicationDbContext context,
+        IRepository<RefreshToken> refreshTokens,
         ITokenService tokenService,
         IOptions<JwtSettings> settings)
     {
-        _context = context;
+        _refreshTokens = refreshTokens;
         _tokenService = tokenService;
         _settings = settings.Value;
     }
@@ -36,17 +35,17 @@ public class RefreshTokenService : IRefreshTokenService
             ExpiresAtUtc = DateTime.UtcNow.AddDays(_settings.RefreshTokenExpiresInDays)
         };
 
-        _context.RefreshTokens.Add(entity);
-        await _context.SaveChangesAsync();
+        await _refreshTokens.CreateAsync(entity);
+        await _refreshTokens.CommitAsync();
 
         return rawToken;
     }
 
     public async Task<(ApplicationUser User, string AccessToken, int ExpiresInSeconds, string RefreshToken)?> RefreshAsync(string rawToken)
     {
-        var stored = await _context.RefreshTokens
-            .Include(t => t.User)
-            .FirstOrDefaultAsync(t => t.TokenHash == HashToken(rawToken));
+        var stored = await _refreshTokens.GetOneAsync(
+            token => token.TokenHash == HashToken(rawToken),
+            [token => token.User]);
 
         if (stored is null)
             return null;
@@ -65,11 +64,10 @@ public class RefreshTokenService : IRefreshTokenService
         if (!stored.User.IsActive || !stored.User.EmailConfirmed)
         {
             stored.RevokedAtUtc = now;
-            await _context.SaveChangesAsync();
+            _refreshTokens.Update(stored);
+            await _refreshTokens.CommitAsync();
             return null;
         }
-
-        await using var transaction = await _context.Database.BeginTransactionAsync();
 
         stored.RevokedAtUtc = now;
 
@@ -79,7 +77,8 @@ public class RefreshTokenService : IRefreshTokenService
 
         var (accessToken, expiresInSeconds, jwtId) = await _tokenService.CreateAccessTokenAsync(stored.User);
 
-        _context.RefreshTokens.Add(new RefreshToken
+        _refreshTokens.Update(stored);
+        await _refreshTokens.CreateAsync(new RefreshToken
         {
             UserId = stored.UserId,
             TokenHash = newHash,
@@ -87,50 +86,41 @@ public class RefreshTokenService : IRefreshTokenService
             ExpiresAtUtc = now.AddDays(_settings.RefreshTokenExpiresInDays)
         });
 
-        await _context.SaveChangesAsync();
-        await transaction.CommitAsync();
+        await _refreshTokens.CommitAsync();
 
         return (stored.User, accessToken, expiresInSeconds, newRawToken);
     }
 
-    public async Task<bool> RevokeAsync(string rawToken, string userId)
-    {
-        var stored = await _context.RefreshTokens
-            .FirstOrDefaultAsync(t => t.TokenHash == HashToken(rawToken) && t.UserId == userId);
-
-        if (stored is null || stored.RevokedAtUtc is not null)
-            return false;
-
-        stored.RevokedAtUtc = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
-
-        return true;
-    }
-
     public async Task RevokeAllAsync(string userId)
     {
-        var activeTokens = await _context.RefreshTokens
-            .Where(token => token.UserId == userId && token.RevokedAtUtc == null)
-            .ToListAsync();
+        var activeTokens = await _refreshTokens.GetAllAsync(
+            token => token.UserId == userId && token.RevokedAtUtc == null);
 
         var revokedAt = DateTime.UtcNow;
         foreach (var token in activeTokens)
+        {
             token.RevokedAtUtc = revokedAt;
+            _refreshTokens.Update(token);
+        }
 
-        if (activeTokens.Count > 0)
-            await _context.SaveChangesAsync();
+        if (activeTokens.Any())
+            await _refreshTokens.CommitAsync();
     }
 
     private async Task RevokeFamilyAsync(string userId)
     {
-        var activeTokens = await _context.RefreshTokens
-            .Where(t => t.UserId == userId && t.RevokedAtUtc == null)
-            .ToListAsync();
+        var activeTokens = await _refreshTokens.GetAllAsync(
+            token => token.UserId == userId && token.RevokedAtUtc == null);
 
+        var revokedAt = DateTime.UtcNow;
         foreach (var token in activeTokens)
-            token.RevokedAtUtc = DateTime.UtcNow;
+        {
+            token.RevokedAtUtc = revokedAt;
+            _refreshTokens.Update(token);
+        }
 
-        await _context.SaveChangesAsync();
+        if (activeTokens.Any())
+            await _refreshTokens.CommitAsync();
     }
 
     private static string GenerateToken()

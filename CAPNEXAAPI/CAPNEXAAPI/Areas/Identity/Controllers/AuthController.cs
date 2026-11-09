@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using System.Security.Claims;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace CAPNEXAAPI.Areas.Identity.Controllers;
 
@@ -15,113 +15,106 @@ namespace CAPNEXAAPI.Areas.Identity.Controllers;
 [EnableRateLimiting("auth")]
 public sealed class AuthController : ControllerBase
 {
-    private readonly IAuthService _authService;
+    private readonly IAuthService _auth;
     private readonly IConfiguration _configuration;
-    private readonly IAuthenticationSchemeProvider _schemeProvider;
+    private readonly IAuthenticationSchemeProvider _schemes;
 
     public AuthController(
-        IAuthService authService,
+        IAuthService auth,
         IConfiguration configuration,
-        IAuthenticationSchemeProvider schemeProvider)
+        IAuthenticationSchemeProvider schemes)
     {
-        _authService = authService;
+        _auth = auth;
         _configuration = configuration;
-        _schemeProvider = schemeProvider;
+        _schemes = schemes;
     }
 
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<IActionResult> Register([FromBody] RegisterDto request)
+    public async Task<IActionResult> Register(RegisterDto request)
     {
-        var apiBaseUrl = _configuration["AppUrls:ApiBaseUrl"]?.TrimEnd('/')
-            ?? $"{Request.Scheme}://{Request.Host}";
-        var result = await _authService.RegisterAsync(request, apiBaseUrl);
+        var result = await _auth.RegisterAsync(request, GetApiBaseUrl());
         if (!result.Succeeded)
+            return result.Conflict
+                ? Conflict(new { message = result.Error })
+                : BadRequest(new { message = result.Error });
+
+        return Ok(new
         {
-            var response = new { message = result.Error };
-            return result.Conflict ? Conflict(response) : BadRequest(response);
-        }
+            message = result.Message,
+            emailConfirmationSent = result.EmailConfirmationSent
+        });
+    }
+
+    [HttpPost("resend-confirmation")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResendConfirmation(ResendConfirmationDto request)
+    {
+        var result = await _auth.ResendConfirmationAsync(request.Email, GetApiBaseUrl());
+        if (result.ServiceUnavailable)
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = result.Error });
 
         return Ok(new { message = result.Message });
     }
 
     [HttpGet("confirm-email")]
     [AllowAnonymous]
-    public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
+    public async Task<IActionResult> ConfirmEmail(string userId, string token)
     {
-        var loginUrl = GetFrontendUrl("/login");
-        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
-            return Redirect($"{loginUrl}?confirmed=false");
+        var confirmed = !string.IsNullOrWhiteSpace(userId) &&
+                        !string.IsNullOrWhiteSpace(token) &&
+                        await _auth.ConfirmEmailAsync(userId, token);
 
-        var confirmed = await _authService.ConfirmEmailAsync(userId, token);
-        return Redirect($"{loginUrl}?confirmed={confirmed.ToString().ToLowerInvariant()}");
+        var loginUrl = _configuration["Frontend:EmailConfirmationUrl"]
+            ?? $"{GetFrontendBaseUrl()}/login";
+        loginUrl = QueryHelpers.AddQueryString(loginUrl, "confirmed", confirmed.ToString().ToLowerInvariant());
+        return Redirect(loginUrl);
     }
 
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Login([FromBody] LoginDto request)
+    public async Task<IActionResult> Login(LoginDto request)
     {
-        var result = await _authService.LoginAsync(request);
+        var result = await _auth.LoginAsync(request);
         if (!result.Succeeded)
-        {
-            var message = result.Error!;
             return result.Unauthorized
-                ? Unauthorized(new { message })
-                : BadRequest(new { message });
-        }
+                ? Unauthorized(new { message = result.Error })
+                : BadRequest(new { message = result.Error });
 
         return Ok(result.Value);
     }
 
-    [HttpPost("exchange")]
-    [AllowAnonymous]
-    public async Task<IActionResult> Exchange([FromBody] ExchangeCodeDto request)
-    {
-        var result = await _authService.ExchangeAsync(request);
-        return result.Succeeded ? Ok(result.Value) : BadRequest(new { message = result.Error });
-    }
-
     [HttpPost("refresh")]
     [AllowAnonymous]
-    public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto request)
+    public async Task<IActionResult> Refresh(RefreshTokenDto request)
     {
-        var result = await _authService.RefreshAsync(request);
-        return result.Succeeded ? Ok(result.Value) : Unauthorized(new { message = result.Error });
-    }
-
-    [HttpPost("revoke")]
-    [Authorize]
-    public async Task<IActionResult> Revoke([FromBody] RefreshTokenDto request)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId is null)
-            return Unauthorized();
-
-        return await _authService.RevokeAsync(request.RefreshToken, userId)
-            ? NoContent()
-            : BadRequest(new { message = "Refresh token not found or already revoked." });
+        var result = await _auth.RefreshAsync(request);
+        return result.Succeeded
+            ? Ok(result.Value)
+            : Unauthorized(new { message = result.Error });
     }
 
     [HttpGet("google/login")]
     [AllowAnonymous]
-    public Task<IActionResult> GoogleLogin() => StartExternalLoginAsync("Google");
+    public Task<IActionResult> GoogleLogin() => StartProviderLogin("Google");
 
     [HttpGet("github/login")]
     [AllowAnonymous]
-    public Task<IActionResult> GitHubLogin() => StartExternalLoginAsync("GitHub");
+    public Task<IActionResult> GitHubLogin() => StartProviderLogin("GitHub");
 
-    private async Task<IActionResult> StartExternalLoginAsync(string scheme)
+    private async Task<IActionResult> StartProviderLogin(string provider)
     {
-        if (await _schemeProvider.GetSchemeAsync(scheme) is null)
-            return BadRequest(new { message = $"{scheme} login is not configured." });
+        if (await _schemes.GetSchemeAsync(provider) is null)
+            return BadRequest(new { message = $"{provider} login is not configured." });
 
-        return Challenge(scheme);
+        return Challenge(provider);
     }
 
-    private string GetFrontendUrl(string path)
-    {
-        var baseUrl = _configuration["AppUrls:FrontendBaseUrl"]?.TrimEnd('/')
-            ?? $"{Request.Scheme}://{Request.Host}";
-        return $"{baseUrl}{path}";
-    }
+    private string GetApiBaseUrl()
+        => _configuration["AppUrls:ApiBaseUrl"]?.TrimEnd('/')
+           ?? $"{Request.Scheme}://{Request.Host}";
+
+    private string GetFrontendBaseUrl()
+        => _configuration["AppUrls:FrontendBaseUrl"]?.TrimEnd('/')
+           ?? $"{Request.Scheme}://{Request.Host}";
 }
