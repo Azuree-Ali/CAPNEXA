@@ -57,16 +57,8 @@ public sealed class StudentProfileService : IStudentProfileService
 
         var firstName = request.FirstName.Trim();
         var lastName = request.LastName.Trim();
-        var phoneNumber = string.IsNullOrWhiteSpace(request.PhoneNumber)
-            ? null
-            : request.PhoneNumber.Trim();
-
-        var phoneChanged = !string.Equals(user.PhoneNumber, phoneNumber, StringComparison.Ordinal);
         user.FirstName = firstName;
         user.LastName = lastName;
-        user.PhoneNumber = phoneNumber;
-        if (phoneChanged)
-            user.PhoneNumberConfirmed = false;
 
         var updateResult = await _users.UpdateAsync(user);
         if (!updateResult.Succeeded)
@@ -121,10 +113,18 @@ public sealed class StudentProfileService : IStudentProfileService
         if (!user.IsActive)
             return Failure<StudentProfileDto>(ProfileOperationError.Forbidden, "account_disabled");
 
+        var studentNumber = request.StudentNumber.Trim();
+        var department = request.Department.Trim();
+        var academicYear = request.AcademicYear.Trim();
+
+        if (string.IsNullOrWhiteSpace(studentNumber) ||
+            string.IsNullOrWhiteSpace(department) ||
+            string.IsNullOrWhiteSpace(academicYear))
+            return Failure<StudentProfileDto>(ProfileOperationError.InvalidRequest, "required_academic_fields_missing");
+
         if (await _db.StudentProfiles.AnyAsync(profile => profile.UserId == userId))
             return Failure<StudentProfileDto>(ProfileOperationError.Conflict, "academic_profile_already_completed");
 
-        var studentNumber = request.StudentNumber.Trim();
         if (await _db.StudentProfiles.AnyAsync(profile => profile.StudentNumber == studentNumber))
             return Failure<StudentProfileDto>(ProfileOperationError.Conflict, "student_number_already_in_use");
 
@@ -132,8 +132,8 @@ public sealed class StudentProfileService : IStudentProfileService
         {
             UserId = userId,
             StudentNumber = studentNumber,
-            Department = request.Department.Trim(),
-            AcademicYear = request.AcademicYear.Trim(),
+            Department = department,
+            AcademicYear = academicYear,
             Level = string.IsNullOrWhiteSpace(request.Level) ? null : request.Level.Trim()
         };
 
@@ -338,8 +338,6 @@ public sealed class StudentProfileService : IStudentProfileService
             EmailConfirmed = user.EmailConfirmed,
             FirstName = user.FirstName,
             LastName = user.LastName,
-            PhoneNumber = user.PhoneNumber,
-            PhoneNumberConfirmed = user.PhoneNumberConfirmed,
             IsActive = user.IsActive,
             CreatedAt = user.CreatedAt,
             AcademicProfileComplete = academicProfileComplete,
