@@ -18,6 +18,7 @@ namespace CAPNEXAAPI.Repositories
             Expression<Func<T, object>>[]? includes = null,
             bool IsTracking = true
             );
+        IQueryable<T> GetQueryable(bool IsTracking = false);
          void Update(T entity);
          void Delete(T entity);
          Task<int> CommitAsync();

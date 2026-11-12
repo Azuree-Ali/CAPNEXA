@@ -71,9 +71,108 @@ All protected routes require a valid bearer token and Student role, except the e
 | PUT | `/api/Student/ProjectProposals/{projectId}` | Student bearer, team leader | Edit a draft proposal |
 | POST | `/api/Student/ProjectProposals/{projectId}/submit` | Student bearer, team leader | Submit a draft for review |
 
-### Admin web dashboard only
+### Admin student management
 
-`GET /api/Admin/Students/{userId}/profile` requires the Admin role. This endpoint is for the web dashboard, not the Flutter student application.
+**ADMIN WEB DASHBOARD ONLY — NOT FOR FLUTTER STUDENT FLOWS**
+
+All routes in this section require the Admin role (`Authorization: Bearer <adminAccessToken>`). They are intended for the Admin web dashboard. The Flutter student application must not call these endpoints.
+
+| Method | Route | Authentication | Result |
+|---|---|---|---|
+| GET | `/api/Admin/Students` | Admin bearer | Lists and searches student accounts with filters and pagination |
+| GET | `/api/Admin/Students/{userId}/profile` | Admin bearer | Returns the full profile for one student |
+| PUT | `/api/Admin/Students/{userId}/status` | Admin bearer | Activates or deactivates a student account |
+
+#### List students
+
+`GET /api/Admin/Students?search=...&department=...&academicYear=...&isActive=true&page=1&pageSize=20`
+
+Query parameters:
+
+| Name | Type | Required | Rules |
+|---|---|---|---|
+| `search` | string | No | Case-insensitive partial match on first name, last name, email, or student number |
+| `department` | string | No | Exact match on the student's department |
+| `academicYear` | string | No | Exact match on the student's academic year |
+| `isActive` | boolean | No | Filters active (`true`) or disabled (`false`) accounts |
+| `page` | integer | No | 1-based page number; defaults to `1`; must be at least `1` |
+| `pageSize` | integer | No | Defaults to `20`; must be between `1` and `100` |
+
+Only accounts in the Student role are returned. Results are ordered newest first (`createdAt` descending, then `userId` ascending) and are paginated in the database. The total count is computed before pagination.
+
+Success is `200`:
+
+```json
+{
+  "items": [
+    {
+      "userId": "6f1a...",
+      "email": "amina@example.edu",
+      "firstName": "Amina",
+      "lastName": "Hassan",
+      "studentNumber": "20260042",
+      "department": "Computer Science",
+      "academicYear": "Year 3",
+      "academicProfileComplete": true,
+      "emailConfirmed": true,
+      "isActive": true,
+      "createdAt": "2026-10-01T12:00:00Z"
+    }
+  ],
+  "page": 1,
+  "pageSize": 20,
+  "totalCount": 1,
+  "totalPages": 1
+}
+```
+
+Invalid pagination returns `400`:
+
+```json
+{"code":"invalid_pagination","message":"Page must be at least 1 and pageSize must be between 1 and 100."}
+```
+
+#### Student profile
+
+`GET /api/Admin/Students/{userId}/profile`
+
+Returns the same profile contract as the Flutter student profile endpoint, including teams and projects, for the requested student. Only accounts in the Student role are eligible.
+
+Success is `200`. Unknown or non-student `userId` returns `404`:
+
+```json
+{"code":"student_not_found","message":"The student was not found."}
+```
+
+An unexpected backend failure returns `500` with `{"code":"profile_operation_failed","message":"..."}`.
+
+#### Activate or deactivate a student
+
+`PUT /api/Admin/Students/{userId}/status`
+
+```json
+{"isActive":false}
+```
+
+The request is idempotent: setting the current state succeeds without further changes. Only accounts in the Student role can be targeted. Setting `isActive` to `false` also revokes all of that student's refresh tokens, so existing sessions can no longer refresh. Reactivating the account does not restore revoked tokens; the student must sign in again.
+
+Success is `200`:
+
+```json
+{"userId":"6f1a...","isActive":false}
+```
+
+Errors:
+
+- `400 {"code":"invalid_status_payload","message":"The isActive value is required."}` when `isActive` is missing.
+- `404 {"code":"student_not_found","message":"The student was not found."}` when the `userId` is unknown or not a Student.
+- `500 {"code":"student_status_update_failed","message":"..."}` when the update cannot be persisted.
+
+A disabled student is rejected from login, refresh, and OAuth token issuance, and protected Student endpoints return `403`:
+
+```json
+{"code":"account_disabled","message":"This account has been disabled."}
+```
 
 ### Sample endpoint
 

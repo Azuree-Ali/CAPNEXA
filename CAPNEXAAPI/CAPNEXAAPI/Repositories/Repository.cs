@@ -69,6 +69,9 @@ namespace CAPNEXAAPI.Repositories
             return await entities.FirstOrDefaultAsync();
         }
 
+        public IQueryable<T> GetQueryable(bool IsTracking = false)
+            => Query(IsTracking: IsTracking);
+
         public void Update(T entity)
         {
             _dbSet.Update(entity);
