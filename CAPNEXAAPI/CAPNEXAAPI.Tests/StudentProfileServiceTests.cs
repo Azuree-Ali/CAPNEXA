@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using CAPNEXAAPI.DataAccess;
 using CAPNEXAAPI.DTOs.Request;
 using CAPNEXAAPI.Models;
+using CAPNEXAAPI.Repositories;
 using CAPNEXAAPI.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -47,7 +48,22 @@ public sealed class StudentProfileServiceTests
     }
 
     [Fact]
-    public async Task UpdateOwnProfile_ChangesOnlyEditableFieldsAndResetsPhoneConfirmation()
+    public async Task GetOwnProfile_ExternalAccountWithoutAcademicProfileIsIncomplete()
+    {
+        await using var fixture = await Fixture.CreateAsync();
+        var user = await fixture.CreateStudentAsync(withPassword: false, confirmed: true);
+
+        var result = await fixture.Service.GetOwnProfileAsync(user.Id);
+
+        Assert.True(result.Succeeded);
+        Assert.False(result.Value!.AcademicProfileComplete);
+        Assert.Null(result.Value.StudentNumber);
+        Assert.Null(result.Value.Department);
+        Assert.Null(result.Value.AcademicYear);
+    }
+
+    [Fact]
+    public async Task UpdateOwnProfile_ChangesNamesAndLeavesIdentityPhoneUnchanged()
     {
         await using var fixture = await Fixture.CreateAsync();
         var user = await fixture.CreateStudentAsync();
@@ -58,16 +74,29 @@ public sealed class StudentProfileServiceTests
         await fixture.Db.SaveChangesAsync();
 
         var result = await fixture.Service.UpdateOwnProfileAsync(user.Id,
-            new UpdateStudentProfileDto { FirstName = " New ", LastName = " Name ", PhoneNumber = "+201222222222" });
+            new UpdateStudentProfileDto { FirstName = " New ", LastName = " Name " });
 
         var saved = await fixture.Users.FindByIdAsync(user.Id);
         var academic = await fixture.Db.StudentProfiles.SingleAsync(item => item.UserId == user.Id);
         Assert.True(result.Succeeded);
         Assert.Equal("New", saved!.FirstName);
-        Assert.Equal("+201222222222", saved.PhoneNumber);
-        Assert.False(saved.PhoneNumberConfirmed);
+        Assert.Equal("+201111111111", saved.PhoneNumber);
+        Assert.True(saved.PhoneNumberConfirmed);
         Assert.Equal("LOCKED", academic.StudentNumber);
         Assert.Equal("CS", academic.Department);
+    }
+
+    [Fact]
+    public async Task CompleteOwnProfile_RejectsMissingRequiredAcademicFields()
+    {
+        await using var fixture = await Fixture.CreateAsync();
+        var user = await fixture.CreateStudentAsync();
+
+        var result = await fixture.Service.CompleteOwnProfileAsync(user.Id,
+            new CompleteStudentProfileDto { StudentNumber = " ", Department = "CS", AcademicYear = "2026" });
+
+        Assert.Equal(ProfileOperationError.InvalidRequest, result.Error);
+        Assert.Equal("required_academic_fields_missing", result.ErrorCode);
     }
 
     [Fact]
@@ -207,7 +236,15 @@ public sealed class StudentProfileServiceTests
             {
                 ["AppUrls:ApiBaseUrl"] = "https://localhost:7072"
             }).Build();
-            Service = new StudentProfileService(Users, Db, Email, RefreshTokens, configuration);
+            Service = new StudentProfileService(
+                Users,
+                new Repository<StudentProfile>(Db),
+                new Repository<Team>(Db),
+                new Repository<TeamMember>(Db),
+                new Repository<Project>(Db),
+                Email,
+                RefreshTokens,
+                configuration);
         }
 
         public static async Task<Fixture> CreateAsync()
@@ -280,7 +317,6 @@ public sealed class StudentProfileServiceTests
         public string? RevokedUserId { get; private set; }
         public Task<string> IssueAsync(string userId, string? jwtId = null) => throw new NotSupportedException();
         public Task<(ApplicationUser User, string AccessToken, int ExpiresInSeconds, string RefreshToken)?> RefreshAsync(string rawToken) => throw new NotSupportedException();
-        public Task<bool> RevokeAsync(string rawToken, string userId) => throw new NotSupportedException();
         public Task RevokeAllAsync(string userId) { RevokedUserId = userId; return Task.CompletedTask; }
     }
 }

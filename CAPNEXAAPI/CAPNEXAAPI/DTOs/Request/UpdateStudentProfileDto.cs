@@ -12,7 +12,4 @@ public sealed class UpdateStudentProfileDto
     [StringLength(100, MinimumLength = 2)]
     public string LastName { get; set; } = string.Empty;
 
-    [Phone]
-    [StringLength(32)]
-    public string? PhoneNumber { get; set; }
 }

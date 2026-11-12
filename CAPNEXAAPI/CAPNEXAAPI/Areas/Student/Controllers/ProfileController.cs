@@ -145,6 +145,7 @@ public sealed class ProfileController : ControllerBase
         var message = code switch
         {
             "account_disabled" => "This account is disabled.",
+            "required_academic_fields_missing" => "Student number, department, and academic year are required.",
             "academic_profile_already_completed" => "The academic profile has already been completed.",
             "student_number_already_in_use" => "This student number is already in use.",
             "email_already_in_use" => "This email address is already in use.",

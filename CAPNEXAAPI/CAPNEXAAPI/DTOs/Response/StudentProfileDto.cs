@@ -7,8 +7,6 @@ public sealed class StudentProfileDto
     public bool EmailConfirmed { get; init; }
     public string FirstName { get; init; } = string.Empty;
     public string LastName { get; init; } = string.Empty;
-    public string? PhoneNumber { get; init; }
-    public bool PhoneNumberConfirmed { get; init; }
     public bool IsActive { get; init; }
     public DateTime CreatedAt { get; init; }
     public bool AcademicProfileComplete { get; init; }

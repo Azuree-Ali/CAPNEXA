@@ -3,62 +3,47 @@ using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
 
-namespace CAPNEXAAPI.Utils;
+namespace CAPNEXAAPI;
 
 public sealed class EmailSettings
 {
-    public string SmtpServer { get; set; } = string.Empty;
-    public int Port { get; set; } = 587;
-    public bool EnableSsl { get; set; } = true;
-    public string SenderEmail { get; set; } = string.Empty;
-    public string? SenderName { get; set; }
-    public string? UserName { get; set; }
-    public string? Password { get; set; }
-}
 
-public sealed class EmailSender : IEmailSender
-{
-    private readonly EmailSettings _settings;
 
-    public EmailSender(IOptions<EmailSettings> options)
+    public sealed class EmailSender : IEmailSender
     {
-        _settings = options.Value;
-    }
+        private readonly IConfiguration _configuration;
 
-    public async Task SendEmailAsync(string email, string subject, string htmlMessage)
-    {
-        if (string.IsNullOrWhiteSpace(_settings.SmtpServer) ||
-            string.IsNullOrWhiteSpace(_settings.SenderEmail) ||
-            _settings.Port is < 1 or > 65535)
+        public EmailSender(IConfiguration configuration)
         {
-            throw new InvalidOperationException("EmailSettings must include a valid SmtpServer, Port, and SenderEmail.");
+            _configuration = configuration;
         }
 
-        if (string.IsNullOrWhiteSpace(_settings.UserName) != string.IsNullOrWhiteSpace(_settings.Password))
+        public async Task SendEmailAsync(
+            string email,
+            string subject,
+            string htmlMessage)
         {
-            throw new InvalidOperationException("EmailSettings.UserName and EmailSettings.Password must both be set for SMTP authentication.");
+            using var client = new SmtpClient("smtp.gmail.com", 587)
+            {
+                EnableSsl = true,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(
+                    _configuration["EmailSettings:Email"],
+                    _configuration["EmailSettings:Password"])
+            };
+
+            using var mail = new MailMessage
+            {
+                From = new MailAddress(
+                    _configuration["EmailSettings:Email"]!),
+                Subject = subject,
+                Body = htmlMessage,
+                IsBodyHtml = true
+            };
+
+            mail.To.Add(email);
+
+            await client.SendMailAsync(mail);
         }
-
-        using var client = new SmtpClient(_settings.SmtpServer, _settings.Port)
-        {
-            EnableSsl = _settings.EnableSsl,
-            UseDefaultCredentials = false
-        };
-
-        if (!string.IsNullOrWhiteSpace(_settings.UserName))
-        {
-            client.Credentials = new NetworkCredential(_settings.UserName, _settings.Password);
-        }
-
-        using var mail = new MailMessage
-        {
-            From = new MailAddress(_settings.SenderEmail, _settings.SenderName ?? string.Empty),
-            Subject = subject,
-            Body = htmlMessage,
-            IsBodyHtml = true
-        };
-        mail.To.Add(new MailAddress(email));
-
-        await client.SendMailAsync(mail);
     }
 }

@@ -34,7 +34,7 @@ public sealed class ProfileEndpointTests
     {
         var service = new FakeStudentProfileService { OwnProfileResult = Ok(Profile()) };
         var controller = StudentController(service);
-        var request = new UpdateStudentProfileDto { FirstName = "New", LastName = "Name", PhoneNumber = "+201000000000" };
+        var request = new UpdateStudentProfileDto { FirstName = "New", LastName = "Name" };
 
         var result = await controller.UpdateMyProfile(request);
 
@@ -148,7 +148,7 @@ public sealed class ProfileEndpointTests
         Assert.NotEmpty(Validate(new CompleteStudentProfileDto()));
         Assert.NotEmpty(Validate(new ChangeStudentEmailDto { NewEmail = "not-an-email" }));
         Assert.NotEmpty(Validate(new ConfirmStudentEmailChangeDto { UserId = "id", NewEmail = "not-an-email", Token = "token" }));
-        Assert.Empty(Validate(new UpdateStudentProfileDto { FirstName = "Ali", LastName = "Hassan", PhoneNumber = "+201000000000" }));
+        Assert.Empty(Validate(new UpdateStudentProfileDto { FirstName = "Ali", LastName = "Hassan" }));
     }
 
     private static List<ValidationResult> Validate(object instance)

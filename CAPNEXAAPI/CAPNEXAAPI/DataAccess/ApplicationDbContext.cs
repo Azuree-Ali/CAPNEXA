@@ -51,6 +51,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         });
         builder.Entity<TeamMember>(entity =>
         {
+            entity.HasIndex(x => x.StudentId).IsUnique();
             entity.HasIndex(x => new { x.TeamId, x.StudentId }).IsUnique();
             entity.HasOne(x => x.Team).WithMany(x => x.Members).HasForeignKey(x => x.TeamId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.Student).WithMany(x => x.TeamMemberships).HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
@@ -58,6 +59,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Project>(entity =>
         {
             entity.Property(x => x.Title).HasMaxLength(250).IsRequired();
+            entity.Property(x => x.RejectionReason).HasMaxLength(2000);
+            entity.HasIndex(x => x.TeamId)
+                .IsUnique()
+                .HasFilter("[Status] <> 'Rejected'");
             entity.HasOne(x => x.Team).WithMany(x => x.Projects).HasForeignKey(x => x.TeamId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.Supervisor).WithMany(x => x.Projects).HasForeignKey(x => x.SupervisorId).OnDelete(DeleteBehavior.SetNull);
         });
