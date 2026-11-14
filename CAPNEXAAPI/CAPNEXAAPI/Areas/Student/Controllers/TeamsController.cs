@@ -56,7 +56,7 @@ public sealed class TeamsController : ControllerBase
         var (status, code, message) = error switch
         {
             TeamError.ProfileRequired => (403, "profile_completion_required", "Complete your academic profile before using teams."),
-            TeamError.AccountDisabled => (403, "account_disabled", "This account is disabled."),
+            TeamError.AccountDisabled => (403, "account_disabled", "This account has been disabled."),
             TeamError.StudentAlreadyInTeam => (409, "student_already_in_team", "You are already a member of a team."),
             TeamError.TeamNotFound => (404, "team_not_found", "No team was found for this code or account."),
             TeamError.TeamFull => (409, "team_full", "This team already has the maximum of five members."),

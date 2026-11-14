@@ -123,7 +123,7 @@ public sealed class ProfileEndpointTests
     public async Task AdminEndpoint_DelegatesStudentProfileLookup()
     {
         var service = new FakeStudentProfileService { AdminProfileResult = Ok(Profile()) };
-        var result = await new StudentsController(service).GetStudentProfile(UserId);
+        var result = await new StudentsController(service, new FakeAdminStudentService()).GetStudentProfile(UserId);
 
         Assert.IsType<OkObjectResult>(result);
         Assert.Equal(UserId, service.LastAdminUserId);
@@ -202,5 +202,14 @@ public sealed class ProfileEndpointTests
         public Task<ProfileOperationResult<bool>> RequestEmailChangeAsync(string userId, string newEmail) { LastUserId = userId; LastEmail = newEmail; return Task.FromResult(EmailRequestResult); }
         public Task<ProfileOperationResult<bool>> ConfirmEmailChangeAsync(string userId, string newEmail, string token) { LastConfirmation = (userId, newEmail, token); return Task.FromResult(EmailConfirmResult); }
         public Task<ProfileOperationResult<StudentProfileDto>> GetStudentProfileForAdminAsync(string userId) { LastAdminUserId = userId; return Task.FromResult(AdminProfileResult); }
+    }
+
+    private sealed class FakeAdminStudentService : IAdminStudentService
+    {
+        public Task<AdminStudentResult<AdminStudentListDto>> GetStudentsAsync(AdminStudentQueryDto query)
+            => Task.FromResult(new AdminStudentResult<AdminStudentListDto>(new AdminStudentListDto()));
+
+        public Task<AdminStudentResult<AdminStudentStatusDto>> UpdateStatusAsync(string userId, bool? isActive)
+            => Task.FromResult(new AdminStudentResult<AdminStudentStatusDto>(new AdminStudentStatusDto { UserId = userId }));
     }
 }

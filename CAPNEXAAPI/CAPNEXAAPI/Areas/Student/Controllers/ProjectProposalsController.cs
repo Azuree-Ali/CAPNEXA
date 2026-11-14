@@ -47,7 +47,7 @@ public sealed class ProjectProposalsController : ControllerBase
         var (status, code, message) = result.Error switch
         {
             ProjectProposalError.ProfileRequired => (403, "profile_completion_required", "Complete your academic profile before using project proposals."),
-            ProjectProposalError.AccountDisabled => (403, "account_disabled", "This account is disabled."),
+            ProjectProposalError.AccountDisabled => (403, "account_disabled", "This account has been disabled."),
             ProjectProposalError.TeamRequired => (409, "team_required", "Join or create a team before using project proposals."),
             ProjectProposalError.NotTeamLeader => (403, "team_leader_required", "Only the team leader can submit the proposal for review."),
             ProjectProposalError.ActiveProposalExists => (409, "active_proposal_exists", "Your team already has a proposal that is not rejected."),
