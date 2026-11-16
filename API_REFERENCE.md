@@ -174,6 +174,151 @@ A disabled student is rejected from login, refresh, and OAuth token issuance, an
 {"code":"account_disabled","message":"This account has been disabled."}
 ```
 
+### Admin proposal review
+
+**ADMIN WEB DASHBOARD ONLY — NOT FOR FLUTTER STUDENT FLOWS**
+
+All routes in this section require the Admin role (`Authorization: Bearer <adminAccessToken>`). Admins can only see submitted proposals; Draft proposals are never returned.
+
+| Method | Route | Authentication | Result |
+|---|---|---|---|
+| GET | `/api/Admin/ProjectProposals` | Admin bearer | Lists submitted proposals with optional status filter, search, and pagination |
+| GET | `/api/Admin/ProjectProposals/{projectId}` | Admin bearer | Returns one proposal with full team details and review decision |
+| PUT | `/api/Admin/ProjectProposals/{projectId}/review` | Admin bearer | Approves or rejects a proposal and writes an audit entry |
+
+#### List proposals
+
+`GET /api/Admin/ProjectProposals?status=PendingReview&search=...&page=1&pageSize=20`
+
+| Name | Type | Required | Rules |
+|---|---|---|---|
+| `status` | string | No | `PendingReview` (default), `Approved`, or `Rejected`; any other value, including `Draft`, returns `400 invalid_status_filter` |
+| `search` | string | No | Case-insensitive partial match on proposal title, team name, or team code; `%` and `_` are treated literally |
+| `page` | integer | No | 1-based page number; defaults to `1`; must be at least `1` |
+| `pageSize` | integer | No | Defaults to `20`; must be between `1` and `100` |
+
+`PendingReview` proposals are ordered oldest submission first (`submittedAt` ascending, then `projectId`). Decided proposals are ordered most recently reviewed first (`reviewedAt` descending, then `projectId`).
+
+Success is `200`:
+
+```json
+{
+  "items": [
+    {
+      "projectId": 12,
+      "title": "Campus Navigator",
+      "status": "PendingReview",
+      "submittedAt": "2026-11-10T09:30:00Z",
+      "reviewedAt": null,
+      "team": {
+        "teamId": 4,
+        "name": "Team Alpha",
+        "teamCode": "A1B2C3D4E5",
+        "memberCount": 3
+      },
+      "leaderName": "Amina Hassan"
+    }
+  ],
+  "page": 1,
+  "pageSize": 20,
+  "totalCount": 1,
+  "totalPages": 1
+}
+```
+
+Errors:
+
+- `400 {"code":"invalid_status_filter","message":"Status must be PendingReview, Approved, or Rejected."}`
+- `400 {"code":"invalid_pagination","message":"Page must be at least 1 and pageSize must be between 1 and 100."}`
+
+#### Proposal details
+
+`GET /api/Admin/ProjectProposals/{projectId}`
+
+Success is `200`. Team members are returned leader first, then by join time ascending. `review` is `null` while the proposal is `PendingReview`.
+
+```json
+{
+  "projectId": 12,
+  "title": "Campus Navigator",
+  "description": "An indoor navigation app for new students.",
+  "status": "PendingReview",
+  "createdAt": "2026-11-09T14:00:00Z",
+  "submittedAt": "2026-11-10T09:30:00Z",
+  "team": {
+    "teamId": 4,
+    "name": "Team Alpha",
+    "teamCode": "A1B2C3D4E5",
+    "maxMembers": 5,
+    "memberCount": 2,
+    "members": [
+      {
+        "userId": "6f1a...",
+        "firstName": "Amina",
+        "lastName": "Hassan",
+        "email": "amina@example.edu",
+        "studentNumber": "20260042",
+        "department": "Computer Science",
+        "academicYear": "Year 3",
+        "isLeader": true,
+        "joinedAt": "2026-11-01T10:00:00Z"
+      }
+    ]
+  },
+  "review": null
+}
+```
+
+After a decision, `review` contains the outcome:
+
+```json
+{
+  "decision": "Rejected",
+  "reason": "The scope is too broad for one semester.",
+  "adminNotes": "Internal note for the admin team.",
+  "reviewedByUserId": "9c2b...",
+  "reviewedByName": "Ada Admin",
+  "reviewedAt": "2026-11-16T08:15:00Z"
+}
+```
+
+Missing proposals and Draft proposals both return `404`:
+
+```json
+{"code":"proposal_not_found","message":"The proposal was not found."}
+```
+
+#### Approve or reject a proposal
+
+`PUT /api/Admin/ProjectProposals/{projectId}/review`
+
+```json
+{
+  "decision": "Rejected",
+  "reason": "The scope is too broad for one semester.",
+  "adminNotes": "Optional internal note for the admin team."
+}
+```
+
+| Field | Type | Required | Rules |
+|---|---|---|---|
+| `decision` | string | Yes | `Approved` or `Rejected` |
+| `reason` | string | Only when rejecting | Maximum 2000 characters; trimmed; empty becomes `null` |
+| `adminNotes` | string | No | Internal only, maximum 4000 characters; trimmed; empty becomes `null` |
+
+On success the proposal moves from `PendingReview` to the chosen decision and `200` returns the same detail contract as the previous endpoint, including the new `review` object. The reviewer identity comes from the Admin access token, never from the request body. `adminNotes` and reviewer identity are internal and are never returned by the Student API.
+
+Errors:
+
+- `404 {"code":"proposal_not_found","message":"The proposal was not found."}` for a missing or Draft proposal.
+- `409 {"code":"proposal_not_pending_review","message":"Only a proposal pending review can be reviewed."}` when the proposal was already decided.
+- `400 {"code":"invalid_decision","message":"Decision must be Approved or Rejected."}`
+- `400 {"code":"rejection_reason_required","message":"A rejection reason is required."}`
+- `400 {"code":"invalid_review_payload","message":"The review reason or admin notes are too long."}`
+- `500 {"code":"admin_proposal_operation_failed","message":"..."}`
+
+Every successful decision writes an audit row with action `ProposalApproved` or `ProposalRejected`, entity `Project`, the admin user, the client IP, and a short description that never contains the reason or admin notes.
+
 ### Sample endpoint
 
 `GET /WeatherForecast` is scaffold/sample functionality, not a CAPNEXA business feature.
@@ -416,15 +561,14 @@ Use platform secure storage for access/refresh tokens. OAuth and email confirmat
 These are planned backend features, not available endpoints in the current API. Build them in this order because each stage depends on earlier data and permissions.
 
 1. **Team management**: backend routes for create, join, leave, and member listing are implemented. Flutter must still connect its screens to these routes. Leadership transfer and team deletion are future work.
-2. **Project proposal**: draft creation/editing, submission, and listing of proposal attempts are implemented. Review decisions and rejection reasons will be completed with proposal review.
-3. **Proposal review**: web dashboard review and decision history.
-4. **Supervisor assignment**: assign supervisors to approved projects and enforce supervisor capacity.
-5. **Milestones**: create ordered milestones, due dates, status, and project progress.
-6. **Submissions and file versions**: upload files to milestones, maintain versions, status, and submission history.
-7. **Review and grading**: supervisor comments, grade, revision requests, and review history.
-8. **Notifications**: list user notifications and mark read; generate events from project workflow changes.
-9. **Student dashboard summary**: aggregate team, project, milestones, deadlines, submissions, and feedback.
-10. **Similarity analysis**: process submitted documents, persist results, and return match details.
-11. **Audit history**: record and provide authorized access to important administrative/workflow events.
+2. **Project proposal**: draft creation/editing, submission, listing of proposal attempts, and Admin review decisions are implemented. A web dashboard screen must still be connected to the Admin review endpoints.
+3. **Supervisor assignment**: assign supervisors to approved projects and enforce supervisor capacity.
+4. **Milestones**: create ordered milestones, due dates, status, and project progress.
+5. **Submissions and file versions**: upload files to milestones, maintain versions, status, and submission history.
+6. **Review and grading**: supervisor comments, grade, revision requests, and review history.
+7. **Notifications**: list user notifications and mark read; generate events from project workflow changes.
+8. **Student dashboard summary**: aggregate team, project, milestones, deadlines, submissions, and feedback.
+9. **Similarity analysis**: process submitted documents, persist results, and return match details.
+10. **Audit history**: record and provide authorized access to important administrative/workflow events.
 
 Each future student feature endpoint must check that the authenticated user has the Student role and a completed academic profile. If incomplete, return `403` with `{ "code": "profile_completion_required", "message": "Complete your academic profile before using this feature." }`. Keep profile read/completion and account-maintenance endpoints available during onboarding. Admin dashboard endpoints remain governed by Admin authorization and are not blocked by student onboarding.
