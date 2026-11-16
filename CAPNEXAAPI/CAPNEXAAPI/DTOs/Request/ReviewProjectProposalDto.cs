@@ -10,7 +10,4 @@ public sealed class ReviewProjectProposalDto
 
     [StringLength(2000)]
     public string? Reason { get; set; }
-
-    [StringLength(4000)]
-    public string? AdminNotes { get; set; }
 }

@@ -39,7 +39,6 @@ public sealed class AdminProposalReviewDto
 {
     public string Decision { get; init; } = string.Empty;
     public string? Reason { get; init; }
-    public string? AdminNotes { get; init; }
     public string? ReviewedByUserId { get; init; }
     public string? ReviewedByName { get; init; }
     public DateTime? ReviewedAt { get; init; }

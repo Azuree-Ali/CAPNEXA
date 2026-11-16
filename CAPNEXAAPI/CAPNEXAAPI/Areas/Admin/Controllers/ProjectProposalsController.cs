@@ -57,7 +57,7 @@ public sealed class ProjectProposalsController : ControllerBase
             "invalid_pagination" => "Page must be at least 1 and pageSize must be between 1 and 100.",
             "invalid_decision" => "Decision must be Approved or Rejected.",
             "rejection_reason_required" => "A rejection reason is required.",
-            "invalid_review_payload" => "The review reason or admin notes are too long.",
+            "invalid_review_payload" => "The review reason is too long.",
             _ => "The proposal operation could not be completed."
         };
 

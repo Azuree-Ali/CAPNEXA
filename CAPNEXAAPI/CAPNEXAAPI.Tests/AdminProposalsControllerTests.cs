@@ -1,6 +1,7 @@
 using System.Net;
 using System.Reflection;
 using System.Security.Claims;
+using System.Text.Json;
 using CAPNEXAAPI.Areas.Admin.Controllers;
 using CAPNEXAAPI.DTOs.Request;
 using CAPNEXAAPI.DTOs.Response;
@@ -217,6 +218,44 @@ public sealed class AdminProposalsControllerTests
             7, new ReviewProjectProposalDto { Decision = "Approved" });
 
         Assert.Equal(500, Assert.IsAssignableFrom<ObjectResult>(result).StatusCode);
+    }
+
+    [Fact]
+    public void DetailResponse_SerializesWithoutAdminNotes()
+    {
+        var detail = new AdminProposalDetailDto
+        {
+            ProjectId = 7,
+            Status = "Approved",
+            Review = new AdminProposalReviewDto
+            {
+                Decision = "Approved",
+                Reason = "Meets requirements",
+                ReviewedByUserId = "admin-1",
+                ReviewedByName = "Ada Admin",
+                ReviewedAt = DateTime.UtcNow
+            }
+        };
+
+        var json = JsonSerializer.Serialize(detail, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+
+        Assert.DoesNotContain("adminNotes", json, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("\"reason\":\"Meets requirements\"", json);
+    }
+
+    [Fact]
+    public void ReviewRequest_IgnoresUnknownAdminNotesProperty()
+    {
+        var request = JsonSerializer.Deserialize<ReviewProjectProposalDto>(
+            """{"decision":"Approved","reason":"ok","adminNotes":"ignored"}""",
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        Assert.NotNull(request);
+        Assert.Equal("Approved", request.Decision);
+        Assert.Equal("ok", request.Reason);
     }
 
     private static ProjectProposalsController Controller(FakeAdminProposalService service)

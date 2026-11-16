@@ -62,7 +62,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(x => x.Status).HasMaxLength(50).IsRequired();
             entity.Property(x => x.RejectionReason).HasMaxLength(2000);
             entity.Property(x => x.ReviewReason).HasMaxLength(2000);
-            entity.Property(x => x.AdminNotes).HasMaxLength(4000);
             entity.HasIndex(x => x.TeamId)
                 .IsUnique()
                 .HasFilter("[Status] <> 'Rejected'");

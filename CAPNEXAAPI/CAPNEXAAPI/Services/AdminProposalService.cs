@@ -11,7 +11,6 @@ public sealed class AdminProposalService : IAdminProposalService
     public const int MaximumPageSize = 100;
 
     private const int MaximumReasonLength = 2000;
-    private const int MaximumAdminNotesLength = 4000;
     private const string LikeEscapeCharacter = "\\";
 
     private readonly IRepository<Project> _projects;
@@ -164,22 +163,19 @@ public sealed class AdminProposalService : IAdminProposalService
                 "invalid_decision");
 
         var reason = TrimToNull(request!.Reason);
-        var adminNotes = TrimToNull(request.AdminNotes);
 
         if (decision == ProjectStatuses.Rejected && reason is null)
             return Failure<AdminProposalDetailDto>(
                 AdminProposalError.InvalidRequest,
                 "rejection_reason_required");
 
-        if (reason?.Length > MaximumReasonLength ||
-            adminNotes?.Length > MaximumAdminNotesLength)
+        if (reason?.Length > MaximumReasonLength)
             return Failure<AdminProposalDetailDto>(
                 AdminProposalError.InvalidRequest,
                 "invalid_review_payload");
 
         project.Status = decision;
         project.ReviewReason = reason;
-        project.AdminNotes = adminNotes;
         project.ReviewedByUserId = adminUserId;
         project.ReviewedAt = DateTime.UtcNow;
         project.RejectionReason = decision == ProjectStatuses.Rejected ? reason : null;
@@ -269,7 +265,6 @@ public sealed class AdminProposalService : IAdminProposalService
                 {
                     Decision = project.Status,
                     Reason = project.ReviewReason,
-                    AdminNotes = project.AdminNotes,
                     ReviewedByUserId = project.ReviewedByUserId,
                     ReviewedByName = reviewer is null
                         ? null

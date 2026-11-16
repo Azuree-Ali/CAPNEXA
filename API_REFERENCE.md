@@ -275,7 +275,6 @@ After a decision, `review` contains the outcome:
 {
   "decision": "Rejected",
   "reason": "The scope is too broad for one semester.",
-  "adminNotes": "Internal note for the admin team.",
   "reviewedByUserId": "9c2b...",
   "reviewedByName": "Ada Admin",
   "reviewedAt": "2026-11-16T08:15:00Z"
@@ -295,8 +294,7 @@ Missing proposals and Draft proposals both return `404`:
 ```json
 {
   "decision": "Rejected",
-  "reason": "The scope is too broad for one semester.",
-  "adminNotes": "Optional internal note for the admin team."
+  "reason": "The scope is too broad for one semester."
 }
 ```
 
@@ -304,9 +302,8 @@ Missing proposals and Draft proposals both return `404`:
 |---|---|---|---|
 | `decision` | string | Yes | `Approved` or `Rejected` |
 | `reason` | string | Only when rejecting | Maximum 2000 characters; trimmed; empty becomes `null` |
-| `adminNotes` | string | No | Internal only, maximum 4000 characters; trimmed; empty becomes `null` |
 
-On success the proposal moves from `PendingReview` to the chosen decision and `200` returns the same detail contract as the previous endpoint, including the new `review` object. The reviewer identity comes from the Admin access token, never from the request body. `adminNotes` and reviewer identity are internal and are never returned by the Student API.
+On success the proposal moves from `PendingReview` to the chosen decision and `200` returns the same detail contract as the previous endpoint, including the new `review` object. The reviewer identity comes from the Admin access token, never from the request body, and is never returned by the Student API.
 
 Errors:
 
@@ -314,10 +311,10 @@ Errors:
 - `409 {"code":"proposal_not_pending_review","message":"Only a proposal pending review can be reviewed."}` when the proposal was already decided.
 - `400 {"code":"invalid_decision","message":"Decision must be Approved or Rejected."}`
 - `400 {"code":"rejection_reason_required","message":"A rejection reason is required."}`
-- `400 {"code":"invalid_review_payload","message":"The review reason or admin notes are too long."}`
+- `400 {"code":"invalid_review_payload","message":"The review reason is too long."}`
 - `500 {"code":"admin_proposal_operation_failed","message":"..."}`
 
-Every successful decision writes an audit row with action `ProposalApproved` or `ProposalRejected`, entity `Project`, the admin user, the client IP, and a short description that never contains the reason or admin notes.
+Every successful decision writes an audit row with action `ProposalApproved` or `ProposalRejected`, entity `Project`, the admin user, the client IP, and a short description that never contains the reason text.
 
 ### Sample endpoint
 

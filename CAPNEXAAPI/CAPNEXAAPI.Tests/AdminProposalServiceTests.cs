@@ -182,8 +182,7 @@ public sealed class AdminProposalServiceTests
             new ReviewProjectProposalDto
             {
                 Decision = ProjectStatuses.Approved,
-                Reason = "  Looks good  ",
-                AdminNotes = "  Internal note  "
+                Reason = "  Looks good  "
             },
             "127.0.0.1");
 
@@ -191,12 +190,41 @@ public sealed class AdminProposalServiceTests
         var stored = await fixture.Db.Projects.AsNoTracking().SingleAsync(item => item.Id == project.Id);
         Assert.Equal(ProjectStatuses.Approved, stored.Status);
         Assert.Equal("Looks good", stored.ReviewReason);
-        Assert.Equal("Internal note", stored.AdminNotes);
         Assert.Null(stored.RejectionReason);
         Assert.Equal(admin.Id, stored.ReviewedByUserId);
         Assert.NotNull(stored.ReviewedAt);
         Assert.Equal(ProjectStatuses.Approved, result.Value!.Review!.Decision);
+        Assert.Equal("Looks good", result.Value.Review.Reason);
         Assert.Equal("Ada Admin", result.Value.Review.ReviewedByName);
+    }
+
+    [Fact]
+    public async Task ReviewProposal_ApproveWithoutReasonSucceedsAndStoresNullReason()
+    {
+        await using var fixture = await Fixture.CreateAsync();
+        var admin = await fixture.CreateAdminAsync();
+        var leader = await fixture.CreateStudentAsync(
+            "approve-no-reason-leader@example.com", "Nora", "NoReason", "S16");
+        var team = await fixture.CreateTeamAsync("No Reason Team", "NOR0001", leader);
+        var project = await fixture.CreateProposalAsync(
+            team, "Approve Without Reason", ProjectStatuses.PendingReview, DateTime.UtcNow.AddDays(-1));
+
+        var result = await fixture.Service.ReviewProposalAsync(
+            admin.Id,
+            project.Id,
+            new ReviewProjectProposalDto
+            {
+                Decision = ProjectStatuses.Approved,
+                Reason = "   "
+            },
+            null);
+
+        Assert.True(result.Succeeded);
+        var stored = await fixture.Db.Projects.AsNoTracking().SingleAsync(item => item.Id == project.Id);
+        Assert.Equal(ProjectStatuses.Approved, stored.Status);
+        Assert.Null(stored.ReviewReason);
+        Assert.Null(stored.RejectionReason);
+        Assert.Null(result.Value!.Review!.Reason);
     }
 
     [Fact]
@@ -298,8 +326,7 @@ public sealed class AdminProposalServiceTests
             new ReviewProjectProposalDto
             {
                 Decision = ProjectStatuses.Rejected,
-                Reason = "sensitive rejection reason",
-                AdminNotes = "sensitive admin notes"
+                Reason = "sensitive rejection reason"
             },
             "10.0.0.5");
 
@@ -310,7 +337,6 @@ public sealed class AdminProposalServiceTests
         Assert.Equal(admin.Id, log.UserId);
         Assert.Equal("10.0.0.5", log.IpAddress);
         Assert.DoesNotContain("sensitive rejection reason", log.Description);
-        Assert.DoesNotContain("sensitive admin notes", log.Description);
     }
 
     [Fact]

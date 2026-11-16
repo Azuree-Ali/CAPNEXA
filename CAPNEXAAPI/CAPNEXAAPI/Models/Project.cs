@@ -10,7 +10,6 @@ public class Project
     public string Status { get; set; } = ProjectStatuses.Draft;
     public string? RejectionReason { get; set; }
     public string? ReviewReason { get; set; }
-    public string? AdminNotes { get; set; }
     public string? ReviewedByUserId { get; set; }
     public DateTime? ReviewedAt { get; set; }
     public DateTime? SubmittedAt { get; set; }
