@@ -11,6 +11,10 @@ namespace CAPNEXAAPI.DataAccess.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropIndex(
+                name: "IX_Projects_TeamId",
+                table: "Projects");
+
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
                 table: "Projects",
@@ -19,6 +23,13 @@ namespace CAPNEXAAPI.DataAccess.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Projects_TeamId",
+                table: "Projects",
+                column: "TeamId",
+                unique: true,
+                filter: "[Status] <> 'Rejected'");
 
             migrationBuilder.AddColumn<string>(
                 name: "AdminNotes",
@@ -96,6 +107,10 @@ namespace CAPNEXAAPI.DataAccess.Migrations
                 name: "ReviewedByUserId",
                 table: "Projects");
 
+            migrationBuilder.DropIndex(
+                name: "IX_Projects_TeamId",
+                table: "Projects");
+
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
                 table: "Projects",
@@ -104,6 +119,13 @@ namespace CAPNEXAAPI.DataAccess.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(50)",
                 oldMaxLength: 50);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Projects_TeamId",
+                table: "Projects",
+                column: "TeamId",
+                unique: true,
+                filter: "[Status] <> 'Rejected'");
         }
     }
 }
