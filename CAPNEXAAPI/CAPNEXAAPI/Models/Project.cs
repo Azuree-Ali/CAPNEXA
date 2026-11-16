@@ -9,11 +9,16 @@ public class Project
     public string? Description { get; set; }
     public string Status { get; set; } = ProjectStatuses.Draft;
     public string? RejectionReason { get; set; }
+    public string? ReviewReason { get; set; }
+    public string? AdminNotes { get; set; }
+    public string? ReviewedByUserId { get; set; }
+    public DateTime? ReviewedAt { get; set; }
     public DateTime? SubmittedAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public Team Team { get; set; } = null!;
     public SupervisorProfile? Supervisor { get; set; }
+    public ApplicationUser? ReviewedByUser { get; set; }
     public ICollection<Milestone> Milestones { get; set; } = new List<Milestone>();
 }
 

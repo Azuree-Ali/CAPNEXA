@@ -224,6 +224,10 @@ namespace CAPNEXAAPI.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AdminNotes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -234,9 +238,20 @@ namespace CAPNEXAAPI.DataAccess.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
+                    b.Property<string>("ReviewReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReviewedByUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime?>("SubmittedAt")
                         .HasColumnType("datetime2");
@@ -254,11 +269,15 @@ namespace CAPNEXAAPI.DataAccess.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ReviewedByUserId");
+
                     b.HasIndex("SupervisorId");
 
                     b.HasIndex("TeamId")
                         .IsUnique()
                         .HasFilter("[Status] <> 'Rejected'");
+
+                    b.HasIndex("Status", "SubmittedAt");
 
                     b.ToTable("Projects");
                 });
@@ -683,6 +702,11 @@ namespace CAPNEXAAPI.DataAccess.Migrations
 
             modelBuilder.Entity("CAPNEXAAPI.Models.Project", b =>
                 {
+                    b.HasOne("CAPNEXAAPI.Models.ApplicationUser", "ReviewedByUser")
+                        .WithMany()
+                        .HasForeignKey("ReviewedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("CAPNEXAAPI.Models.SupervisorProfile", "Supervisor")
                         .WithMany("Projects")
                         .HasForeignKey("SupervisorId")
@@ -693,6 +717,8 @@ namespace CAPNEXAAPI.DataAccess.Migrations
                         .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ReviewedByUser");
 
                     b.Navigation("Supervisor");
 
