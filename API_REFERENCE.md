@@ -316,6 +316,202 @@ Errors:
 
 Every successful decision writes an audit row with action `ProposalApproved` or `ProposalRejected`, entity `Project`, the admin user, the client IP, and a short description that never contains the reason text.
 
+### Admin supervisor assignment
+
+These endpoints are Admin only. A `supervisorId` is a `SupervisorProfile` id (the value stored on `Project.SupervisorId`), not a user id. Only accounts that have a supervisor profile are returned here. `assignedProjectsCount` is the number of projects whose `SupervisorId` equals that profile id, and `availableCapacity` is `max(0, maxProjects - assignedProjectsCount)`. A supervisor with `maxProjects = 0` has no capacity. The Admin can change only `maxProjects`; account and other profile fields are read-only in this feature. Supervisor accounts and profiles are created by a separate feature, so the list is normally empty until then.
+
+#### List supervisors
+
+`GET /api/Admin/Supervisors`
+
+| Query | Type | Default | Rules |
+|---|---|---|---|
+| `search` | string | none | Case-insensitive contains match on first name, last name, email, department, and specialization; LIKE wildcards are escaped |
+| `department` | string | none | Exact match after trimming |
+| `isActive` | bool | none | Filters on the supervisor account status |
+| `hasCapacity` | bool | none | `true` returns supervisors with `availableCapacity > 0`; `false` returns supervisors with `availableCapacity == 0` |
+| `page` | int | 1 | Must be at least 1 |
+| `pageSize` | int | 20 | 1 to 100 |
+
+Results are ordered by last name, first name, then supervisor id.
+
+```json
+{
+  "items": [
+    {
+      "supervisorId": 3,
+      "userId": "6f1a...",
+      "firstName": "Sara",
+      "lastName": "Hassan",
+      "email": "sara@example.edu",
+      "isActive": true,
+      "department": "Computer Science",
+      "specialization": null,
+      "researchInterests": null,
+      "maxProjects": 4,
+      "assignedProjectsCount": 1,
+      "availableCapacity": 3
+    }
+  ],
+  "page": 1,
+  "pageSize": 20,
+  "totalCount": 1,
+  "totalPages": 1
+}
+```
+
+Errors:
+
+- `400 {"code":"invalid_pagination","message":"Page must be at least 1 and pageSize must be between 1 and 100."}`
+
+#### Supervisor details
+
+`GET /api/Admin/Supervisors/{supervisorId}`
+
+Returns the list fields plus the supervisor's assigned projects ordered by project id. Missing supervisors return `404 {"code":"supervisor_not_found","message":"The supervisor was not found."}`.
+
+```json
+{
+  "supervisorId": 3,
+  "userId": "6f1a...",
+  "firstName": "Sara",
+  "lastName": "Hassan",
+  "email": "sara@example.edu",
+  "isActive": true,
+  "department": "Computer Science",
+  "specialization": null,
+  "researchInterests": null,
+  "maxProjects": 4,
+  "assignedProjectsCount": 1,
+  "availableCapacity": 3,
+  "assignedProjects": [
+    {
+      "projectId": 12,
+      "title": "Campus Navigator",
+      "status": "Approved",
+      "teamId": 4,
+      "teamName": "Team Alpha",
+      "teamCode": "A1B2C3D4E5"
+    }
+  ]
+}
+```
+
+#### Update supervisor capacity
+
+`PUT /api/Admin/Supervisors/{supervisorId}/max-projects`
+
+```json
+{
+  "maxProjects": 4
+}
+```
+
+| Field | Type | Required | Rules |
+|---|---|---|---|
+| `maxProjects` | int | Yes | 0 to 20; `null` or missing is rejected |
+
+Success returns `200` with the supervisor detail contract. If the value equals the current value, the call succeeds and writes no audit row.
+
+Errors:
+
+- `404 {"code":"supervisor_not_found","message":"The supervisor was not found."}`
+- `400 {"code":"invalid_capacity_payload","message":"maxProjects is required and must be between 0 and 20."}`
+- `409 {"code":"capacity_below_assigned_projects","message":"maxProjects cannot be lower than the supervisor's assigned projects count."}`
+
+A successful change writes an audit row with action `SupervisorCapacityUpdated` and entity `SupervisorProfile`.
+
+#### List unassigned approved projects
+
+`GET /api/Admin/ProjectAssignments/unassigned`
+
+| Query | Type | Default | Rules |
+|---|---|---|---|
+| `search` | string | none | Case-insensitive contains match on project title, team name, and team code; LIKE wildcards are escaped |
+| `page` | int | 1 | Must be at least 1 |
+| `pageSize` | int | 20 | 1 to 100 |
+
+Only projects with status `Approved` and no supervisor are returned, ordered by `reviewedAt` ascending (longest waiting first) then project id.
+
+```json
+{
+  "items": [
+    {
+      "projectId": 12,
+      "title": "Campus Navigator",
+      "reviewedAt": "2026-11-16T08:15:00Z",
+      "team": {
+        "teamId": 4,
+        "name": "Team Alpha",
+        "teamCode": "A1B2C3D4E5",
+        "memberCount": 2
+      },
+      "leaderName": "Amina Hassan"
+    }
+  ],
+  "page": 1,
+  "pageSize": 20,
+  "totalCount": 1,
+  "totalPages": 1
+}
+```
+
+Errors:
+
+- `400 {"code":"invalid_pagination","message":"Page must be at least 1 and pageSize must be between 1 and 100."}`
+
+#### Assign a supervisor to an approved project
+
+`PUT /api/Admin/ProjectAssignments/{projectId}`
+
+```json
+{
+  "supervisorId": 3
+}
+```
+
+| Field | Type | Required | Rules |
+|---|---|---|---|
+| `supervisorId` | int | Yes | At least 1; must identify an existing `SupervisorProfile` |
+
+Success returns `200` with the project, its team summary, and the supervisor with counts computed after the assignment. Reassignment from another supervisor is allowed and only the new supervisor's capacity is checked.
+
+```json
+{
+  "projectId": 12,
+  "title": "Campus Navigator",
+  "status": "Approved",
+  "team": {
+    "teamId": 4,
+    "name": "Team Alpha",
+    "teamCode": "A1B2C3D4E5",
+    "memberCount": 2
+  },
+  "supervisor": {
+    "supervisorId": 3,
+    "userId": "6f1a...",
+    "firstName": "Sara",
+    "lastName": "Hassan",
+    "email": "sara@example.edu",
+    "maxProjects": 4,
+    "assignedProjectsCount": 1,
+    "availableCapacity": 3
+  }
+}
+```
+
+Rules are evaluated in this order:
+
+- `404 {"code":"project_not_found","message":"The project was not found."}`
+- `409 {"code":"project_not_approved","message":"Only approved projects can be assigned to a supervisor."}`
+- `404 {"code":"supervisor_not_found","message":"The supervisor was not found."}`
+- `409 {"code":"supervisor_inactive","message":"The supervisor account is inactive."}`
+- Assigning the same supervisor again returns `200` and writes no audit row.
+- `409 {"code":"supervisor_capacity_reached","message":"The supervisor has reached the maximum number of projects."}`
+- `400 {"code":"invalid_supervisor_payload","message":"supervisorId is required and must be at least 1."}`
+
+A new assignment writes audit action `SupervisorAssigned`; moving a project from another supervisor writes `SupervisorReassigned`. Both use entity `Project`, the Admin id from the token, and the client IP.
+
 ### Sample endpoint
 
 `GET /WeatherForecast` is scaffold/sample functionality, not a CAPNEXA business feature.
@@ -559,7 +755,7 @@ These are planned backend features, not available endpoints in the current API. 
 
 1. **Team management**: backend routes for create, join, leave, and member listing are implemented. Flutter must still connect its screens to these routes. Leadership transfer and team deletion are future work.
 2. **Project proposal**: draft creation/editing, submission, listing of proposal attempts, and Admin review decisions are implemented. A web dashboard screen must still be connected to the Admin review endpoints.
-3. **Supervisor assignment**: assign supervisors to approved projects and enforce supervisor capacity.
+3. **Supervisor assignment**: the Admin side (supervisor capacity management and approved-project assignment) is implemented. Supervisor account creation and Supervisor-area endpoints are not implemented yet.
 4. **Milestones**: create ordered milestones, due dates, status, and project progress.
 5. **Submissions and file versions**: upload files to milestones, maintain versions, status, and submission history.
 6. **Review and grading**: supervisor comments, grade, revision requests, and review history.
