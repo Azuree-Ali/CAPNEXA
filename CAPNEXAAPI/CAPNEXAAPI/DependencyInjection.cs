@@ -311,6 +311,8 @@ public static class DependencyInjection
         services.AddScoped<IProjectProposalService, ProjectProposalService>();
         services.AddScoped<IAdminStudentService, AdminStudentService>();
         services.AddScoped<IAdminProposalService, AdminProposalService>();
+        services.AddScoped<IAdminSupervisorService, AdminSupervisorService>();
+        services.AddScoped<IAdminProjectAssignmentService, AdminProjectAssignmentService>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         services.AddHttpClient("GitHub", client => client.Timeout = TimeSpan.FromSeconds(15));
