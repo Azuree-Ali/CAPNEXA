@@ -30,3 +30,4 @@ node_modules/
 web/dist/
 .npm-cache/
 CAPNEXAAPI/CAPNEXAAPI/appsettings.Development.json
+.env.example
