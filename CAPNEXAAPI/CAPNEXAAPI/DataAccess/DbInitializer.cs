@@ -24,8 +24,6 @@ public static class DbInitializer
         var configuration = services.GetRequiredService<IConfiguration>();
         var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("DbInitializer");
 
-        await dbContext.Database.MigrateAsync();
-
         foreach (var roleName in Roles)
         {
             if (!await roleManager.RoleExistsAsync(roleName))
