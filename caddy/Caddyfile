@@ -1,0 +1,27 @@
+{
+    local_certs
+}
+
+capnexa.local {
+    tls internal
+
+    encode zstd gzip
+
+    reverse_proxy web:80 {
+        header_up Host {host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}
+
+api.capnexa.local {
+    tls internal
+
+    encode zstd gzip
+
+    reverse_proxy api:8080 {
+        header_up Host {host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}
