@@ -20,7 +20,7 @@ ENV PATH="/root/.dotnet/tools:${PATH}"
 
 RUN dotnet tool install --global dotnet-ef --version 10.0.12
 
-ENTRYPOINT ["dotnet", "ef", "database", "update", \
+ENTRYPOINT ["dotnet-ef", "database", "update", \
     "--project", "CAPNEXAAPI.csproj", \
     "--startup-project", "CAPNEXAAPI.csproj", \
     "--configuration", "Release", \
