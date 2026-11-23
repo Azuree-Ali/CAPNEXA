@@ -1,0 +1,7 @@
+# Docker Compose loads this file automatically when you run `docker compose up`.
+# It enables ASP.NET Core Development mode, which maps /openapi and /scalar in Program.cs.
+# Production runs with: docker compose -f docker-compose.yml up --build -d
+services:
+  api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development

@@ -1,0 +1,101 @@
+name: ${COMPOSE_PROJECT_NAME:-capnexa}
+
+x-api-env: &api-env
+  ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+  ASPNETCORE_HTTP_PORTS: "8080"
+  ConnectionStrings__DefaultConnection: ${DB_CONNECTION_STRING}
+  Jwt__Issuer: ${JWT_ISSUER}
+  Jwt__Audience: ${JWT_AUDIENCE}
+  Jwt__Key: ${JWT_KEY}
+  Jwt__AccessTokenExpiresInMinutes: ${JWT_ACCESS_TOKEN_EXPIRES_IN_MINUTES}
+  Jwt__RefreshTokenExpiresInDays: ${JWT_REFRESH_TOKEN_EXPIRES_IN_DAYS}
+  AppUrls__ApiBaseUrl: ${APP_API_BASE_URL}
+  AppUrls__FrontendBaseUrl: ${APP_FRONTEND_BASE_URL}
+  Frontend__OAuthCallbackPath: ${FRONTEND_OAUTH_CALLBACK_PATH}
+  Auth__Google__ClientId: ${GOOGLE_CLIENT_ID}
+  Auth__Google__ClientSecret: ${GOOGLE_CLIENT_SECRET}
+  Auth__Google__CallbackPath: /api/Identity/Auth/google/callback
+  Auth__GitHub__ClientId: ${GITHUB_CLIENT_ID}
+  Auth__GitHub__ClientSecret: ${GITHUB_CLIENT_SECRET}
+  Auth__GitHub__CallbackPath: /api/Identity/Auth/github/callback
+  EmailSettings__Email: ${EMAIL_SETTINGS_EMAIL}
+  EmailSettings__Password: ${EMAIL_SETTINGS_PASSWORD}
+  SeedAdmin__FirstName: ${SEED_ADMIN_FIRST_NAME}
+  SeedAdmin__LastName: ${SEED_ADMIN_LAST_NAME}
+  SeedAdmin__UserName: ${SEED_ADMIN_USER_NAME}
+  SeedAdmin__Email: ${SEED_ADMIN_EMAIL}
+  SeedAdmin__Password: ${SEED_ADMIN_PASSWORD}
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: capnexa-db
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' -b -o /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  migrate:
+    build:
+      context: ./CAPNEXAAPI/CAPNEXAAPI
+      dockerfile: Dockerfile
+      target: migrate
+    container_name: capnexa-migrate
+    environment:
+      <<: *api-env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: ./CAPNEXAAPI/CAPNEXAAPI
+      dockerfile: Dockerfile
+      target: final
+    container_name: capnexa-api
+    restart: unless-stopped
+    environment:
+      <<: *api-env
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+        VITE_AUTH_MODE: ${VITE_AUTH_MODE:-preview}
+    container_name: capnexa-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+volumes:
+  sqlserver-data:
