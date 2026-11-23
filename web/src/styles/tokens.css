@@ -1,0 +1,45 @@
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme) prefix(tw);
+@import "tailwindcss/utilities.css" layer(utilities) prefix(tw) source("../");
+
+/* Preflight is intentionally omitted to preserve the approved existing screens. */
+:root {
+  --capnexa-brand-600: #1d4ed8;
+  --capnexa-brand-700: #1e40af;
+  --capnexa-brand-900: #172554;
+  --capnexa-brand-50: #eff4ff;
+  --capnexa-brand-100: #dbe6fe;
+  --capnexa-accent: #89f5e7;
+  --capnexa-canvas: #f8fafc;
+  --capnexa-surface: #ffffff;
+  --capnexa-muted-surface: #f1f5f9;
+  --capnexa-border: #e2e8f0;
+  --capnexa-heading: #0f172a;
+  --capnexa-body: #475569;
+  --capnexa-muted: #64748b;
+  --capnexa-danger: #b91c1c;
+  --capnexa-danger-bg: #fee2e2;
+  --capnexa-control-radius: 8px;
+  --capnexa-card-radius: 12px;
+  --capnexa-gutter: 24px;
+}
+
+@theme inline {
+  --color-brand-50: var(--capnexa-brand-50);
+  --color-brand-100: var(--capnexa-brand-100);
+  --color-brand-600: var(--capnexa-brand-600);
+  --color-brand-700: var(--capnexa-brand-700);
+  --color-brand-900: var(--capnexa-brand-900);
+  --color-accent: var(--capnexa-accent);
+  --color-canvas: var(--capnexa-canvas);
+  --color-surface: var(--capnexa-surface);
+  --color-border: var(--capnexa-border);
+  --color-heading: var(--capnexa-heading);
+  --color-body: var(--capnexa-body);
+  --color-muted: var(--capnexa-muted);
+  --color-danger: var(--capnexa-danger);
+  --radius-control: var(--capnexa-control-radius);
+  --radius-card: var(--capnexa-card-radius);
+  --spacing-gutter: var(--capnexa-gutter);
+  --font-portal: "Capnexa Inter", Inter, Arial, sans-serif;
+}

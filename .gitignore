@@ -24,3 +24,8 @@ Thumbs.db
 # Docker / local environment
 .env
 caddy-local-root.crt
+
+# Node / web
+node_modules/
+web/dist/
+.npm-cache/

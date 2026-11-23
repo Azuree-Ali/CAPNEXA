@@ -1,0 +1,45 @@
+import type { PortalRole } from "../../../config/navigation";
+import type { Profile } from "../types/profile.types";
+export const profileFixtures: Record<PortalRole, Profile> = {
+  Admin: {
+    role: "Admin",
+    name: "Dr. Omar Hassan",
+    initials: "OH",
+    title: "System Administrator",
+    firstName: "Omar",
+    lastName: "Hassan",
+    email: "o.hassan@example.edu",
+    department: "Office of Academic Affairs",
+    institutionId: "ADM-2026-0007",
+    accessScope: "All cohorts and workspaces",
+    officeLocation: "Admin Building, Room 210",
+    officeHours: "Sun–Thu 09:00–15:00 EET",
+    interests: [],
+    preferences: {
+      digest: "daily",
+      alerts: "immediate",
+      locale: "English (US)",
+      theme: "Light Mode",
+    },
+  },
+  Supervisor: {
+    role: "Supervisor",
+    name: "Dr. Olivia Bennett",
+    initials: "OB",
+    title: "Faculty Supervisor",
+    firstName: "Olivia",
+    lastName: "Bennett",
+    email: "o.bennett@example.edu",
+    department: "Computer Science & Engineering",
+    institutionId: "FAC-2026-0491",
+    officeLocation: "CS-314 (Tech Hall)",
+    officeHours: "Tue/Thu 14:00–16:00 EST",
+    interests: ["Artificial Intelligence", "Distributed Systems", "Natural Language Processing"],
+    preferences: {
+      digest: "daily",
+      alerts: "immediate",
+      locale: "English (US)",
+      theme: "Light Mode",
+    },
+  },
+};
