@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
@@ -32,6 +33,7 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 
+        services.AddMemoryCache();
         services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
@@ -310,6 +312,7 @@ public static class DependencyInjection
         services.AddScoped<ITeamService, TeamService>();
         services.AddScoped<IProjectProposalService, ProjectProposalService>();
         services.AddScoped<IAdminStudentService, AdminStudentService>();
+        services.AddScoped<IStudentDashboardService, StudentDashboardService>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         services.AddHttpClient("GitHub", client => client.Timeout = TimeSpan.FromSeconds(15));

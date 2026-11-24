@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mail;
+using System.Text;
 using CAPNEXAAPI.DTOs.Request;
 using CAPNEXAAPI.DTOs.Response;
 using CAPNEXAAPI.Models;
@@ -7,6 +8,7 @@ using CAPNEXAAPI.Repositories;
 using CAPNEXAAPI.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CAPNEXAAPI.Services;
 
@@ -17,19 +19,22 @@ public sealed class AuthService : IAuthService
     private readonly IEmailSender _emailSender;
     private readonly ITokenService _tokens;
     private readonly IRefreshTokenService _refreshTokens;
+    private readonly IMemoryCache _cache;
 
     public AuthService(
         UserManager<ApplicationUser> users,
         IRepository<StudentProfile> studentProfiles,
         IEmailSender emailSender,
         ITokenService tokens,
-        IRefreshTokenService refreshTokens)
+        IRefreshTokenService refreshTokens,
+        IMemoryCache cache)
     {
         _users = users;
         _studentProfiles = studentProfiles;
         _emailSender = emailSender;
         _tokens = tokens;
         _refreshTokens = refreshTokens;
+        _cache = cache;
     }
 
     public async Task<AuthOperationResult> RegisterAsync(RegisterDto request, string apiBaseUrl)
@@ -254,5 +259,112 @@ public sealed class AuthService : IAuthService
             return firstName;
 
         return string.IsNullOrWhiteSpace(displayName) ? provider : displayName;
+    }
+
+    public async Task<AuthOperationResult> ForgotPasswordAsync(ForgotPasswordDto request, string apiBaseUrl)
+    {
+        var email = request.Email.Trim();
+
+        var user = await _users.FindByEmailAsync(email);
+        if (user is null || !user.IsActive)
+        {
+            return new(Message: "If an account with this email exists, a password reset OTP has been sent.");
+        }
+
+        var otp = GenerateOtp();
+        var cacheKey = GetOtpCacheKey(email);
+        var expiry = DateTimeOffset.UtcNow.AddMinutes(10);
+
+        _cache.Set(cacheKey, new OtpEntry { Otp = otp, ExpiresAt = expiry }, TimeSpan.FromMinutes(10));
+
+        try
+        {
+            await SendOtpEmailAsync(user, otp);
+            return new(Message: "If an account with this email exists, a password reset OTP has been sent.");
+        }
+        catch (SmtpException)
+        {
+            return new("The OTP email could not be sent. Try again later.", ServiceUnavailable: true);
+        }
+        catch (InvalidOperationException)
+        {
+            return new("The OTP email could not be sent. Try again later.", ServiceUnavailable: true);
+        }
+    }
+
+    public async Task<AuthOperationResult> ResetPasswordAsync(ResetPasswordDto request)
+    {
+        var email = request.Email.Trim();
+        var otp = request.Otp.Trim();
+
+        var cacheKey = GetOtpCacheKey(email);
+        if (!_cache.TryGetValue(cacheKey, out OtpEntry? entry) || entry is null)
+        {
+            return new("Invalid or expired OTP. Request a new one.");
+        }
+
+        if (entry.ExpiresAt < DateTimeOffset.UtcNow)
+        {
+            _cache.Remove(cacheKey);
+            return new("OTP has expired. Request a new one.");
+        }
+
+        if (!string.Equals(entry.Otp, otp, StringComparison.Ordinal))
+        {
+            return new("Invalid OTP. Please try again.");
+        }
+
+        var user = await _users.FindByEmailAsync(email);
+        if (user is null || !user.IsActive)
+        {
+            return new("Invalid or expired OTP. Request a new one.");
+        }
+
+        var token = await _users.GeneratePasswordResetTokenAsync(user);
+        var result = await _users.ResetPasswordAsync(user, token, request.NewPassword);
+
+        if (!result.Succeeded)
+        {
+            var errorCode = result.Errors.Any(e => e.Code == "PasswordMismatch")
+                ? "current_password_incorrect"
+                : "password_policy_failed";
+            return new(errorCode);
+        }
+
+        _cache.Remove(cacheKey);
+        await _refreshTokens.RevokeAllAsync(user.Id);
+
+        return new(Message: "Your password has been reset successfully. You can now log in with your new password.");
+    }
+
+    private static string GenerateOtp()
+    {
+        var random = Random.Shared;
+        return random.Next(100000, 1000000).ToString("D6");
+    }
+
+    private static string GetOtpCacheKey(string email)
+        => $"pwd_reset:{email.ToLowerInvariant()}";
+
+    private sealed class OtpEntry
+    {
+        public string Otp { get; set; } = string.Empty;
+        public DateTimeOffset ExpiresAt { get; set; }
+    }
+
+    private async Task SendOtpEmailAsync(ApplicationUser user, string otp)
+    {
+        var body = $"""
+            <h2>CAPNEXA - Password Reset</h2>
+            <p>Hi {WebUtility.HtmlEncode(user.FirstName)},</p>
+            <p>You requested a password reset. Your one-time password (OTP) is:</p>
+            <p style="font-size: 24px; font-weight: bold; letter-spacing: 4px; font-family: monospace;">{otp}</p>
+            <p>This OTP expires in <strong>10 minutes</strong> and can only be used once.</p>
+            <p>If you didn't request this, please ignore this email.</p>
+            <hr>
+            <p style="font-size: 12px; color: #666;">CAPNEXA Team</p>
+            """;
+
+        await _emailSender.SendEmailAsync(user.Email!, "CAPNEXA - Password Reset OTP", body);
     }
 }

@@ -57,6 +57,28 @@ public sealed class AuthController : ControllerBase
         return Ok(new { message = result.Message });
     }
 
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordDto request)
+    {
+        var result = await _auth.ForgotPasswordAsync(request, GetApiBaseUrl());
+        if (result.ServiceUnavailable)
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = result.Error });
+
+        return Ok(new { message = result.Message });
+    }
+
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPassword(ResetPasswordDto request)
+    {
+        var result = await _auth.ResetPasswordAsync(request);
+        if (!result.Succeeded)
+            return BadRequest(new { message = result.Error });
+
+        return Ok(new { message = result.Message });
+    }
+
     [HttpGet("confirm-email")]
     [AllowAnonymous]
     public async Task<IActionResult> ConfirmEmail(string userId, string token)

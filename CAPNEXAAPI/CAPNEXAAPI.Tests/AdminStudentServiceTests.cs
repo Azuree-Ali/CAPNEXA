@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -424,8 +425,9 @@ public sealed class AdminStudentServiceTests
                 new Repository<IdentityUserRole<string>>(db),
                 new Repository<IdentityRole>(db),
                 RefreshTokens);
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
             Auth = new AuthService(
-                Users, studentProfiles, emailSender, tokenService, realRefreshTokens);
+                Users, studentProfiles, emailSender, tokenService, realRefreshTokens, memoryCache);
             Profiles = new StudentProfileService(
                 Users, studentProfiles, teams, teamMembers, projects, emailSender,
                 realRefreshTokens, configuration);

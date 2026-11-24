@@ -70,6 +70,7 @@ All protected routes require a valid bearer token and Student role, except the e
 | POST | `/api/Student/ProjectProposals` | Student bearer, any team member | Create a draft proposal |
 | PUT | `/api/Student/ProjectProposals/{projectId}` | Student bearer, any team member | Edit a draft proposal |
 | POST | `/api/Student/ProjectProposals/{projectId}/submit` | Student bearer, team leader | Submit a draft for review |
+| GET | `/api/Student/Dashboard` | Student bearer | Get student dashboard summary |
 
 ### Admin web dashboard only — not for Flutter
 
@@ -401,7 +402,118 @@ Success is `200` with the created or updated proposal. Any team member may creat
 
 No request body. Only the team leader can submit a complete draft. Success is `200` with status `PendingReview` and a `submittedAt` value. A non-leader receives `403 team_leader_required`. A rejected proposal cannot be resubmitted; create a new proposal instead.
 
-## 7. Errors Flutter should handle
+## 7. Student dashboard summary
+
+All dashboard endpoints require a Student bearer token, an active account, and a completed academic profile. The dashboard aggregates the student's project journey in one response: team membership, proposal status, project details (if approved), milestones, progress, and upcoming deadlines.
+
+### Get dashboard summary
+
+`GET /api/Student/Dashboard`
+
+Success is `200` with this shape:
+
+```json
+{
+  "team": {
+    "teamId": 12,
+    "name": "Team Alpha",
+    "teamCode": "A1B2C3D4E5",
+    "maxMembers": 5,
+    "memberCount": 3,
+    "leader": {
+      "userId": "<identity-id>",
+      "firstName": "Amina",
+      "lastName": "Hassan",
+      "studentNumber": "20260042"
+    },
+    "members": [
+      {"userId":"<identity-id>","firstName":"Amina","lastName":"Hassan","studentNumber":"20260042","isLeader":true,"joinedAt":"2026-11-09T12:00:00Z"},
+      {"userId":"<identity-id-2>","firstName":"Omar","lastName":"Ali","studentNumber":"20260043","isLeader":false,"joinedAt":"2026-11-09T12:15:00Z"},
+      {"userId":"<identity-id-3>","firstName":"Leila","lastName":"Mohamed","studentNumber":"20260044","isLeader":false,"joinedAt":"2026-11-09T13:00:00Z"}
+    ]
+  },
+  "proposal": {
+    "projectId": 7,
+    "title": "Campus Helper",
+    "status": "Approved",
+    "rejectionReason": null,
+    "createdAt": "2026-11-09T12:00:00Z",
+    "submittedAt": "2026-11-10T10:00:00Z"
+  },
+  "project": {
+    "projectId": 7,
+    "title": "Campus Helper",
+    "status": "Approved",
+    "createdAt": "2026-11-09T12:00:00Z",
+    "supervisorId": 3,
+    "supervisorName": "Dr. Sarah Ahmed"
+  },
+  "milestones": [
+    {
+      "milestoneId": 1,
+      "title": "Requirements Analysis",
+      "description": "Gather and document requirements",
+      "dueDate": "2026-12-01T23:59:59Z",
+      "order": 1,
+      "status": "Completed",
+      "createdAt": "2026-11-11T09:00:00Z"
+    },
+    {
+      "milestoneId": 2,
+      "title": "Design Phase",
+      "description": "Create system architecture and UI mockups",
+      "dueDate": "2026-12-15T23:59:59Z",
+      "order": 2,
+      "status": "InProgress",
+      "createdAt": "2026-11-11T09:00:00Z"
+    },
+    {
+      "milestoneId": 3,
+      "title": "Implementation",
+      "description": "Build core features",
+      "dueDate": "2027-01-15T23:59:59Z",
+      "order": 3,
+      "status": "Pending",
+      "createdAt": "2026-11-11T09:00:00Z"
+    }
+  ],
+  "progressPercentage": 33,
+  "upcomingDeadlines": [
+    {
+      "milestoneId": 2,
+      "title": "Design Phase",
+      "dueDate": "2026-12-15T23:59:59Z",
+      "order": 2
+    },
+    {
+      "milestoneId": 3,
+      "title": "Implementation",
+      "dueDate": "2027-01-15T23:59:59Z",
+      "order": 3
+    }
+  ]
+}
+```
+
+**Behavior by student state:**
+
+| Student state | Response |
+|---|---|
+| No team | `team: null`, `proposal: null`, `project: null`, `milestones: []`, `progressPercentage: 0`, `upcomingDeadlines: []` |
+| Has team, no proposal | `team: {...}`, `proposal: null`, `project: null`, `milestones: []`, `progressPercentage: 0`, `upcomingDeadlines: []` |
+| Has team, rejected proposal | `team: {...}`, `proposal: {status: "Rejected", rejectionReason: "..."}`, `project: null`, `milestones: []`, `progressPercentage: 0`, `upcomingDeadlines: []` |
+| Has team, approved proposal | `team: {...}`, `proposal: {...}`, `project: {...}`, `milestones: [...]`, `progressPercentage: N`, `upcomingDeadlines: [...]` |
+
+**Progress calculation:** `completed milestones / total milestones * 100` (integer division). Returns `0` when there are no milestones. A milestone is considered **completed** when its `Status` field equals `"Completed"`. Other status values (`"Pending"`, `"InProgress"`, etc.) do not count toward progress.
+
+**Upcoming deadlines:** Milestones with a `DueDate` that are not completed, ordered by due date ascending.
+
+### Errors
+
+- `403 profile_completion_required` — academic profile incomplete
+- `403 account_disabled` — account is disabled
+
+## 8. Errors Flutter should handle
 
 Business errors use this shape:
 
@@ -466,8 +578,8 @@ These features do not yet have Flutter student endpoints. Do not build Dio calls
 6. **Submissions and file versions**: upload files to milestones, maintain versions, status, and submission history.
 7. **Review and grading**: supervisor comments, grade, revision requests, and review history.
 8. **Notifications**: list user notifications and mark read; generate events from project workflow changes.
-9. **Student dashboard summary**: aggregate team, project, milestones, deadlines, submissions, and feedback.
+9. **Student dashboard summary**: aggregate team, proposal, project, milestones, progress, and upcoming deadlines — **implemented**.
 10. **Similarity analysis**: process submitted documents, persist results, and return match details.
 11. **Audit history**: record and provide authorized access to important administrative/workflow events.
 
-Student team and proposal endpoints require the Student role, an active account, a completed academic profile, and the relevant team membership. If the academic profile is incomplete, they return `403` with code `profile_completion_required`. The profile read/completion and account-maintenance endpoints remain available during onboarding. Admin dashboard endpoints use the Admin role and must stay in the web application.
+Student team, proposal, and dashboard endpoints require the Student role, an active account, and a completed academic profile; team and proposal endpoints also require team membership. If the academic profile is incomplete, they return `403` with code `profile_completion_required`. The profile read/completion and account-maintenance endpoints remain available during onboarding. Admin dashboard endpoints use the Admin role and must stay in the web application.

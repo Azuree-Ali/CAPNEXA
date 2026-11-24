@@ -18,6 +18,8 @@ public interface IAuthService
         string? lastName,
         string? displayName);
     Task<AuthOperationResult<AuthResponseDto>> RefreshAsync(RefreshTokenDto request);
+    Task<AuthOperationResult> ForgotPasswordAsync(ForgotPasswordDto request, string apiBaseUrl);
+    Task<AuthOperationResult> ResetPasswordAsync(ResetPasswordDto request);
 }
 
 public sealed record AuthOperationResult<T>(T? Value, string? Error = null, bool Unauthorized = false)
