@@ -1,0 +1,851 @@
+/* CAPNEXA polish layer: additive only. Loaded after portal.css; no logic depends on it. */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --polish-ring: 0 0 0 4px rgb(29 78 216 / 14%);
+  --polish-shadow-hover: 0 12px 28px -12px rgb(23 37 84 / 28%);
+}
+::selection {
+  background: var(--capnexa-brand-100);
+  color: var(--capnexa-brand-900);
+}
+
+/* Icon tiles: gradient + inner ring, lift and tilt on hover */
+.dashboard-metric-icon,
+.dashboard-event-icon {
+  background: linear-gradient(145deg, var(--capnexa-brand-50), var(--capnexa-brand-100));
+  box-shadow:
+    inset 0 0 0 1px rgb(29 78 216 / 14%),
+    0 2px 6px -2px rgb(29 78 216 / 25%);
+  transition:
+    transform 260ms var(--ease-out),
+    box-shadow 260ms var(--ease-out);
+}
+[data-metric="overdue"] .dashboard-metric-icon {
+  background: linear-gradient(145deg, #fff1f1, var(--capnexa-danger-bg));
+  box-shadow:
+    inset 0 0 0 1px rgb(185 28 28 / 16%),
+    0 2px 6px -2px rgb(185 28 28 / 25%);
+}
+.dashboard-metric-icon svg,
+.dashboard-event-icon svg {
+  stroke-width: 1.6;
+}
+
+/* Metric + panel cards */
+.dashboard-metrics a,
+.dashboard-panel {
+  transition:
+    transform 260ms var(--ease-out),
+    box-shadow 260ms var(--ease-out),
+    border-color 200ms ease;
+}
+.dashboard-metrics a {
+  position: relative;
+  overflow: hidden;
+}
+.dashboard-metrics a::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  block-size: 3px;
+  background: linear-gradient(90deg, var(--capnexa-brand-600), var(--capnexa-accent));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 320ms var(--ease-out);
+}
+[data-metric="overdue"]::after {
+  background: var(--capnexa-danger);
+}
+.dashboard-metric-top > svg {
+  opacity: 0;
+  transform: translate(-4px, 4px);
+  transition:
+    opacity 200ms ease,
+    transform 260ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dashboard-metrics a:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--polish-shadow-hover);
+  }
+  .dashboard-metrics a:hover::after {
+    transform: scaleX(1);
+  }
+  .dashboard-metrics a:hover .dashboard-metric-icon {
+    transform: translateY(-1px) rotate(-6deg) scale(1.08);
+  }
+  .dashboard-metrics a:hover .dashboard-metric-top > svg {
+    opacity: 1;
+    transform: none;
+  }
+  .dashboard-panel:hover {
+    box-shadow: 0 8px 24px -14px rgb(23 37 84 / 22%);
+  }
+  .dashboard-event-list li:hover .dashboard-event-icon {
+    transform: scale(1.08);
+  }
+}
+/* Touch: arrow always visible (no hover available) */
+@media (hover: none) {
+  .dashboard-metric-top > svg {
+    opacity: 0.7;
+    transform: none;
+  }
+}
+
+/* Sidebar: animated active rail + icon nudge */
+.portal-nav-item {
+  position: relative;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+.portal-nav-item::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -2px;
+  inset-block: 10px;
+  inline-size: 3px;
+  border-radius: 3px;
+  background: linear-gradient(var(--capnexa-brand-600), var(--capnexa-accent));
+  transform: scaleY(0);
+  transition: transform 260ms var(--ease-out);
+}
+.portal-nav-item.is-active::before {
+  transform: scaleY(1);
+}
+.portal-nav-item svg {
+  transition: transform 220ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .portal-nav-item:not(.portal-unavailable):hover svg {
+    transform: translateX(2px) scale(1.08);
+  }
+}
+.portal-nav-item.is-active svg {
+  color: var(--capnexa-brand-600);
+}
+
+/* Charts: bars and donut draw in */
+.dashboard-distribution span {
+  transform-origin: left;
+  animation: bar-grow 700ms var(--ease-out) both;
+}
+.dashboard-distribution span:nth-child(2) {
+  animation-delay: 80ms;
+}
+.dashboard-distribution span:nth-child(3) {
+  animation-delay: 160ms;
+}
+.dashboard-distribution span:nth-child(4) {
+  animation-delay: 240ms;
+}
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+}
+@property --donut-sweep {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+.dashboard-donut:not([data-empty="true"]) {
+  -webkit-mask: conic-gradient(#000 var(--donut-sweep), transparent 0);
+  mask: conic-gradient(#000 var(--donut-sweep), transparent 0);
+  animation: donut-sweep 1100ms var(--ease-out) both;
+}
+@keyframes donut-sweep {
+  from {
+    --donut-sweep: 0%;
+  }
+  to {
+    --donut-sweep: 100%;
+  }
+}
+progress {
+  accent-color: var(--capnexa-brand-600);
+}
+progress::-webkit-progress-value {
+  transition: inline-size 600ms var(--ease-out);
+}
+
+/* Tables: gentle row hover */
+.dashboard-table-scroll tbody tr {
+  transition: background-color 150ms ease;
+}
+.dashboard-table-scroll tbody tr:hover {
+  background: var(--capnexa-brand-50);
+}
+
+/* Buttons */
+.dashboard-primary,
+.primary-button {
+  transition:
+    transform 160ms var(--ease-out),
+    box-shadow 200ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .dashboard-primary:hover,
+  .primary-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px -8px rgb(29 78 216 / 55%);
+  }
+}
+.dashboard-primary:active,
+.primary-button:active {
+  transform: scale(0.98);
+}
+
+/* Live status dot */
+.dashboard-mode[data-connected="true"]::before {
+  content: "";
+  display: inline-block;
+  inline-size: 7px;
+  block-size: 7px;
+  margin-inline-end: 6px;
+  border-radius: 50%;
+  background: #16a34a;
+  animation: pulse-dot 2s ease-out infinite;
+}
+@keyframes pulse-dot {
+  0% {
+    box-shadow: 0 0 0 0 rgb(22 163 74 / 55%);
+  }
+  100% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+}
+
+/* Login brand panel: living constellation + glowing icons */
+.constellation circle[r="9"],
+.constellation circle[r="22"] {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: node-pulse 3.2s ease-in-out infinite;
+}
+.constellation path[stroke-dasharray] {
+  animation: dash-flow 14s linear infinite;
+}
+.constellation circle:not([r="9"]):not([r="22"]):not([r="160"]):not([r="240"]) {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: node-twinkle 4s ease-in-out infinite;
+}
+.constellation circle:nth-of-type(odd) {
+  animation-delay: -1.4s;
+}
+@keyframes node-pulse {
+  50% {
+    transform: scale(1.35);
+    opacity: 0.8;
+  }
+}
+@keyframes node-twinkle {
+  50% {
+    opacity: 0.45;
+  }
+}
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -120;
+  }
+}
+.feature-icon {
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 14%),
+    0 0 18px -4px rgb(137 245 231 / 35%);
+}
+.feature-card {
+  animation: card-in 600ms var(--ease-out) both;
+}
+.feature-card:nth-child(1) {
+  animation-delay: 500ms;
+}
+.feature-card:nth-child(2) {
+  animation-delay: 620ms;
+}
+.feature-card:nth-child(3) {
+  animation-delay: 740ms;
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+.split-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-block-end: 0.08em;
+}
+.split-word-inner {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Page transition for routed content */
+.portal-main > * {
+  animation: page-in 380ms var(--ease-out) both;
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* Focus polish */
+:focus-visible {
+  outline-color: var(--capnexa-brand-600);
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  box-shadow: var(--polish-ring);
+  outline-offset: 1px;
+}
+:is(.input-wrap, .portal-search, .operation-filter, .academic-tools label)
+  :is(input, select):focus-visible {
+  box-shadow: none;
+  outline: none;
+}
+.operation-filter:focus-within {
+  border-color: var(--capnexa-brand-600);
+  box-shadow: var(--polish-ring);
+}
+
+/* Thin scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+/* Respect reduced motion: everything above becomes instant */
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-distribution span,
+  .dashboard-donut,
+  .feature-card,
+  .portal-main > *,
+  .constellation *,
+  .dashboard-mode::before {
+    animation: none !important;
+  }
+  .dashboard-metrics a,
+  .dashboard-panel,
+  .portal-nav-item,
+  .portal-nav-item svg,
+  .dashboard-metric-icon,
+  .dashboard-event-icon {
+    transition: none !important;
+  }
+  .dashboard-metrics a:hover,
+  .dashboard-metrics a:hover .dashboard-metric-icon {
+    transform: none !important;
+  }
+  .dashboard-donut {
+    -webkit-mask: none;
+    mask: none;
+  }
+}
+.portal-main > .admin-dashboard {
+  animation: none;
+}
+.split-sr {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- Skeleton loading ---------- */
+.skeleton-table {
+  display: grid;
+  gap: 12px;
+  inline-size: 100%;
+  margin-block-start: 16px;
+  text-align: start;
+}
+.skeleton-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--capnexa-border);
+  border-radius: 10px;
+  background: var(--capnexa-surface);
+}
+.skeleton {
+  display: block;
+  block-size: 12px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--capnexa-muted-surface) 25%,
+    #e5ebf3 50%,
+    var(--capnexa-muted-surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  animation-delay: calc(var(--row, 0) * 90ms);
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- Empty / error states (CSS-only, no markup or text changes) ---------- */
+.academic-empty:not(.is-loading),
+.dashboard-panel-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  color: var(--capnexa-body);
+}
+.academic-empty:not(.is-loading) {
+  padding-block: 2.2rem;
+  border: 1px dashed var(--capnexa-border);
+  border-radius: var(--capnexa-card-radius);
+  background: linear-gradient(180deg, #fff, var(--capnexa-canvas));
+}
+.academic-empty:not(.is-loading)::before,
+.dashboard-panel-message::before {
+  content: "";
+  inline-size: 52px;
+  block-size: 52px;
+  border-radius: 16px;
+  margin-block-end: 6px;
+  background-color: var(--capnexa-brand-50);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d4ed8' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3Cpath d='M9 13h6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 26px;
+  box-shadow:
+    inset 0 0 0 1px var(--capnexa-brand-100),
+    0 6px 14px -8px rgb(29 78 216 / 40%);
+  animation: float-soft 3.4s ease-in-out infinite;
+}
+.academic-empty:has([role="alert"])::before {
+  background-color: var(--capnexa-danger-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b91c1c' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/%3E%3C/svg%3E");
+  box-shadow: inset 0 0 0 1px rgb(185 28 28 / 18%);
+}
+@keyframes float-soft {
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* ---------- Workspace pages (tables, metrics, headers) ---------- */
+.academic-metrics > div {
+  transition:
+    transform 240ms var(--ease-out),
+    box-shadow 240ms var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+.academic-metrics > div::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 3px;
+  background: linear-gradient(var(--capnexa-brand-600), var(--capnexa-accent));
+  opacity: 0.85;
+}
+.academic-metrics dd {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+@media (hover: hover) and (pointer: fine) {
+  .academic-metrics > div:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--polish-shadow-hover);
+  }
+}
+.academic-workspace > header h1,
+.dashboard-heading h1 {
+  letter-spacing: -0.02em;
+}
+.academic-workspace > header h1 {
+  background: linear-gradient(90deg, var(--capnexa-brand-900), var(--capnexa-brand-600));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.academic-scroll thead th,
+.dashboard-table-scroll thead th {
+  position: sticky;
+  inset-block-start: 0;
+  background: var(--capnexa-canvas);
+  z-index: 1;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--capnexa-muted);
+}
+.academic-scroll tbody tr {
+  transition: background-color 150ms ease;
+}
+.academic-scroll tbody tr:hover {
+  background: var(--capnexa-brand-50);
+}
+.academic-tools label:focus-within {
+  box-shadow: var(--polish-ring);
+  border-color: var(--capnexa-brand-600);
+}
+.academic-tools label {
+  transition:
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+}
+.academic-status,
+.dashboard-status {
+  letter-spacing: 0.01em;
+}
+.academic-workspace a svg {
+  transition: transform 200ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .academic-workspace a:hover svg {
+    transform: translate(2px, -2px);
+  }
+}
+
+/* ---------- Dialogs: soft entrance + blurred backdrop ---------- */
+dialog[open] {
+  animation: dialog-in 260ms var(--ease-out);
+}
+dialog::backdrop {
+  background: rgb(15 23 42 / 45%);
+  backdrop-filter: blur(3px);
+  animation: fade-in 260ms ease;
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- Login: button sheen + field icon response ---------- */
+.login-form-content .primary-button {
+  position: relative;
+  overflow: hidden;
+}
+.login-form-content .primary-button::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inline-size: 40%;
+  inset-inline-start: -60%;
+  background: linear-gradient(100deg, transparent, rgb(255 255 255 / 28%), transparent);
+  transform: skewX(-18deg);
+  transition: inset-inline-start 600ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .login-form-content .primary-button:hover::after {
+    inset-inline-start: 120%;
+  }
+}
+.input-wrap svg {
+  transition:
+    color 200ms ease,
+    transform 200ms var(--ease-out);
+}
+.input-wrap:focus-within svg {
+  color: var(--capnexa-brand-600);
+  transform: scale(1.1);
+}
+.login-card {
+  animation: card-in 700ms var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton,
+  .academic-empty::before,
+  .dashboard-panel-message::before,
+  dialog[open],
+  dialog::backdrop,
+  .login-card {
+    animation: none !important;
+  }
+  .skeleton {
+    background: var(--capnexa-muted-surface);
+  }
+  .academic-metrics > div,
+  .academic-workspace a svg,
+  .input-wrap svg {
+    transition: none !important;
+  }
+}
+
+/* ---------- Topbar: clear profile entry + uncluttered mobile ---------- */
+.portal-user--link {
+  border-radius: 999px;
+  padding: 3px;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+.portal-user--link:hover {
+  text-decoration: none;
+  background: var(--capnexa-muted-surface);
+}
+.portal-user--link .portal-avatar {
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 3px var(--capnexa-brand-100);
+  transition:
+    box-shadow 200ms ease,
+    transform 200ms var(--ease-out);
+}
+.portal-user--link:hover .portal-avatar {
+  transform: scale(1.06);
+}
+.portal-user--link.is-active .portal-avatar {
+  background: var(--capnexa-brand-600);
+  color: #fff;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 4px var(--capnexa-brand-600);
+}
+@media (min-width: 1024px) {
+  .portal-user--link {
+    padding: 4px 12px 4px 4px;
+  }
+}
+
+@media (max-width: 599px) {
+  /* Search palette duplicates the inline search; Help is also in the footer and the drawer. */
+  .portal-topbar .portal-topbar-actions > .portal-icon.portal-palette-btn,
+  .portal-topbar .portal-topbar-actions > .portal-icon.portal-help-btn {
+    display: none;
+  }
+  .portal-topbar .portal-topbar-actions > .portal-icon.portal-bell {
+    display: inline-flex;
+  }
+  .portal-topbar .portal-topbar-actions {
+    gap: 2px;
+  }
+  .portal-topbar .portal-search-container {
+    min-width: 0;
+    flex: 1;
+  }
+}
+
+/* ---------- Fix: topbar profile hover must not whiten the dark bar ---------- */
+.portal-topbar .portal-user--link {
+  background: transparent;
+}
+.portal-topbar .portal-user--link:hover {
+  background: rgb(255 255 255 / 14%);
+}
+.portal-topbar .portal-user--link .portal-avatar {
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 28%);
+}
+.portal-topbar .portal-user--link.is-active {
+  background: rgb(255 255 255 / 10%);
+}
+.portal-topbar .portal-user--link.is-active .portal-avatar {
+  background: var(--capnexa-accent);
+  color: var(--capnexa-brand-900);
+  box-shadow: 0 0 0 2px rgb(137 245 231 / 55%);
+}
+.portal-topbar .portal-user--link:focus-visible {
+  outline: 2px solid var(--capnexa-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Workspace search palette ---------- */
+.academic-palette {
+  inline-size: min(560px, calc(100vw - 32px));
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 30px 70px -20px rgb(15 23 42 / 55%);
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+}
+.academic-palette[open] {
+  display: flex;
+}
+.palette-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 6px 20px;
+}
+.palette-header h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--capnexa-heading);
+  margin: 0;
+}
+.academic-palette .palette-close {
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  inline-size: 44px;
+  block-size: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--capnexa-body);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 200ms var(--ease-out);
+}
+.academic-palette .palette-close:hover {
+  background: var(--capnexa-muted-surface);
+  color: var(--capnexa-heading);
+  transform: rotate(90deg);
+}
+.palette-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 16px 10px;
+  padding: 0 12px;
+  border: 1px solid var(--capnexa-border);
+  border-radius: 10px;
+  background: var(--capnexa-canvas);
+  color: var(--capnexa-muted);
+  transition:
+    box-shadow 200ms ease,
+    border-color 200ms ease,
+    background-color 200ms ease;
+}
+.palette-field:focus-within {
+  background: #fff;
+  border-color: var(--capnexa-brand-600);
+  box-shadow: var(--polish-ring);
+}
+.academic-palette .palette-field input {
+  flex: 1;
+  min-inline-size: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 15px;
+  color: var(--capnexa-heading);
+  box-shadow: none;
+}
+.palette-field kbd {
+  font: 600 11px/1 inherit;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--capnexa-border);
+  background: #fff;
+  color: var(--capnexa-muted);
+}
+.palette-results {
+  list-style: none;
+  margin: 0;
+  padding: 0 10px 12px;
+  overflow-y: auto;
+  max-block-size: min(50dvh, 22rem);
+}
+.palette-results li {
+  border: 0;
+}
+.academic-palette .palette-results a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 12px;
+  border-radius: 10px;
+  color: var(--capnexa-heading);
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+.academic-palette .palette-results a svg {
+  opacity: 0;
+  transition: opacity 140ms ease;
+  color: var(--capnexa-brand-600);
+}
+.academic-palette .palette-results a:hover,
+.academic-palette .palette-results a:focus-visible {
+  background: var(--capnexa-brand-50);
+  color: var(--capnexa-brand-700);
+}
+.academic-palette .palette-results a:hover svg,
+.academic-palette .palette-results a:focus-visible svg {
+  opacity: 1;
+}
+.palette-empty {
+  padding: 28px 20px 32px;
+  text-align: center;
+  color: var(--capnexa-body);
+  margin: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .academic-palette .palette-close:hover {
+    transform: none;
+  }
+}
+
+/* ---------- Portal footer: quiet, light, in-flow (no dark band) ---------- */
+/* The dark band came from the OS dark-mode rule; the portal body is light, so it clashed.
+   Scoped to the portal only: login/forgot-password keep their framed header + footer. */
+.portal-column > footer.site-footer {
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+  color: var(--capnexa-muted);
+  --brand-ink: var(--capnexa-brand-900);
+  --brand-x-start: var(--capnexa-brand-700);
+  --brand-x-end: #007681;
+}
+.portal-column > footer.site-footer .footer-inner {
+  max-inline-size: none;
+  inline-size: auto;
+  margin-inline: clamp(16px, 2.2vw, 32px);
+  padding-inline: 0;
+  padding-block: 4px;
+  border-block-start: 1px solid var(--capnexa-border);
+  font-size: 12px;
+}
+.portal-column > footer.site-footer .text-button {
+  color: var(--capnexa-muted);
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
+}
+.portal-column > footer.site-footer .text-button:hover {
+  color: var(--capnexa-brand-700);
+  background: var(--capnexa-brand-50);
+  text-decoration: none;
+}
+.portal-column > footer.site-footer nav {
+  gap: 4px;
+}

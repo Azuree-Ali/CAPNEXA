@@ -1,25 +1,10 @@
+import { loginCopy as copy } from "@/features/auth/content/login.content";
 import { StitchIcon } from "./StitchIcon";
+import { SplitWords } from "@/lib/motion/SplitWords";
 import { BrandLogo } from "../../../components/branding/BrandLogo";
 export function AuthBrandPanel() {
-  const features = [
-    {
-      icon: "hub" as const,
-      title: "Centralized Management",
-      text: "Keep project work in one place.",
-    },
-    {
-      icon: "fact_check" as const,
-      title: "AI-Assisted Academic Integrity",
-      text: "AI assistance for academic integrity workflows.",
-    },
-    {
-      icon: "verified_user" as const,
-      title: "Secure Collaboration",
-      text: "Collaborate securely across the capstone journey.",
-    },
-  ];
   return (
-    <aside className="brand-panel" aria-label="About CAPNEXA">
+    <aside className="brand-panel" aria-label={copy.aboutCAPNEXA}>
       <svg
         className="constellation"
         viewBox="0 0 720 860"
@@ -99,10 +84,12 @@ export function AuthBrandPanel() {
       </svg>
       <div className="brand-content">
         <BrandLogo variant="panel" tagline />
-        <h1>Your Capstone Journey, Connected</h1>
-        <p className="brand-intro">Manage capstone work from proposal to evaluation.</p>
+        <h1>
+          <SplitWords text={copy.yourCapstoneJourneyConnected} />
+        </h1>
+        <p className="brand-intro">{copy.manageCapstoneWorkFromProposalToEvaluation}</p>
         <div className="feature-list">
-          {features.map(({ icon, title, text }) => (
+          {copy.features.map(({ icon, title, text }) => (
             <div className="feature-card" key={title}>
               <span className="feature-icon">
                 <StitchIcon name={icon} size={20} />

@@ -1,0 +1,52 @@
+import { dashboardContent } from "@/features/dashboard/content/dashboard.content";
+import { studentsContent } from "@/features/students/content/students.content";
+import { supervisorsContent } from "@/features/supervisors/content/supervisors.content";
+import { supervisorsOliviaBennettContent } from "@/features/supervisors/content/supervisorsOliviaBennett.content";
+import { projectsContent } from "@/features/projects/content/projects.content";
+import { projectsCampusAtlasContent } from "@/features/projects/content/projectsCampusAtlas.content";
+import { proposalsContent } from "@/features/proposals/content/proposals.content";
+import { proposalsReviewContent } from "@/features/proposals/content/proposalsReview.content";
+import { assignmentsContent } from "@/features/assignments/content/assignments.content";
+import { teamsAtlasContent } from "@/features/teams/content/teamsAtlas.content";
+import { milestonesContent } from "@/features/milestones/content/milestones.content";
+import { milestonesTimelineContent } from "@/features/milestones/content/milestonesTimeline.content";
+import { submissionsContent } from "@/features/submissions/content/submissions.content";
+import { reviewsAtlasDesignContent } from "@/features/reviews/content/reviewsAtlasDesign.content";
+import { notificationsContent } from "@/features/notifications/content/notifications.content";
+import { reportsContent } from "@/features/reports/content/reports.content";
+import { auditLogsContent } from "@/features/audit-logs/content/auditLogs.content";
+import { settingsContent } from "@/features/settings/content/settings.content";
+import { settingsPermissionsContent } from "@/features/settings/content/settingsPermissions.content";
+import { recommendationsContent } from "@/features/advanced/ai-matching/content/recommendations.content";
+import { recommendationsCompareContent } from "@/features/advanced/ai-matching/content/recommendationsCompare.content";
+import { assistantContent } from "@/features/advanced/academic-assistant/content/assistant.content";
+import { monitoringContent } from "@/features/advanced/anomaly-monitoring/content/monitoring.content";
+import { analyticsContent } from "@/features/advanced/analytics/content/analytics.content";
+import { evaluationsContent } from "@/features/evaluations/content/evaluations.content";
+export const workspaceRoutes = [
+  { path: "dashboard", content: dashboardContent },
+  { path: "students", content: studentsContent },
+  { path: "supervisors", content: supervisorsContent },
+  { path: "supervisors/olivia-bennett", content: supervisorsOliviaBennettContent },
+  { path: "projects", content: projectsContent },
+  { path: "projects/campus-atlas", content: projectsCampusAtlasContent },
+  { path: "proposals", content: proposalsContent },
+  { path: "proposals/review", content: proposalsReviewContent },
+  { path: "assignments", content: assignmentsContent },
+  { path: "teams/atlas", content: teamsAtlasContent },
+  { path: "milestones", content: milestonesContent },
+  { path: "milestones/timeline", content: milestonesTimelineContent },
+  { path: "submissions", content: submissionsContent },
+  { path: "reviews/atlas-design", content: reviewsAtlasDesignContent },
+  { path: "notifications", content: notificationsContent },
+  { path: "reports", content: reportsContent },
+  { path: "audit-logs", content: auditLogsContent },
+  { path: "settings", content: settingsContent },
+  { path: "settings/permissions", content: settingsPermissionsContent },
+  { path: "recommendations", content: recommendationsContent },
+  { path: "recommendations/compare", content: recommendationsCompareContent },
+  { path: "assistant", content: assistantContent },
+  { path: "monitoring", content: monitoringContent },
+  { path: "analytics", content: analyticsContent },
+  { path: "evaluations", content: evaluationsContent },
+];

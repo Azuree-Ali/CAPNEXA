@@ -1,3 +1,4 @@
+import { profileCopy as copy } from "@/features/settings/content/profile.content";
 import type { Profile } from "../types/profile.types";
 import { ReadOnlyField } from "./InstitutionDetails";
 export function RoleAccessCard({ profile }: { profile: Profile }) {
@@ -10,8 +11,8 @@ export function RoleAccessCard({ profile }: { profile: Profile }) {
     >
       <div className="profile-card-heading">
         <div>
-          <h2 id="role-access-title">Role & Access</h2>
-          <p>Permissions granted to your administrator account.</p>
+          <h2 id="role-access-title">{copy.roleAccess}</h2>
+          <p>{copy.permissionsGrantedToYourAdministratorAccount}</p>
         </div>
       </div>
       <div className="profile-fields">

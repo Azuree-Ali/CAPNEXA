@@ -1,4 +1,6 @@
-import { useOutletContext } from "react-router-dom";
+import { loginCopy as copy } from "@/features/auth/content/login.content";
+import { connected } from "@/lib/api/api-client";
+import { Link, useOutletContext } from "react-router-dom";
 import { Fragment } from "react";
 import { StitchIcon } from "../components/StitchIcon";
 import { AuthBrandPanel } from "../components/AuthBrandPanel";
@@ -13,18 +15,21 @@ export function LoginPage() {
           <div className="login-form-content">
             <span className="access-pill">
               <StitchIcon name="admin_panel_settings" size={15} />
-              Administrator &amp; Supervisor access
+              {copy.administratorSupervisorAccess}
             </span>
-            <h2>Welcome back</h2>
-            <p className="form-intro">
-              Sign in with your university credentials to oversee capstone projects.
-            </p>
+            <h2>{copy.welcomeBack}</h2>
+            <p className="form-intro">{copy.signInWithYourUniversityCredentialsToOversee}</p>
             <LoginForm />
+            {!connected && (
+              <Link className="preview-entry" to="/admin/dashboard">
+                {copy.openDemonstrationWorkspace}
+              </Link>
+            )}
           </div>
           <div className="legal-links">
-            {["Privacy Policy", "Terms of Service", "Help & Support"].map((label, index) => (
+            {copy.legalLinks.map((label, index) => (
               <Fragment key={label}>
-                {index > 0 && <span aria-hidden="true">•</span>}
+                {index > 0 && <span aria-hidden="true">{copy.separator}</span>}
                 <button type="button" onClick={() => openInfo(label)}>
                   {label}
                 </button>

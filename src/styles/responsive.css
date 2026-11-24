@@ -160,7 +160,7 @@
     height: 34px;
   }
   .capnexa-brand--header .capnexa-brand__wordmark {
-    width: 112px;
+    font-size: 17.92px;
   }
   .capnexa-brand--panel {
     gap: 10px;
@@ -170,7 +170,7 @@
     height: 48px;
   }
   .capnexa-brand--panel .capnexa-brand__wordmark {
-    width: 160px;
+    font-size: 25.6px;
   }
 }
 

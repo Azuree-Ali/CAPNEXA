@@ -1,13 +1,14 @@
+import { profileCopy as copy } from "@/features/settings/content/profile.content";
 import { Mail } from "lucide-react";
 export function ProfileSupport({ onContact }: { onContact: () => void }) {
   // BACKEND: Supply the actual department support contact; no email address is assumed.
   return (
     <section className="profile-card" aria-labelledby="profile-support-title">
-      <h2 id="profile-support-title">Profile Support</h2>
-      <p>Need to update institution-managed details? Contact your department.</p>
+      <h2 id="profile-support-title">{copy.profileSupport}</h2>
+      <p>{copy.needToUpdateInstitutionManagedDetailsContactYour}</p>
       <button type="button" className="profile-button" onClick={onContact}>
         <Mail size={17} />
-        Contact Department
+        {copy.contactDepartment}
       </button>
     </section>
   );

@@ -43,3 +43,16 @@
   --spacing-gutter: var(--capnexa-gutter);
   --font-portal: "Capnexa Inter", Inter, Arial, sans-serif;
 }
+
+:root {
+  --brand-ink: var(--capnexa-brand-900);
+  --brand-x-start: var(--capnexa-brand-700);
+  --brand-x-end: #007681;
+}
+
+:root {
+  --capnexa-data-indigo: #5146a6;
+  --capnexa-data-teal: #08796f;
+  --capnexa-data-amber: #9a5708;
+  --capnexa-panel-shadow: 0 1px 2px rgb(15 23 42 / 5%);
+}

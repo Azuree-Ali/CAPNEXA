@@ -1,12 +1,10 @@
+import { branding } from "./branding.content";
+
 type BrandLogoProps = {
   variant?: "header" | "panel" | "compact" | "footer";
   showSymbol?: boolean;
   tagline?: boolean;
 };
-
-const SYMBOL_SRC = "/branding/logo.png";
-
-const WORDMARK_SRC = "/branding/text-logo.png";
 
 export function BrandLogo({
   variant = "header",
@@ -18,25 +16,21 @@ export function BrandLogo({
       {showSymbol && (
         <img
           className="capnexa-brand__symbol"
-          src={SYMBOL_SRC}
+          src={branding.symbol}
           width={505}
           height={494}
-          style={{ objectFit: "contain" }}
+
           alt=""
         />
       )}
 
       <span className="capnexa-brand__text">
-        <img
-          className="capnexa-brand__wordmark"
-          src={WORDMARK_SRC}
-          width={1051}
-          height={205}
-          style={{ objectFit: "contain" }}
-          alt="CAPNEXA"
-        />
-
-        {tagline && <span className="capnexa-brand__tagline">The Connected Capstone Journey</span>}
+        <span dir="ltr" lang="en" className="capnexa-brand__wordmark">
+          {branding.name.slice(0, branding.accentIndex)}
+          <span className="capnexa-brand__accent">{branding.name[branding.accentIndex]}</span>
+          {branding.name.slice(branding.accentIndex + 1)}
+        </span>
+        {tagline && <span className="capnexa-brand__tagline">{branding.tagline}</span>}
       </span>
     </span>
   );

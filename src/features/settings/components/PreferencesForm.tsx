@@ -1,3 +1,4 @@
+import { profileCopy as copy } from "@/features/settings/content/profile.content";
 import type { ProfilePreferences, DigestSchedule, SubmissionAlerts } from "../types/profile.types";
 export function PreferencesForm({
   value,
@@ -21,45 +22,43 @@ export function PreferencesForm({
     >
       <div className="profile-card-heading profile-divider">
         <div>
-          <h2 id="preferences-title">Notification & Workspace Preferences</h2>
-          <p>Choose how you receive project updates.</p>
+          <h2 id="preferences-title">{copy.notificationWorkspacePreferences}</h2>
+          <p>{copy.chooseHowYouReceiveProjectUpdates}</p>
         </div>
       </div>
       <div className="profile-preferences-form">
         <label className="profile-field">
-          <span>Email digest schedule</span>
+          <span>{copy.emailDigestSchedule}</span>
           <select
             disabled={disabled}
             value={value.digest}
             onChange={(e) => onChange({ ...value, digest: e.target.value as DigestSchedule })}
           >
-            <option value="daily">Daily 08:00 EST (Morning Briefing)</option>
-            <option value="weekly">Weekly Monday 08:00 EST</option>
-            <option value="off">Off</option>
+            <option value="daily">{copy.daily0800ESTMorningBriefing}</option>
+            <option value="weekly">{copy.weeklyMonday0800EST}</option>
+            <option value="off">{copy.off}</option>
           </select>
-          <small>
-            Aggregates submission uploads and student milestone progress into one email.
-          </small>
+          <small>{copy.aggregatesSubmissionUploadsAndStudentMilestoneProgressInto}</small>
         </label>
         <label className="profile-field">
-          <span>Deliverable submission alerts</span>
+          <span>{copy.deliverableSubmissionAlerts}</span>
           <select
             disabled={disabled}
             value={value.alerts}
             onChange={(e) => onChange({ ...value, alerts: e.target.value as SubmissionAlerts })}
           >
-            <option value="immediate">Immediate notification</option>
-            <option value="digest">Include in digest only</option>
-            <option value="off">Off</option>
+            <option value="immediate">{copy.immediateNotification}</option>
+            <option value="digest">{copy.includeInDigestOnly}</option>
+            <option value="off">{copy.off}</option>
           </select>
         </label>
         <div className="profile-fields">
           <label className="profile-field">
-            <span>Interface language</span>
+            <span>{copy.interfaceLanguage}</span>
             <input value={value.locale} readOnly />
           </label>
           <label className="profile-field">
-            <span>Interface theme</span>
+            <span>{copy.interfaceTheme}</span>
             <input value="Light Mode (Institutional)" readOnly />
           </label>
         </div>

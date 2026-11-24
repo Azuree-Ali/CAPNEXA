@@ -1,3 +1,5 @@
+import { loginCopy as copy } from "@/features/auth/content/login.content";
+import { connected } from "@/lib/api/api-client";
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { LoaderCircle } from "lucide-react";
@@ -44,27 +46,29 @@ export function LoginForm() {
         disabled={pending}
       />
       <div className="form-options">
-        <label className="checkbox-label">
-          <input
-            type="checkbox"
-            checked={values.rememberMe}
-            onChange={(e) => update("rememberMe", e.target.checked)}
-            disabled={pending}
-          />
-          Remember me
-        </label>
-        <Link to="/forgot-password">Forgot password?</Link>
+        {!connected && (
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={values.rememberMe}
+              onChange={(e) => update("rememberMe", e.target.checked)}
+              disabled={pending}
+            />
+            {copy.rememberMe}
+          </label>
+        )}
+        <Link to="/forgot-password">{copy.forgotPassword}</Link>
       </div>
       <FormFeedback error={error} message={result?.message} />
       <button type="submit" className="primary-button" disabled={pending}>
         {pending ? (
           <>
             <LoaderCircle size={18} className="spin" />
-            Signing in...
+            {copy.signingIn}
           </>
         ) : (
           <>
-            Sign In
+            {copy.signIn}
             <StitchIcon name="arrow_forward" size={18} />
           </>
         )}

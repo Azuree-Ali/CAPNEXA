@@ -1,3 +1,4 @@
+import { profileCopy as copy } from "@/features/settings/content/profile.content";
 export function SecuritySettings({
   onOptions,
 }: {
@@ -14,39 +15,39 @@ export function SecuritySettings({
     >
       <div className="profile-card-heading profile-divider">
         <div>
-          <h2 id="security-title">Security & sign-in</h2>
-          <p>Explore account security options in this demo.</p>
+          <h2 id="security-title">{copy.securitySignIn}</h2>
+          <p>{copy.exploreAccountSecurityOptionsInThisDemo}</p>
         </div>
       </div>
       <div className="profile-security-options">
         <div className="profile-security-row">
           <div>
-            <h3>Password options</h3>
-            <p>No password changes are made in this preview.</p>
+            <h3>{copy.passwordOptions}</h3>
+            <p>{copy.noPasswordChangesAreMadeInThisPreview}</p>
           </div>
           <button type="button" className="profile-button" onClick={() => onOptions("password")}>
-            View options
+            {copy.viewOptions}
           </button>
         </div>
         <div className="profile-security-row">
           <div>
-            <h3>Two-step verification</h3>
-            <p>No verification method is configured by this demo.</p>
+            <h3>{copy.twoStepVerification}</h3>
+            <p>{copy.noVerificationMethodIsConfiguredByThisDemo}</p>
           </div>
           <button
             type="button"
             className="profile-button"
             onClick={() => onOptions("verification")}
           >
-            View options
+            {copy.viewOptions}
           </button>
         </div>
         <div className="profile-security-row">
           <div>
-            <h3>Preview session</h3>
-            <p>This page does not manage real account sessions.</p>
+            <h3>{copy.previewSession}</h3>
+            <p>{copy.thisPageDoesNotManageRealAccountSessions}</p>
           </div>
-          <span className="profile-pill">Preview only</span>
+          <span className="profile-pill">{copy.previewOnly}</span>
         </div>
       </div>
     </section>

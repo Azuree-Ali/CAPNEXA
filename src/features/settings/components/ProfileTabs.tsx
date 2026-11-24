@@ -1,3 +1,4 @@
+import { profileCopy as copy } from "@/features/settings/content/profile.content";
 import { useRef } from "react";
 import { UserRound, LockKeyhole, SlidersHorizontal } from "lucide-react";
 import type { ProfileTab } from "../types/profile.types";
@@ -15,7 +16,7 @@ export function ProfileTabs({
 }) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   return (
-    <div className="profile-tabs" role="tablist" aria-label="Profile settings">
+    <div className="profile-tabs" role="tablist" aria-label={copy.profileSettings}>
       {tabs.map(({ id, label, icon: Icon }, index) => (
         <button
           key={id}
