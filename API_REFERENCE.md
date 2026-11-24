@@ -46,6 +46,8 @@ Required completion fields are exactly student number, department, and academic 
 | GET | `/api/Identity/Auth/confirm-email?userId=...&token=...` | Public/browser | Confirms email and redirects to frontend login |
 | POST | `/api/Identity/Auth/login` | Public | Returns access token, refresh token, and user |
 | POST | `/api/Identity/Auth/refresh` | Public | Rotates refresh token and returns new auth response |
+| POST | `/api/Identity/Auth/forgot-password` | Public | Sends 6-digit OTP to email for password reset |
+| POST | `/api/Identity/Auth/reset-password` | Public | Validates OTP and resets password |
 | GET | `/api/Identity/Auth/google/login` | Public/browser | Starts Google OAuth |
 | GET | `/api/Identity/Auth/github/login` | Public/browser | Starts GitHub OAuth |
 
@@ -312,6 +314,77 @@ For an existing password account, `currentPassword` is required. A confirmed ext
 
 Request: `POST /api/Student/Profile/email-change` with `{"newEmail":"new@example.edu"}`. Backend emails a confirmation link; the email is not changed until confirmation. The linked page displays a form and posts URL-encoded fields `UserId`, `NewEmail`, `Token` to `/api/Student/Profile/confirm-email-change`.
 
+## 4.5. Password reset (forgot password)
+
+All password reset endpoints are public (no authentication required). Rate limited to 10 requests per minute per IP.
+
+### Request password reset OTP
+
+`POST /api/Identity/Auth/forgot-password`
+
+```json
+{
+  "email": "student@university.edu"
+}
+```
+
+**Response (always `200` — generic to prevent email enumeration):**
+
+```json
+{
+  "message": "If an account with this email exists, a password reset OTP has been sent."
+}
+```
+
+**Validation errors (`400`):**
+
+```json
+{"message": "Email is required."}
+{"message": "Invalid email address."}
+```
+
+**Service unavailable (`503`):**
+
+```json
+{"message": "The OTP email could not be sent. Try again later."}
+```
+
+> **Security:** The response is identical whether the email exists or not. A 6-digit OTP is sent via email, valid for 10 minutes, single-use.
+
+### Reset password with OTP
+
+`POST /api/Identity/Auth/reset-password`
+
+```json
+{
+  "email": "student@university.edu",
+  "otp": "123456",
+  "newPassword": "NewSecurePass123!",
+  "confirmPassword": "NewSecurePass123!"
+}
+```
+
+**Success (`200`):**
+
+```json
+{
+  "message": "Your password has been reset successfully. You can now log in with your new password."
+}
+```
+
+**Errors (`400`):**
+
+| Error | Message |
+|-------|---------|
+| Invalid/expired OTP | `{"message": "Invalid or expired OTP. Request a new one."}` |
+| OTP expired | `{"message": "OTP has expired. Request a new one."}` |
+| Wrong OTP | `{"message": "Invalid OTP. Please try again."}` |
+| Mismatched passwords | `{"message": "Password and confirmation password do not match."}` |
+| Weak password | `{"message": "password_policy_failed"}` |
+| OTP format invalid | `{"message": "OTP must be 6 digits."}` |
+
+> **After reset:** All refresh tokens for the user are revoked. The user must log in again with the new password.
+
 ## 5. Team management
 
 All team routes require a Student bearer token, a completed academic profile, and an active account. The maximum is five members including the leader. Each student may belong to one team at a time. There is no academic-year restriction. The backend creates the invite code and sets the creator as leader; do not send `teamId`, `maxMembers`, or `isLeader` in create/join requests.
@@ -530,6 +603,24 @@ Business errors use this shape:
 
 Auth endpoints commonly return `{ "message": "..." }`; team and proposal business errors return `{ "code": "...", "message": "..." }`. Check the response `code` as well as the HTTP status.
 
+### Password reset errors (public endpoints)
+
+Password reset endpoints return `{ "message": "..." }` (no `code` field):
+
+| HTTP | Message | Cause |
+|------|---------|-------|
+| `400` | `Email is required.` | Missing email in forgot-password |
+| `400` | `Invalid email address.` | Malformed email |
+| `400` | `OTP must be 6 digits.` | OTP format invalid |
+| `400` | `Invalid OTP. Please try again.` | Wrong OTP |
+| `400` | `OTP has expired. Request a new one.` | OTP > 10 min old |
+| `400` | `Invalid or expired OTP. Request a new one.` | OTP used/expired/not found |
+| `400` | `Password and confirmation password do not match.` | Mismatched passwords |
+| `400` | `password_policy_failed` | Password doesn't meet requirements (min 8 chars, etc.) |
+| `503` | `The OTP email could not be sent. Try again later.` | SMTP failure |
+
+> **Security:** Forgot-password **always returns `200`** with generic message — never reveals if email exists.
+
 ## 8. Dio integration
 
 Use one Dio instance with the API origin as `baseUrl`. Add the bearer token only to protected calls. Store access and refresh tokens in platform secure storage; do not print token or password values in logs.
@@ -559,6 +650,60 @@ final profileComplete = response.data['academicProfileComplete'] as bool;
 ```
 
 For `DioException`, inspect `e.response?.statusCode` and `e.response?.data`. If an authorized request returns `401`, call `POST /api/Identity/Auth/refresh` once with the stored refresh token, securely replace both returned tokens, and retry the original request once. Do not refresh after a failed login or failed refresh, and prevent retry loops.
+
+### Password reset flow (public endpoints)
+
+```dart
+// 1. Request OTP
+final forgotResponse = await dio.post(
+  '/api/Identity/Auth/forgot-password',
+  data: {'email': 'student@university.edu'},
+);
+// Always 200: { "message": "If an account with this email exists, a password reset OTP has been sent." }
+
+// 2. Show OTP input screen in Flutter, then:
+final resetResponse = await dio.post(
+  '/api/Identity/Auth/reset-password',
+  data: {
+    'email': 'student@university.edu',
+    'otp': otpController.text.trim(),
+    'newPassword': newPasswordController.text,
+    'confirmPassword': confirmPasswordController.text,
+  },
+);
+// Success: 200 { "message": "Your password has been reset successfully..." }
+// Errors: 400 { "message": "Invalid or expired OTP..." } etc.
+
+// 3. After successful reset, navigate to login screen
+```
+
+### Student Dashboard Summary (protected)
+
+```dart
+final dashboardResponse = await dio.get(
+  '/api/Student/Dashboard',
+  options: withBearer(accessToken),
+);
+
+final dashboard = dashboardResponse.data;
+// dashboard['team'] - TeamDashboardDto? (null if no team)
+// dashboard['proposal'] - ProposalDashboardDto? (null if no proposal)
+// dashboard['project'] - ProjectDashboardDto? (null if proposal not approved)
+// dashboard['milestones'] - List<MilestoneDashboardDto>
+// dashboard['progressPercentage'] - int (0-100)
+// dashboard['upcomingDeadlines'] - List<UpcomingDeadlineDto>
+
+// Handle student states:
+if (dashboard['team'] == null) {
+  // Student has no team → show "Create/Join Team" screen
+} else if (dashboard['proposal'] == null) {
+  // Has team, no proposal → show "Create Proposal" screen
+} else if (dashboard['proposal']['status'] == 'Rejected') {
+  // Rejected → show rejection reason, allow new proposal
+} else if (dashboard['proposal']['status'] == 'Approved') {
+  // Approved → show project, milestones, progress, deadlines
+}
+```
 
 For teams and proposals, send JSON maps matching the request examples above. A successful leave returns `204` and has no response body. After creating, joining, or leaving a team, call `GET /api/Student/Teams/me` if the screen needs the latest membership state.
 
