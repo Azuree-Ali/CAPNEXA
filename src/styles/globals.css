@@ -320,9 +320,11 @@ nav {
   outline: none;
 }
 .input-wrap input::placeholder {
-  color: #767680;
+  color: var(--capnexa-body);
 }
 .reveal-button {
+  min-width: 45px;
+  min-height: 45px;
   border: 0;
   padding: 4px;
   background: none;
@@ -653,11 +655,7 @@ nav {
   align-items: flex-start;
 }
 .capnexa-brand__wordmark {
-  display: block;
-  width: 144px;
-  max-width: 100%;
-  height: auto;
-  object-fit: contain;
+  font-size: 23.04px;
 }
 .capnexa-brand__tagline {
   display: block;
@@ -676,14 +674,13 @@ nav {
   height: 64px;
 }
 .capnexa-brand--panel .capnexa-brand__wordmark {
-  width: 192px;
-  filter: brightness(0) invert(1);
+  font-size: 30.72px;
 }
 .capnexa-brand--footer {
   gap: 0;
 }
 .capnexa-brand--footer .capnexa-brand__wordmark {
-  width: 80px;
+  font-size: 12.8px;
 }
 .capnexa-brand--compact {
   gap: 8px;
@@ -693,7 +690,7 @@ nav {
   height: 30px;
 }
 .capnexa-brand--compact .capnexa-brand__wordmark {
-  width: 112px;
+  font-size: 17.92px;
 }
 .portal-brand-logo {
   display: flex;
@@ -755,4 +752,132 @@ nav {
     justify-content: center;
     gap: 8px;
   }
+}
+
+@font-face {
+  font-family: "Capnexa Wordmark";
+  src: url("/branding/capnexa-wordmark.woff") format("woff");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+.capnexa-brand__wordmark {
+  font-family: "Capnexa Wordmark", Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: normal;
+  unicode-bidi: isolate;
+  color: var(--brand-ink);
+  user-select: text;
+}
+.capnexa-brand--panel,
+[data-theme="dark"] :is(.site-header, .site-footer, .portal-topbar, .portal-brand-row) {
+  --brand-ink: var(--capnexa-brand-50);
+  --brand-x-start: #9bbfff;
+  --brand-x-end: var(--capnexa-accent);
+}
+@supports (background-clip: text) {
+  .capnexa-brand__accent {
+    background: linear-gradient(55deg, var(--brand-x-start), var(--brand-x-end));
+    background-clip: text;
+    color: transparent;
+  }
+}
+.capnexa-brand__wordmark::selection,
+.capnexa-brand__accent::selection {
+  background: Highlight;
+  color: HighlightText;
+}
+@media (forced-colors: active) {
+  .capnexa-brand__accent {
+    background: none;
+    color: CanvasText;
+  }
+}
+.site-footer {
+  background: var(--capnexa-surface);
+  border-block-start: 1px solid var(--capnexa-border);
+}
+.footer-inner {
+  padding-block: 12px;
+}
+.footer-inner .text-button {
+  min-inline-size: 44px;
+  min-block-size: 44px;
+}
+.topbar-wordmark {
+  display: inline-flex;
+}
+@media (min-width: 580px) and (max-width: 1023px) {
+  .topbar-wordmark {
+    display: inline-flex;
+  }
+}
+@media (max-width: 579px) {
+  .portal-topbar:has(.topbar-wordmark) {
+    flex-wrap: wrap;
+  }
+  .topbar-wordmark {
+    display: flex;
+    flex-basis: 100%;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .site-header,
+  .site-footer,
+  .portal-topbar,
+  .portal-brand-row {
+    background: var(--capnexa-brand-900);
+    color: var(--capnexa-brand-50);
+    --brand-ink: var(--capnexa-brand-50);
+    --brand-x-start: #9bbfff;
+    --brand-x-end: var(--capnexa-accent);
+  }
+  .site-header .text-button,
+  .site-footer .text-button,
+  .portal-brand-row small,
+  .portal-topbar .portal-icon {
+    color: var(--capnexa-brand-50);
+  }
+  .portal-topbar .portal-search,
+  .portal-topbar .portal-icon {
+    background: var(--capnexa-surface);
+    color: var(--capnexa-heading);
+  }
+  .portal-topbar .portal-user-text strong,
+  .portal-topbar .portal-user-text small {
+    color: var(--capnexa-brand-50);
+  }
+}
+
+[data-theme="dark"] :is(.site-header, .site-footer, .portal-topbar, .portal-brand-row) {
+  background: var(--capnexa-brand-900);
+  color: var(--capnexa-brand-50);
+}
+[data-theme="dark"] :is(.site-header, .site-footer) .text-button {
+  color: var(--capnexa-brand-50);
+}
+.preview-entry {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  margin-top: 1rem;
+}
+.copyright-line {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.3em;
+  justify-content: center;
+}
+.copyright-line .capnexa-brand {
+  vertical-align: baseline;
+}
+
+.access-state-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 0.5rem;
 }

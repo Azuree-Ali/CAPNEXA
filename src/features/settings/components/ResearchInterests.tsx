@@ -1,3 +1,4 @@
+import { profileCopy as copy } from "@/features/settings/content/profile.content";
 import { useState } from "react";
 import { X, Plus } from "lucide-react";
 export function ResearchInterests({
@@ -38,11 +39,8 @@ export function ResearchInterests({
     >
       <div className="profile-card-heading">
         <div>
-          <h2 id="research-title">Research Interests</h2>
-          <p>
-            Academic domain topics used for automatic student project matching and supervisor
-            allocation.
-          </p>
+          <h2 id="research-title">{copy.researchInterests}</h2>
+          <p>{copy.academicDomainTopicsUsedForAutomaticStudentProject}</p>
         </div>
       </div>
       <div className="profile-topics">
@@ -61,15 +59,15 @@ export function ResearchInterests({
             </span>
           ))
         ) : (
-          <p>No research interests added yet.</p>
+          <p>{copy.noResearchInterestsAddedYet}</p>
         )}
       </div>
       <div className="profile-topic-add">
         <input
-          aria-label="New research topic"
+          aria-label={copy.newResearchTopic}
           maxLength={80}
           disabled={disabled}
-          placeholder="Add a new research topic (e.g. Computer Vision)..."
+          placeholder={copy.addANewResearchTopicEGComputer}
           value={topic}
           aria-invalid={!!error}
           aria-describedby={error ? "topic-error" : undefined}
@@ -86,7 +84,7 @@ export function ResearchInterests({
         />
         <button className="profile-button" type="button" disabled={disabled} onClick={add}>
           <Plus size={16} />
-          Add topic
+          {copy.addTopic}
         </button>
       </div>
       {error ? (

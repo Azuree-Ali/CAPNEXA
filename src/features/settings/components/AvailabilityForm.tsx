@@ -1,3 +1,4 @@
+import { profileCopy as copy } from "@/features/settings/content/profile.content";
 import { MapPin, Clock3 } from "lucide-react";
 import type { PortalRole } from "../../../config/navigation";
 export function AvailabilityForm({
@@ -34,7 +35,7 @@ export function AvailabilityForm({
       </div>
       <div className="profile-fields">
         <label className="profile-field">
-          <span>Office Location</span>
+          <span>{copy.officeLocation}</span>
           <div className="profile-input-icon">
             <input
               maxLength={160}

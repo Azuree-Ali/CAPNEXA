@@ -9,6 +9,6 @@ export interface RecoveryValues {
 export type FieldErrors = Partial<Record<"email" | "password", string>>;
 // BACKEND: هذه نتيجة العرض فقط. أضف أنواع user/roles/MFA من العقد الفعلي.
 export interface PreviewResult {
-  mode: "preview";
+  mode: "preview" | "authenticated";
   message: string;
 }

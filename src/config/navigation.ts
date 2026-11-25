@@ -10,7 +10,7 @@ import {
   CircleCheck,
   ChartNoAxesCombined,
   History,
-  Sun,
+  Settings,
   UserRound,
   ScanSearch,
   Bell,
@@ -33,7 +33,6 @@ export interface PortalIdentity {
   initials: string;
   title: string;
 }
-// TODO(BACKEND): Academic year, current user and badge counts must come from the server.
 // These identities and counts are visual fixtures only, never authentication data.
 export const previewIdentity: Record<PortalRole, PortalIdentity> = {
   Admin: { name: "Dr. Omar Hassan", initials: "OH", title: "System Administrator" },
@@ -41,32 +40,32 @@ export const previewIdentity: Record<PortalRole, PortalIdentity> = {
 };
 export const navigation: Record<PortalRole, NavigationGroup[]> = {
   Admin: [
-    { items: [{ label: "Overview", path: "dashboard", icon: LayoutDashboard }] },
+    { items: [{ label: "Overview", path: "dashboard", available: true, icon: LayoutDashboard }] },
     {
       label: "ACADEMIC MANAGEMENT",
       items: [
-        { label: "Students", path: "students", icon: GraduationCap },
-        { label: "Supervisors", path: "supervisors", icon: UsersRound },
-        { label: "Projects", path: "projects", icon: Folder },
-        { label: "Proposals", path: "proposals", icon: FileChartColumn },
-        { label: "Assignments", path: "assignments", icon: ClipboardList },
-        { label: "Milestones", path: "milestones", icon: Flag },
+        { label: "Students", path: "students", available: true, icon: GraduationCap },
+        { label: "Supervisors", path: "supervisors", available: true, icon: UsersRound },
+        { label: "Projects", path: "projects", available: true, icon: Folder },
+        { label: "Proposals", path: "proposals", available: true, icon: FileChartColumn },
+        { label: "Assignments", path: "assignments", available: true, icon: ClipboardList },
+        { label: "Milestones", path: "milestones", available: true, icon: Flag },
       ],
     },
     {
       label: "OPERATIONS",
       items: [
-        { label: "Submissions", path: "submissions", icon: FileText },
-        { label: "Evaluations", path: "evaluations", icon: CircleCheck },
-        { label: "Reports", path: "reports", icon: ChartNoAxesCombined },
+        { label: "Submissions", path: "submissions", available: true, icon: FileText },
+        { label: "Evaluations", path: "evaluations", available: true, icon: CircleCheck },
+        { label: "Reports", path: "reports", available: true, icon: ChartNoAxesCombined },
       ],
     },
     {
       label: "ADMINISTRATION",
       items: [
-        { label: "Audit Logs", path: "audit-logs", icon: History },
-        { label: "Settings", path: "settings", icon: Sun },
-        { label: "Profile", path: "profile", icon: UserRound, available: true },
+        { label: "Audit Logs", path: "audit-logs", available: true, icon: History },
+        { label: "Settings", path: "settings", available: true, icon: Settings },
+        { label: "Profile", path: "profile", available: true, icon: UserRound },
       ],
     },
   ],

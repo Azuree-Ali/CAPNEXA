@@ -1,3 +1,6 @@
+import { accessStates } from "@/features/auth/content/accessState.content";
+import { SiteFooter } from "../../components/layout/SiteFooter";
+import { branding } from "../../components/branding/branding.content";
 import { useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { X } from "lucide-react";
@@ -14,7 +17,11 @@ export function AuthLayout() {
         ? "Reset password"
         : pathname === "/login"
           ? "Sign in"
-          : "Page not found";
+          : pathname === "/session-expired"
+            ? accessStates.expired.title
+            : pathname === "/forbidden"
+              ? accessStates.forbidden.title
+              : accessStates.missing.title;
 
     document.title = `${pageTitle} | CAPNEXA`;
   }, [pathname]);
@@ -60,25 +67,15 @@ export function AuthLayout() {
         <Outlet context={{ openInfo: setInfo }} />
       </main>
 
-      <footer className="site-footer">
-        <div className="footer-inner">
-          <div className="copyright-line">
-            <span>©</span>
-            <BrandLogo variant="footer" showSymbol={false} />
-            <span>All rights reserved.</span>
-          </div>
-
-          <nav aria-label="Footer links">
-            {infoButton("Privacy")}
-            {infoButton("Help")}
-          </nav>
-        </div>
-      </footer>
-
+      <SiteFooter
+        onPrivacy={() => setInfo(branding.privacy)}
+        onHelp={() => setInfo(branding.help)}
+      />
       <dialog
         ref={dialogRef}
         className="info-dialog"
         aria-labelledby="info-title"
+        data-backdrop-close
         onClose={() => setInfo(null)}
       >
         <button type="button" className="dialog-close" aria-label="Close" onClick={closeDialog}>

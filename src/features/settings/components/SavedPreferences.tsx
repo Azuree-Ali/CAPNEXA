@@ -1,3 +1,4 @@
+import { profileCopy as copy } from "@/features/settings/content/profile.content";
 import { digestLabels, alertLabels } from "../types/profile.types";
 import type { ProfilePreferences } from "../types/profile.types";
 export function SavedPreferences({ preferences }: { preferences: ProfilePreferences }) {
@@ -11,8 +12,8 @@ export function SavedPreferences({ preferences }: { preferences: ProfilePreferen
     <section className="profile-card" aria-labelledby="saved-preferences-title">
       <div className="profile-card-heading">
         <div>
-          <h2 id="saved-preferences-title">Saved Preferences</h2>
-          <p>Configured system locale and notification rules.</p>
+          <h2 id="saved-preferences-title">{copy.savedPreferences}</h2>
+          <p>{copy.configuredSystemLocaleAndNotificationRules}</p>
         </div>
       </div>
       <dl className="profile-preferences-list">
@@ -29,7 +30,7 @@ export function SavedPreferences({ preferences }: { preferences: ProfilePreferen
           </div>
         ))}
       </dl>
-      <p className="profile-saved-note">Updates appear here after you save.</p>
+      <p className="profile-saved-note">{copy.updatesAppearHereAfterYouSave}</p>
     </section>
   );
 }

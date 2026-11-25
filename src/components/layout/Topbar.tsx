@@ -1,46 +1,13 @@
+import { connected } from "@/lib/api/api-client";
+import { portalCopy as copy } from "./portal.content";
+import { WorkspaceSearch } from "./WorkspaceSearch";
+import { workspaceRoutes } from "@/app/router/workspace-routes";
 import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, CircleHelp, SlidersHorizontal, Search, Menu } from "lucide-react";
+import { Bell, CircleHelp, Search, Menu } from "lucide-react";
+import { BrandLogo } from "../branding/BrandLogo";
 import { UserIdentity } from "./UserIdentity";
 import type { PortalIdentity, PortalRole } from "../../config/navigation";
-const sections = [
-  {
-    label: "Personal Information",
-    tab: "personal",
-    id: "institution-details",
-    terms: "name email department office profile",
-  },
-  {
-    label: "Office & Availability",
-    tab: "personal",
-    id: "availability",
-    terms: "contact location hours schedule",
-  },
-  {
-    label: "Research Interests",
-    tab: "personal",
-    id: "research-interests",
-    terms: "topics artificial intelligence distributed systems",
-  },
-  {
-    label: "Role & Access",
-    tab: "personal",
-    id: "role-access",
-    terms: "permissions administrator scope",
-  },
-  {
-    label: "Security & sign-in",
-    tab: "security",
-    id: "security-settings",
-    terms: "password verification session security",
-  },
-  {
-    label: "Notification & Workspace Preferences",
-    tab: "preferences",
-    id: "preferences-settings",
-    terms: "digest alerts notifications language theme",
-  },
-];
 export function Topbar({
   role,
   user,
@@ -64,8 +31,20 @@ export function Topbar({
   // global-search API. Add cancellation, loading/errors and server pagination. No
   // project, student or submission records are invented by this preview.
   const search = query.trim().toLowerCase();
+  const destinations =
+    role === "Admin"
+      ? workspaceRoutes.map(({ path, content }) => ({
+          label: content.title,
+          tab: "",
+          id: "/admin/" + path,
+          terms: content.description,
+        }))
+      : [];
+  const profileSections = connected
+    ? [{ label: copy.accountProfile, tab: "", id: base, terms: copy.accountTerms }]
+    : copy.profileSections;
   const results = search
-    ? sections.filter(
+    ? [...profileSections, ...destinations].filter(
         (s) =>
           !(role === "Admin" && s.id === "research-interests") &&
           !(role === "Supervisor" && s.id === "role-access") &&
@@ -75,7 +54,7 @@ export function Topbar({
   function choose(index: number) {
     const item = results[index];
     if (!item) return;
-    navigate(`${base}?tab=${item.tab}#${item.id}`);
+    navigate(item.tab ? `${base}?tab=${item.tab}#${item.id}` : item.id);
     setOpen(false);
     setQuery("");
     setSelected(-1);
@@ -89,11 +68,14 @@ export function Topbar({
   }, []);
   return (
     <header className="portal-topbar">
+      <span className="topbar-wordmark">
+        <BrandLogo variant="footer" showSymbol={false} />
+      </span>
       <button
         type="button"
         className="portal-icon portal-menu"
         onClick={onMenu}
-        aria-label="Open navigation"
+        aria-label={copy.menu}
         aria-haspopup="dialog"
       >
         <Menu size={22} />
@@ -118,7 +100,7 @@ export function Topbar({
           <input
             ref={input}
             role="combobox"
-            aria-label="Search workspace"
+            aria-label={copy.searchLabel}
             aria-autocomplete="list"
             aria-expanded={open && !!search}
             aria-controls={listId}
@@ -127,11 +109,7 @@ export function Topbar({
             }
             autoComplete="off"
             value={query}
-            placeholder={
-              role === "Admin"
-                ? "Search users, projects, cohorts..."
-                : "Search projects, submissions, reviews..."
-            }
+            placeholder={copy.searchPlaceholder}
             onFocus={() => setOpen(true)}
             onChange={(event) => {
               setQuery(event.target.value);
@@ -159,8 +137,8 @@ export function Topbar({
         </form>
         {open && search ? (
           <div className="portal-search-results">
-            <p>Profile sections</p>
-            <ul role="listbox" id={listId} aria-label="Search results">
+            <p>{copy.searchHeading}</p>
+            <ul role="listbox" id={listId} aria-label={copy.searchResults}>
               {results.map((item, index) => (
                 <li
                   role="option"
@@ -175,41 +153,35 @@ export function Topbar({
                 </li>
               ))}
             </ul>
-            {!results.length ? <p role="status">No matching profile sections.</p> : null}
-            <small>Search currently covers your profile sections.</small>
+            {!results.length ? <p role="status">{copy.noDestinations}</p> : null}
+            <small>{copy.searchHint}</small>
           </div>
         ) : (
-          <ul role="listbox" id={listId} hidden aria-label="Search results" />
+          <ul role="listbox" id={listId} hidden aria-label={copy.searchResults} />
         )}
       </div>
       <div className="portal-topbar-actions">
+        {role === "Admin" && <WorkspaceSearch />}
         {/* BACKEND: Supply notification items and unread count before enabling the bell. */}
         <button
           type="button"
           className="portal-icon portal-bell"
-          disabled
-          aria-label="Notifications — no items yet"
-          title="No notifications yet"
+          disabled={role !== "Admin"}
+          onClick={() => navigate("/admin/notifications")}
+          aria-label={copy.notifications}
+          title={copy.notifications}
         >
           <Bell size={20} />
         </button>
         <button
           type="button"
-          className="portal-icon"
+          className="portal-icon portal-help-btn"
           onClick={onHelp}
-          aria-label="Help & Documentation"
+          aria-label={copy.helpLabel}
         >
           <CircleHelp size={18} />
         </button>
-        <button
-          type="button"
-          className="portal-icon"
-          onClick={() => navigate(`${base}?tab=preferences`)}
-          aria-label="Open preferences"
-        >
-          <SlidersHorizontal size={18} />
-        </button>
-        <UserIdentity user={user} />
+        <UserIdentity user={user} to={base} label={`${user.name}, ${copy.accountProfile}`} />
       </div>
     </header>
   );

@@ -1,3 +1,4 @@
+import { loginCopy as copy } from "@/features/auth/content/login.content";
 import { useState } from "react";
 import { StitchIcon } from "./StitchIcon";
 interface Props {
@@ -10,7 +11,7 @@ export function PasswordField({ value, onChange, error, disabled }: Props) {
   const [visible, setVisible] = useState(false);
   return (
     <div className="form-field">
-      <label htmlFor="password">Password</label>
+      <label htmlFor="password">{copy.password}</label>
       <div className={`input-wrap ${error ? "invalid" : ""}`}>
         <StitchIcon name="lock" size={18} />
         <input
@@ -19,7 +20,7 @@ export function PasswordField({ value, onChange, error, disabled }: Props) {
           type={visible ? "text" : "password"}
           autoComplete="current-password"
           required
-          placeholder="••••••••••••"
+          placeholder={copy.separator2}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
@@ -31,7 +32,7 @@ export function PasswordField({ value, onChange, error, disabled }: Props) {
           className="reveal-button"
           disabled={disabled}
           onClick={() => setVisible((v) => !v)}
-          aria-label={visible ? "Hide password" : "Show password"}
+          aria-label={visible ? copy.hidePassword : copy.showPassword}
           aria-pressed={visible}
         >
           <StitchIcon name={visible ? "visibility_off" : "visibility"} size={20} />

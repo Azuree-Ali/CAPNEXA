@@ -1,3 +1,4 @@
+import { profileCopy as copy } from "@/features/settings/content/profile.content";
 import { LockKeyhole } from "lucide-react";
 import type { Profile } from "../types/profile.types";
 export function ReadOnlyField({ label, value }: { label: string; value: string }) {
@@ -21,7 +22,7 @@ export function InstitutionDetails({ profile }: { profile: Profile }) {
     >
       <div className="profile-card-heading">
         <div>
-          <h2 id="institution-title">Institution-managed Details</h2>
+          <h2 id="institution-title">{copy.institutionManagedDetails}</h2>
           <p>
             {profile.role === "Admin"
               ? "Core profile data synchronized with University Directory records."
@@ -30,7 +31,7 @@ export function InstitutionDetails({ profile }: { profile: Profile }) {
         </div>
         <span className="profile-pill">
           <LockKeyhole size={13} />
-          Read-only
+          {copy.readOnly}
         </span>
       </div>
       <div className="profile-fields">

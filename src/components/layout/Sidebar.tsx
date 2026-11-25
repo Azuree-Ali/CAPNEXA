@@ -1,3 +1,5 @@
+import { portalCopy as copy } from "./portal.content";
+import { setSession } from "@/lib/api/api-client";
 import { NavLink, useNavigate } from "react-router-dom";
 import { X, LogOut } from "lucide-react";
 import { BrandLogo } from "../branding/BrandLogo";
@@ -15,6 +17,7 @@ export function Sidebar({
 }) {
   const navigate = useNavigate();
   function logout() {
+    setSession(null);
     // BACKEND: Invalidate the authenticated server session and clear the user/query
     // cache through the real auth service. This preview has no auth token or session.
     // Remove only CAPNEXA preview data, never clear unrelated browser storage.
@@ -33,19 +36,18 @@ export function Sidebar({
       <div className="portal-brand-row">
         <div>
           <BrandLogo variant="compact" />
-          <small>AY 2025–2026</small>
         </div>
         {onClose ? (
           <button
             className="portal-icon portal-close"
             onClick={onClose}
-            aria-label="Close navigation"
+            aria-label={copy.closeNavigation}
           >
             <X size={20} />
           </button>
         ) : null}
       </div>
-      <nav className="portal-nav" aria-label={`${role} navigation`}>
+      <nav className="portal-nav" aria-label={`${role} ${copy.navigation}`}>
         {navigation[role].map((group, index) => (
           <div className="portal-nav-group" key={group.label ?? index}>
             {group.label ? <p className="portal-group-label">{group.label}</p> : null}
@@ -65,7 +67,7 @@ export function Sidebar({
                   key={path}
                   className="portal-nav-item portal-unavailable"
                   aria-disabled="true"
-                  title="Planned screen — not implemented yet"
+                  title={copy.planned}
                 >
                   <Icon size={20} strokeWidth={1.75} />
                   <span>{label}</span>
@@ -82,8 +84,8 @@ export function Sidebar({
           type="button"
           className="portal-icon portal-logout"
           onClick={logout}
-          aria-label="Log out"
-          title="Log out"
+          aria-label={copy.logout}
+          title={copy.logout}
         >
           <LogOut size={20} />
         </button>

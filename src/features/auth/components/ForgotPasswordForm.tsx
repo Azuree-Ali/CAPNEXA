@@ -1,3 +1,4 @@
+import { recoveryCopy as copy } from "@/features/auth/content/recovery.content";
 import { useState, type FormEvent } from "react";
 import { ArrowRight, CheckCircle2, LoaderCircle } from "lucide-react";
 import { EmailField } from "./EmailField";
@@ -25,6 +26,10 @@ export function ForgotPasswordForm() {
       aria-busy={pending}
       className="auth-form recovery-form"
     >
+      <p className="recovery-notice">
+        <CheckCircle2 size={18} aria-hidden="true" />
+        <span>{copy.previewNotice}</span>
+      </p>
       <EmailField
         value={email}
         error={fieldError}
@@ -35,20 +40,17 @@ export function ForgotPasswordForm() {
           clearFeedback();
         }}
       />
-      <p className="recovery-notice">
-        <CheckCircle2 size={18} aria-hidden="true" />
-        <span>If an eligible account exists, instructions will be sent.</span>
-      </p>
+
       <FormFeedback error={error} message={result?.message} />
       <button type="submit" className="primary-button" disabled={pending}>
         {pending ? (
           <>
             <LoaderCircle size={18} className="spin" />
-            Sending request...
+            {copy.sendingRequest}
           </>
         ) : (
           <>
-            Send Reset Instructions
+            {copy.sendResetInstructions}
             <ArrowRight size={18} />
           </>
         )}

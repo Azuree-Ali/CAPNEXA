@@ -5,6 +5,7 @@ import { App } from "@/app/App";
 import "../styles/tokens.css";
 import "../styles/globals.css";
 import "../styles/responsive.css";
+import "../styles/polish.css";
 
 const rootElement = document.getElementById("root");
 

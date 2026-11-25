@@ -1,3 +1,5 @@
+import { connected, currentUser } from "@/lib/api/api-client";
+import { profileCopy as copy } from "@/features/settings/content/profile.content";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { X } from "lucide-react";
@@ -22,24 +24,10 @@ function editable(p: Profile): ProfileEditable {
     preferences: { ...p.preferences },
   };
 }
-const dialogs = {
-  password: {
-    title: "Password options",
-    text: "Password changes are not available in this preview. Your institution will provide the account password policy and recovery options.",
-  },
-  verification: {
-    title: "Two-step verification",
-    text: "Verification setup is not available yet. No verification method has been enabled or changed.",
-  },
-  support: {
-    title: "Contact your department",
-    text: "Contact your department through your university directory to update institution-managed details. A department contact has not been provided yet.",
-  },
-};
-export function ProfilePage({ role }: { role: PortalRole }) {
+function PreviewProfilePage({ role }: { role: PortalRole }) {
   const { profile, error, saving, save, retry } = useProfile(role);
   useEffect(() => {
-    document.title = `Profile — ${role} | CAPNEXA`;
+    document.title = `${copy.profile} — ${role} | CAPNEXA`;
   }, [role]);
   if (!profile)
     return (
@@ -48,11 +36,11 @@ export function ProfilePage({ role }: { role: PortalRole }) {
           <>
             <p>{error}</p>
             <button className="profile-button" onClick={retry}>
-              Try again
+              {copy.tryAgain}
             </button>
           </>
         ) : (
-          "Loading profile..."
+          copy.loading
         )}
       </div>
     );
@@ -80,7 +68,7 @@ function ProfileContent({
         : "personal";
   const location = useLocation();
   const dialog = useRef<HTMLDialogElement>(null);
-  const [dialogType, setDialogType] = useState<keyof typeof dialogs>("support");
+  const [dialogType, setDialogType] = useState<keyof typeof copy.dialogs>("support");
   const dirty = JSON.stringify(draft) !== JSON.stringify(editable(profile));
   function selectTab(next: ProfileTab) {
     const copy = new URLSearchParams(params);
@@ -105,7 +93,7 @@ function ProfileContent({
       target?.focus({ preventScroll: true });
     }
   }, [location.hash, tab]);
-  function openDialog(type: keyof typeof dialogs) {
+  function openDialog(type: keyof typeof copy.dialogs) {
     setDialogType(type);
     dialog.current?.showModal();
   }
@@ -113,17 +101,19 @@ function ProfileContent({
     const result = await save(draft);
     if (result) {
       setDraft(editable(result));
-      setMessage("Changes saved in this browser preview. No server data was changed.");
+      setMessage(copy.saved);
     }
   }
   return (
     <>
       <p className="portal-breadcrumb">
-        {profile.role} Workspace <span>/ Profile</span>
+        {profile.role}
+        {copy.workspace}
+        <span>{copy.profile}</span>
       </p>
-      <h1 className="portal-title">Profile</h1>
+      <h1 className="portal-title">{copy.profile2}</h1>
       <p className="portal-subtitle">
-        Manage your details, availability and notification preferences.
+        {copy.manageYourDetailsAvailabilityAndNotificationPreferences}
       </p>
       <ProfileHeader profile={profile} />
       <ProfileTabs selected={tab} onChange={selectTab} />
@@ -169,17 +159,17 @@ function ProfileContent({
                       disabled={saving || !dirty}
                       onClick={() => {
                         setDraft(editable(profile));
-                        setMessage("Unsaved changes discarded.");
+                        setMessage(copy.discarded);
                       }}
                     >
-                      Cancel
+                      {copy.cancel}
                     </button>
                     <button
                       type="submit"
                       className="profile-button profile-button-primary"
                       disabled={saving || !dirty}
                     >
-                      {saving ? "Saving..." : "Save Changes"}
+                      {saving ? copy.saving : copy.saveChanges}
                     </button>
                   </div>
                 </>
@@ -207,7 +197,7 @@ function ProfileContent({
             </p>
           ) : null}
         </div>
-        <aside className="profile-secondary" aria-label="Profile information">
+        <aside className="profile-secondary" aria-label={copy.profileInformation}>
           <SavedPreferences preferences={profile.preferences} />
           <ProfileSupport onContact={() => openDialog("support")} />
         </aside>
@@ -218,16 +208,48 @@ function ProfileContent({
           className="portal-icon"
           autoFocus
           onClick={() => dialog.current?.close()}
-          aria-label="Close dialog"
+          aria-label={copy.closeDialog}
         >
           <X size={20} />
         </button>
-        <h2 id="profile-dialog-title">{dialogs[dialogType].title}</h2>
-        <p>{dialogs[dialogType].text}</p>
+        <h2 id="profile-dialog-title">{copy.dialogs[dialogType].title}</h2>
+        <p>{copy.dialogs[dialogType].text}</p>
         <button className="profile-button" onClick={() => dialog.current?.close()}>
-          Close
+          {copy.close}
         </button>
       </dialog>
     </>
   );
+}
+
+export function ProfilePage({ role }: { role: PortalRole }) {
+  const user = currentUser();
+  if (connected && user)
+    return (
+      <section className="academic-workspace">
+        <header>
+          <h1>{copy.accountProfile}</h1>
+          <p>{copy.staffProfileNotice}</p>
+        </header>
+        <div className="academic-records">
+          <dl className="record-fields">
+            <div>
+              <dt>{copy.nameLabel}</dt>
+              <dd>
+                {user.firstName} {user.lastName}
+              </dd>
+            </div>
+            <div>
+              <dt>{copy.emailLabel}</dt>
+              <dd>{user.email}</dd>
+            </div>
+            <div>
+              <dt>{copy.rolesLabel}</dt>
+              <dd>{user.roles.join(", ")}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+    );
+  return <PreviewProfilePage role={role} />;
 }

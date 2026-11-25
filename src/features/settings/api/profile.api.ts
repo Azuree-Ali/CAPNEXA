@@ -1,5 +1,5 @@
 import type { PortalRole } from "../../../config/navigation";
-import { profileFixtures } from "../mocks/profile.mock";
+import { profileCopy } from "../content/profile.content";
 import type { Profile, ProfileEditable } from "../types/profile.types";
 const storageKey = (role: PortalRole) => `capnexa:profile-preview:v1:${role}`;
 function checkAbort(signal?: AbortSignal) {
@@ -35,7 +35,7 @@ function pickEditable(value: ProfileEditable): ProfileEditable {
 // current user and role on the server; the route's role is only a preview fixture.
 export async function getProfile(role: PortalRole, signal?: AbortSignal): Promise<Profile> {
   checkAbort(signal);
-  const base = structuredClone(profileFixtures[role]);
+  const base = structuredClone(profileCopy.fixtures[role]);
   try {
     const raw = sessionStorage.getItem(storageKey(role));
     if (raw) {
@@ -66,5 +66,5 @@ export async function saveProfile(
     );
   }
   checkAbort(signal);
-  return { ...structuredClone(profileFixtures[role]), ...editable };
+  return { ...structuredClone(profileCopy.fixtures[role]), ...editable };
 }

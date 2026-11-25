@@ -44,14 +44,14 @@
   box-sizing: border-box;
 }
 .portal-sidebar {
-  width: 264px;
-  flex: 0 0 264px;
+  width: 232px;
+  flex: 0 0 232px;
   height: 100dvh;
   position: sticky;
   top: 0;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--portal-border);
+  border-inline-end: 1px solid var(--portal-border);
   background: #fff;
 }
 .portal-brand-row {
@@ -77,14 +77,14 @@
   height: 30px;
 }
 .portal-brand-row .capnexa-brand__wordmark {
-  width: 112px;
+  font-size: 17.92px;
 }
 .portal-nav {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
   overflow-y: auto;
-  padding: 0 16px 16px;
+  padding: 12px 12px 16px;
   flex: 1;
   min-height: 0;
 }
@@ -100,7 +100,7 @@
   font-weight: 500;
 }
 .portal-nav-item {
-  min-height: 40px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -122,8 +122,9 @@
 }
 .portal-nav-item.is-active,
 .portal-nav-item.is-active:hover {
-  color: #fff;
-  background: var(--portal-blue);
+  color: var(--capnexa-brand-700);
+  background: var(--capnexa-brand-50);
+  box-shadow: inset 0 0 0 1px var(--capnexa-brand-100);
 }
 .portal-unavailable {
   cursor: default;
@@ -176,8 +177,19 @@
   color: var(--portal-muted);
 }
 .portal-column {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   flex: 1;
+}
+.portal-column > .portal-main {
+  flex: 1;
+  inline-size: 100%;
+  min-inline-size: 0;
+  margin-block: 0;
+}
+.portal-column > .site-footer {
+  margin-block-start: auto;
 }
 .portal-topbar {
   height: 64px;
@@ -521,7 +533,7 @@
   background: var(--capnexa-muted-surface);
 }
 .portal-nav-item.is-active:hover {
-  background: var(--capnexa-brand-600);
+  background: var(--capnexa-brand-100);
 }
 .portal-sidebar-user {
   display: flex;
@@ -1091,4 +1103,1040 @@
   .profile-tabs button {
     font-size: 12px;
   }
+}
+.academic-workspace {
+  max-inline-size: 76rem;
+  margin-inline: auto;
+  color: var(--capnexa-heading);
+}
+.academic-workspace header {
+  margin-block-end: 1.75rem;
+}
+.academic-workspace h1 {
+  font-size: clamp(1.8rem, 3.2vw, 2.75rem);
+  letter-spacing: -0.035em;
+  line-height: 1.16;
+  margin-block: 0.7rem;
+}
+.academic-workspace p {
+  color: var(--capnexa-body);
+  line-height: 1.55;
+}
+.academic-workspace header small {
+  display: inline-block;
+  margin-block-start: 0.85rem;
+  color: var(--capnexa-body);
+}
+.academic-records,
+.academic-links a {
+  border: 1px solid var(--capnexa-border);
+  border-radius: var(--capnexa-card-radius);
+  background: var(--capnexa-surface);
+}
+.academic-tools,
+.academic-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+.academic-tools {
+  padding: 1rem 1.25rem;
+  justify-content: space-between;
+  border-block-end: 1px solid var(--capnexa-border);
+}
+.academic-tools h2 {
+  font-size: 1.1rem;
+}
+.academic-tools label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--capnexa-border);
+  border-radius: var(--capnexa-control-radius);
+}
+.academic-tools input {
+  width: min(13rem, 55vw);
+  border: none;
+  background: transparent;
+  min-height: 44px;
+}
+.academic-scroll {
+  overflow-x: auto;
+}
+.academic-records table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: start;
+  font-size: 0.9rem;
+}
+.academic-records th,
+.academic-records td {
+  text-align: start;
+  padding: 0.85rem 1.25rem;
+  border-block-end: 1px solid var(--capnexa-border);
+}
+.academic-records thead {
+  background: var(--capnexa-canvas);
+  color: var(--capnexa-body);
+}
+.academic-workspace a,
+.academic-empty button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  color: var(--capnexa-brand-700);
+}
+.academic-links {
+  margin-block-start: 1rem;
+}
+.academic-links a,
+.academic-empty {
+  padding: 1rem;
+}
+.academic-workspace button {
+  min-height: 44px;
+}
+.record-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+.record-fields dt {
+  font-size: 0.8rem;
+  color: var(--capnexa-body);
+}
+.record-fields dd {
+  margin: 0.4rem 0;
+  font-weight: 600;
+}
+.academic-workspace button {
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--capnexa-control-radius);
+  border: 1px solid var(--capnexa-border);
+  background: var(--capnexa-surface);
+  color: var(--capnexa-brand-700);
+  font-weight: 600;
+}
+.academic-workspace .info-dialog form {
+  display: grid;
+  gap: 1rem;
+}
+.academic-workspace .info-dialog label {
+  display: grid;
+  gap: 0.5rem;
+}
+.academic-workspace input,
+.academic-workspace textarea {
+  min-height: 44px;
+  max-width: 100%;
+}
+@media (max-width: 579px) {
+  .portal-topbar:has(.topbar-wordmark) {
+    height: auto;
+    min-height: 76px;
+    padding-block: 4px;
+    row-gap: 0;
+  }
+}
+.profile-topic button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.portal-icon {
+  min-width: 44px;
+  min-height: 44px;
+}
+.academic-palette {
+  max-block-size: min(75dvh, 36rem);
+  overflow: auto;
+  color: var(--capnexa-heading);
+}
+.academic-palette input,
+.academic-palette button,
+.academic-palette a {
+  min-height: 44px;
+}
+.academic-palette input {
+  margin-block: 1rem;
+  width: 100%;
+}
+.academic-palette ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.academic-palette a {
+  display: flex;
+  align-items: center;
+  padding-inline: 0.7rem;
+  border-block-end: 1px solid var(--capnexa-border);
+}
+.academic-workspace select {
+  min-height: 44px;
+  max-width: 100%;
+}
+
+.academic-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.8rem;
+  margin-block: 0 1rem;
+}
+.academic-metrics > div,
+.academic-disclosures details + details {
+  border: 1px solid var(--capnexa-border);
+}
+.academic-metrics > div {
+  border-radius: var(--capnexa-card-radius);
+  background: var(--capnexa-surface);
+  padding: 0.9rem 1rem;
+}
+.academic-metrics dt {
+  color: var(--capnexa-body);
+  font-size: 0.83rem;
+}
+.academic-metrics dd {
+  margin: 0.3rem 0 0;
+  font-size: 1.12rem;
+  font-weight: 700;
+}
+.academic-panel {
+  padding: 1.15rem;
+}
+.academic-panel h2 {
+  font-size: 1.05rem;
+}
+.academic-panel p + p {
+  margin-block-start: 0.55rem;
+}
+.academic-secondary {
+  display: block;
+  color: var(--capnexa-body);
+  font-size: 0.85rem;
+}
+.academic-views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-block-end: 0.65rem;
+}
+.academic-views a {
+  padding-inline: 0.75rem;
+  border-radius: var(--capnexa-control-radius);
+}
+.academic-views a[aria-current="page"],
+.academic-status {
+  background: var(--capnexa-brand-50);
+  color: var(--capnexa-brand-700);
+}
+.academic-status {
+  display: inline-flex;
+  border-radius: 1rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.academic-list {
+  padding-inline-start: 1.3rem;
+  line-height: 1.7;
+}
+.academic-timeline {
+  display: grid;
+  gap: 0.8rem;
+  border-inline-start: 3px solid var(--capnexa-brand-100);
+  padding-inline-start: 1.8rem;
+}
+.academic-card-heading,
+.academic-disclosures summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+.academic-disclosures details + details {
+  border-width: 1px 0 0;
+}
+.academic-disclosures summary {
+  min-block-size: 54px;
+  cursor: pointer;
+  padding: 0.7rem 1.15rem;
+}
+.academic-disclosures summary::before {
+  content: "+";
+  color: var(--capnexa-brand-700);
+  font-weight: 700;
+}
+.academic-disclosures details[open] > summary::before {
+  content: "−";
+}
+.academic-disclosures summary > span:first-of-type {
+  flex: 1;
+}
+.academic-disclosures summary:focus-visible,
+.academic-views a:focus-visible {
+  outline: 2px solid var(--capnexa-brand-600);
+  outline-offset: -3px;
+}
+.academic-tools select {
+  max-inline-size: 100%;
+}
+.academic-workspace progress {
+  accent-color: var(--capnexa-brand-600);
+  inline-size: 5rem;
+}
+
+.academic-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: 1rem;
+}
+.academic-query,
+.academic-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.75rem;
+  margin-block-end: 1rem;
+}
+.academic-query label {
+  flex: 1 1 16rem;
+}
+.academic-query input {
+  display: block;
+  width: 100%;
+  margin-block-start: 0.35rem;
+}
+.academic-query input,
+.academic-tools select {
+  color: var(--capnexa-heading);
+  background: var(--capnexa-surface);
+  border: 1px solid var(--capnexa-border);
+  border-radius: var(--capnexa-control-radius);
+  padding-inline: 0.65rem;
+}
+.academic-result,
+.academic-compare,
+.academic-inline-actions {
+  margin-block-start: 0.8rem;
+}
+.academic-list button {
+  text-align: start;
+  margin-block: 0.2rem;
+}
+.academic-choice {
+  display: flex;
+  min-block-size: 44px;
+  align-items: center;
+  gap: 0.65rem;
+  margin-block-start: 0.65rem;
+  cursor: pointer;
+}
+.academic-sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+}
+.academic-plain-list {
+  list-style: none;
+  padding-inline-start: 0.9rem;
+}
+.academic-chart-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.academic-filter-fields {
+  justify-content: flex-start;
+  border-block-end: 0;
+  padding-inline: 0;
+}
+.academic-filter-fields label {
+  flex: 1 1 12rem;
+  display: grid;
+  padding: 0;
+  border: 0;
+  font-weight: 600;
+}
+.academic-workspace :is(select, textarea):focus-visible {
+  outline: 2px solid var(--capnexa-brand-600);
+  outline-offset: 2px;
+}
+.academic-workspace .info-dialog {
+  max-block-size: calc(100dvh - 2rem);
+}
+.academic-workspace .info-dialog input {
+  min-inline-size: 0;
+  width: 100%;
+}
+
+.admin-dashboard {
+  --dashboard-gap: clamp(12px, 1.5vw, 20px);
+  display: grid;
+  gap: var(--dashboard-gap);
+  color: var(--capnexa-heading);
+}
+.dashboard-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  padding-block-end: 6px;
+}
+.dashboard-context {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  color: var(--capnexa-body);
+  font-size: 12px;
+  font-weight: 600;
+}
+.dashboard-mode,
+.dashboard-status {
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: var(--capnexa-brand-50);
+  color: var(--capnexa-brand-700);
+  font-size: 12px;
+  font-weight: 600;
+}
+.dashboard-mode[data-connected="true"] {
+  background: var(--capnexa-muted-surface);
+  color: var(--capnexa-body);
+}
+.dashboard-heading h1 {
+  font-size: clamp(28px, 3vw, 40px);
+  letter-spacing: -0.045em;
+  margin-block: 8px 4px;
+  line-height: 1.12;
+}
+.dashboard-heading p,
+.dashboard-panel-heading p {
+  margin: 0;
+  color: var(--capnexa-body);
+}
+.dashboard-primary,
+.dashboard-panel-heading a,
+.dashboard-table-scroll a {
+  min-block-size: 44px;
+  min-inline-size: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: var(--capnexa-control-radius);
+  padding: 0 12px;
+  font-weight: 600;
+}
+.dashboard-primary {
+  border: 1px solid var(--capnexa-brand-700);
+  background: var(--capnexa-brand-700);
+  color: white;
+}
+.dashboard-primary:hover {
+  background: var(--capnexa-brand-900);
+}
+.dashboard-metrics,
+.dashboard-stage-list,
+.dashboard-health-list,
+.dashboard-allocation-list,
+.dashboard-event-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.dashboard-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--dashboard-gap);
+}
+.dashboard-metrics a,
+.dashboard-panel {
+  background: var(--capnexa-surface);
+  border: 1px solid var(--capnexa-border);
+  border-radius: var(--capnexa-card-radius);
+  box-shadow: var(--capnexa-panel-shadow);
+}
+.dashboard-metrics a {
+  display: grid;
+  gap: 4px;
+  block-size: 100%;
+  align-content: start;
+  padding: clamp(12px, 1.4vw, 18px);
+  color: var(--capnexa-heading);
+  font-weight: 600;
+  text-decoration: none;
+}
+.dashboard-metrics a:hover {
+  border-color: var(--capnexa-brand-600);
+}
+.dashboard-metric-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  color: var(--capnexa-body);
+  margin-block-end: 6px;
+}
+.dashboard-metric-icon,
+.dashboard-event-icon {
+  display: grid;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: var(--capnexa-control-radius);
+  background: var(--capnexa-brand-50);
+  color: var(--capnexa-brand-700);
+}
+[data-metric="overdue"] .dashboard-metric-icon {
+  background: var(--capnexa-danger-bg);
+  color: var(--capnexa-danger);
+}
+.dashboard-metrics strong {
+  font-size: 31px;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.dashboard-metrics strong.dashboard-metric-unavailable {
+  font-size: 16px;
+  color: var(--capnexa-body);
+}
+.dashboard-metrics small,
+.dashboard-allocation-row small,
+.dashboard-event-list small,
+.dashboard-table-scroll small {
+  display: block;
+  color: var(--capnexa-body);
+  font-size: 12px;
+  font-weight: 400;
+}
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--dashboard-gap);
+}
+.dashboard-primary-column,
+.dashboard-secondary-column {
+  display: grid;
+  min-width: 0;
+  gap: var(--dashboard-gap);
+}
+.dashboard-panel {
+  min-width: 0;
+  padding: clamp(14px, 1.55vw, 22px);
+}
+.dashboard-panel-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-block-end: 16px;
+}
+.dashboard-panel-heading h2 {
+  font-size: 17px;
+  line-height: 1.25;
+  margin: 0 0 4px;
+}
+.dashboard-panel-heading p {
+  font-size: 13px;
+}
+.dashboard-panel-heading a,
+.dashboard-table-scroll a {
+  color: var(--capnexa-brand-700);
+  background: var(--capnexa-brand-50);
+  font-size: 12px;
+  text-align: center;
+  text-decoration: none;
+}
+.dashboard-panel-heading a:hover,
+.dashboard-table-scroll a:hover {
+  background: var(--capnexa-brand-100);
+  text-decoration: underline;
+}
+.dashboard-panel-message {
+  padding: 14px;
+  margin: 0;
+  border-radius: var(--capnexa-control-radius);
+  background: var(--capnexa-muted-surface);
+  color: var(--capnexa-body);
+}
+.dashboard-distribution {
+  display: flex;
+  overflow: hidden;
+  block-size: 13px;
+  border-radius: 100px;
+  background: var(--capnexa-muted-surface);
+}
+.dashboard-distribution span + span {
+  border-inline-start: 2px solid var(--capnexa-surface);
+}
+.dashboard-dot,
+.dashboard-distribution span {
+  background: var(--dashboard-series, var(--capnexa-brand-600));
+}
+.dashboard-dot {
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: 50%;
+}
+.admin-dashboard [data-series="0"] {
+  --dashboard-series: var(--capnexa-data-indigo);
+}
+.admin-dashboard [data-series="2"] {
+  --dashboard-series: var(--capnexa-data-teal);
+}
+.admin-dashboard [data-series="3"] {
+  --dashboard-series: var(--capnexa-data-amber);
+}
+.admin-dashboard [data-health="1"] {
+  --dashboard-series: var(--capnexa-data-teal);
+}
+.admin-dashboard [data-health="2"] {
+  --dashboard-series: var(--capnexa-danger);
+}
+.dashboard-stage-list {
+  margin-block-start: 10px;
+}
+.dashboard-stage-list li,
+.dashboard-health-list li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 4px;
+  border-block-end: 1px solid var(--capnexa-border);
+}
+.dashboard-stage-list li {
+  grid-template-columns: auto 1fr minmax(20px, auto) minmax(42px, auto);
+}
+.dashboard-stage-list li:last-child,
+.dashboard-health-list li:last-child {
+  border-block-end: 0;
+}
+.dashboard-stage-list li > :last-child {
+  text-align: end;
+  color: var(--capnexa-body);
+}
+.dashboard-donut {
+  inline-size: 148px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--capnexa-brand-600) 0 var(--on-track-end),
+    var(--capnexa-data-teal) var(--on-track-end) var(--attention-end),
+    var(--capnexa-danger) var(--attention-end) 100%
+  );
+}
+.dashboard-donut[data-empty="true"] {
+  background: var(--capnexa-muted-surface);
+}
+.dashboard-donut div {
+  display: grid;
+  align-content: center;
+  text-align: center;
+  inline-size: 116px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--capnexa-surface);
+  color: var(--capnexa-body);
+  font-size: 12px;
+}
+.dashboard-donut strong {
+  font-size: 30px;
+  line-height: 1.1;
+  color: var(--capnexa-heading);
+}
+.dashboard-table-scroll {
+  position: relative;
+  overflow-x: auto;
+  border: 1px solid var(--capnexa-border);
+  border-radius: var(--capnexa-control-radius);
+}
+.dashboard-table-scroll:focus-visible {
+  outline: 2px solid var(--capnexa-brand-600);
+  outline-offset: 2px;
+}
+.dashboard-table-scroll table {
+  width: 100%;
+  min-width: 500px;
+  border-collapse: collapse;
+  text-align: start;
+  font-size: 13px;
+}
+.dashboard-table-scroll :is(th, td) {
+  padding: 10px 9px;
+  text-align: start;
+}
+.dashboard-table-scroll thead {
+  background: var(--capnexa-muted-surface);
+  color: var(--capnexa-body);
+}
+.dashboard-table-scroll tbody tr {
+  border-block-start: 1px solid var(--capnexa-border);
+}
+.dashboard-allocation-list li {
+  padding: 12px;
+  background: var(--capnexa-muted-surface);
+  border-radius: var(--capnexa-control-radius);
+}
+.dashboard-allocation-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.dashboard-allocation-row > :last-child {
+  text-align: end;
+}
+.dashboard-allocation-list progress {
+  width: 100%;
+  accent-color: var(--capnexa-brand-600);
+}
+.dashboard-event-list {
+  display: grid;
+  gap: 12px;
+}
+.dashboard-event-list li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  font-size: 13px;
+}
+.dashboard-event-list .dashboard-status {
+  display: inline-block;
+  margin-block-start: 4px;
+}
+@media (max-width: 1130px) {
+  .dashboard-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 850px) {
+  .dashboard-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 480px) {
+  .dashboard-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.portal-search {
+  min-block-size: 44px;
+}
+.portal-search-results {
+  inset-inline-start: 0;
+  color: var(--capnexa-heading);
+}
+.portal-search-results li {
+  min-block-size: 44px;
+}
+.portal-brand-row {
+  border-block-end: 1px solid var(--capnexa-border);
+}
+.portal-column > .site-footer {
+  box-shadow: var(--capnexa-panel-shadow);
+}
+.connected-workspace .academic-heading {
+  margin-block-end: 20px;
+}
+.connected-workspace .academic-records {
+  min-width: 0;
+  box-shadow: var(--capnexa-panel-shadow);
+}
+.operation-tools,
+.operation-pagination {
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+}
+.operation-tools label {
+  padding: 0 12px;
+  min-block-size: 44px;
+  border: 1px solid var(--capnexa-border);
+  border-radius: var(--capnexa-control-radius);
+  background: var(--capnexa-canvas);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--capnexa-body);
+}
+.operation-tools select {
+  border: 0;
+  background: transparent;
+  color: var(--capnexa-heading);
+  font: inherit;
+  font-weight: 600;
+  min-block-size: 40px;
+}
+.operation-filter,
+.operation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.operation-filter {
+  flex: 1 1 240px;
+  flex-wrap: nowrap;
+  min-inline-size: 0;
+  max-inline-size: min(100%, 420px);
+  padding-inline-start: 10px;
+  border: 1px solid var(--capnexa-border);
+  border-radius: var(--capnexa-control-radius);
+  background: var(--capnexa-canvas);
+  color: var(--capnexa-muted);
+}
+.operation-filter > input {
+  width: auto;
+  flex: 1 1 0;
+  min-inline-size: 0;
+  padding-inline: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--capnexa-heading);
+}
+.operation-filter > button {
+  flex-shrink: 0;
+  white-space: nowrap;
+  border-inline-start: 1px solid var(--capnexa-border);
+  border-block: 0;
+  border-inline-end: 0;
+  border-radius: 0 var(--capnexa-control-radius) var(--capnexa-control-radius) 0;
+  background: var(--capnexa-surface);
+  font-weight: 600;
+}
+.operation-back,
+.operation-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+.operation-actions {
+  margin-block-start: 14px;
+}
+.academic-status[data-connected="true"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--capnexa-brand-50);
+  border: 1px solid var(--capnexa-brand-100);
+  color: var(--capnexa-brand-900);
+  font-size: 12px;
+  font-weight: 600;
+}
+.academic-status[data-connected="true"]::before {
+  content: "";
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 50%;
+  background: #16a34a;
+}
+.operation-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.operation-badge.is-success {
+  background: #dcfce7;
+  color: #166534;
+}
+.operation-badge.is-danger {
+  background: var(--capnexa-danger-bg);
+  color: var(--capnexa-danger);
+}
+.operation-badge.is-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+.operation-table th button {
+  padding-inline: 0;
+  text-align: start;
+  border-color: transparent;
+  background: transparent;
+  color: var(--capnexa-brand-700);
+  font-weight: 600;
+}
+.operation-table th button:hover {
+  text-decoration: underline;
+}
+.operation-table {
+  position: relative;
+}
+.operation-table:focus-visible {
+  outline: 2px solid var(--capnexa-brand-600);
+  outline-offset: -2px;
+}
+.operation-pagination {
+  justify-content: end;
+  border-block-end: 0;
+}
+.operation-pagination button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.operation-overview h2,
+.operation-subrecord h3 {
+  padding: 14px 20px;
+  border-block-end: 1px solid var(--capnexa-border);
+  margin: 0;
+  font-size: 16px;
+}
+.operation-subrecord-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 20px 0;
+}
+.operation-subrecord-head h3 {
+  border: 0;
+  padding: 0;
+  font-size: 15px;
+}
+.operation-subaction {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--capnexa-brand-700);
+  background: var(--capnexa-brand-50);
+  border-color: var(--capnexa-brand-100);
+}
+.operation-overview .record-fields {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.operation-subrecord + .operation-subrecord {
+  border-block-start: 1px solid var(--capnexa-border);
+}
+.operation-capacity {
+  display: grid;
+  gap: 8px;
+  padding: 0 20px 20px;
+}
+.operation-capacity-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  max-inline-size: 360px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--capnexa-heading);
+}
+.operation-capacity progress {
+  inline-size: min(100%, 360px);
+  block-size: 10px;
+}
+.operation-success,
+.operation-error {
+  border-radius: var(--capnexa-control-radius);
+  padding: 10px 14px;
+}
+.operation-success {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  background: var(--capnexa-brand-50);
+  border: 1px solid var(--capnexa-brand-100);
+  color: var(--capnexa-brand-900);
+  font-weight: 500;
+}
+.operation-dialog {
+  padding: clamp(18px, 4vw, 28px);
+  background: var(--capnexa-surface);
+}
+.operation-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.operation-dialog-head .dialog-close {
+  position: static;
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--capnexa-control-radius);
+}
+.operation-dialog :is(h2, p) {
+  margin: 0;
+}
+.operation-dialog :is(input, select, textarea) {
+  min-block-size: 44px;
+  max-inline-size: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--capnexa-border);
+  border-radius: var(--capnexa-control-radius);
+  background: var(--capnexa-surface);
+  color: var(--capnexa-heading);
+  font: inherit;
+}
+.operation-dialog textarea {
+  resize: vertical;
+  min-block-size: 84px;
+}
+.operation-dialog .operation-actions {
+  margin-block-start: 4px;
+}
+.operation-dialog .operation-error {
+  background: var(--capnexa-danger-bg);
+  color: var(--capnexa-danger);
+}
+.operation-actions button[data-action] {
+  background: var(--capnexa-brand-700);
+  border-color: var(--capnexa-brand-700);
+  color: var(--capnexa-surface);
+}
+.operation-actions button:is([data-action="reject"], [data-action="deactivate"]) {
+  background: var(--capnexa-danger);
+  border-color: var(--capnexa-danger);
+}
+.operation-actions button:disabled {
+  opacity: 0.65;
+}
+.dashboard-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.dashboard-shortcuts a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-block-size: 44px;
+  padding-inline: 12px;
+  border: 1px solid var(--capnexa-border);
+  border-radius: var(--capnexa-control-radius);
+  background: var(--capnexa-surface);
+  color: var(--capnexa-brand-700);
+  text-decoration: none;
+}
+.dashboard-shortcuts a:hover {
+  border-color: var(--capnexa-brand-600);
+  text-decoration: underline;
 }

@@ -1,3 +1,4 @@
+import { authFieldsCopy as copy } from "@/features/auth/content/authFields.content";
 import { StitchIcon } from "./StitchIcon";
 interface Props {
   value: string;
@@ -9,7 +10,7 @@ interface Props {
 export function EmailField({ value, onChange, error, disabled, id = "university-email" }: Props) {
   return (
     <div className="form-field">
-      <label htmlFor={id}>University email</label>
+      <label htmlFor={id}>{copy.universityEmail}</label>
       <div className={`input-wrap ${error ? "invalid" : ""}`}>
         <StitchIcon name="alternate_email" size={18} />
         <input
@@ -19,7 +20,7 @@ export function EmailField({ value, onChange, error, disabled, id = "university-
           autoComplete="username"
           inputMode="email"
           required
-          placeholder="e.g., j.morrison@institution.edu"
+          placeholder={copy.eGJMorrisonInstitutionEdu}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
