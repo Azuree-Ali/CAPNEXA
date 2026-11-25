@@ -56,3 +56,9 @@
   --capnexa-data-amber: #9a5708;
   --capnexa-panel-shadow: 0 1px 2px rgb(15 23 42 / 5%);
 }
+
+:root {
+  --capnexa-motion-fast: 140ms;
+  --capnexa-motion-enter: 190ms;
+  --capnexa-motion-ease: cubic-bezier(0.2, 0.7, 0.25, 1);
+}

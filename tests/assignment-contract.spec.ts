@@ -198,6 +198,13 @@ test("supervisors filter by status/capacity and reassign approved projects with 
   page,
 }) => {
   let reassigned = false;
+  const replacement: AdminSupervisorListItemDto = {
+    ...candidate,
+    supervisorId: 5,
+    userId: "staff-5",
+    firstName: "Daniel",
+    lastName: "Reed",
+  };
   await page.route("https://capnexa.test/api/**", async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname === "/api/Identity/Auth/login") return route.fulfill({ json: account });
@@ -209,7 +216,7 @@ test("supervisors filter by status/capacity and reassign approved projects with 
         const isActive = url.searchParams.get("isActive");
         const hasCapacity = url.searchParams.get("hasCapacity");
         if (isActive === "false") return route.fulfill({ json: paged([]) });
-        if (hasCapacity === "true") return route.fulfill({ json: paged([candidate]) });
+        if (hasCapacity === "true") return route.fulfill({ json: paged([candidate, replacement]) });
         return route.fulfill({
           json: paged([
             {
@@ -242,9 +249,9 @@ test("supervisors filter by status/capacity and reassign approved projects with 
         });
       case "/api/Admin/ProjectAssignments/7":
         expect(route.request().method()).toBe("PUT");
-        expect(route.request().postDataJSON()).toEqual({ supervisorId: 4 });
+        expect(route.request().postDataJSON()).toEqual({ supervisorId: 5 });
         reassigned = true;
-        return route.fulfill({ json: { ...project, status: "Approved", supervisor: candidate } });
+        return route.fulfill({ json: { ...project, status: "Approved", supervisor: replacement } });
       default:
         throw new Error("Unexpected fixture route: " + url.pathname);
     }
@@ -263,7 +270,8 @@ test("supervisors filter by status/capacity and reassign approved projects with 
   await expect(page.getByRole("heading", { name: project.title })).toBeVisible();
   await page.getByRole("button", { name: "Reassign supervisor" }).click();
   const dialog = page.getByRole("dialog");
-  await dialog.getByLabel("Available supervisor").selectOption("4");
+  await expect(dialog.getByRole("option", { name: /Olivia Bennett/ })).toHaveCount(0);
+  await dialog.getByLabel("Available supervisor").selectOption("5");
   await dialog.getByRole("button", { name: "Confirm change" }).click();
   await expect(page.getByText("Supervisor reassigned.")).toBeVisible();
   await expect(page.getByText("No assigned projects are recorded.")).toBeVisible();

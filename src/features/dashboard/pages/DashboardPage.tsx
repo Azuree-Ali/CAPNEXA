@@ -14,9 +14,7 @@ import {
 } from "../components/DashboardPanels";
 
 export function DashboardPage() {
-  const scope = useReveal<HTMLDivElement>(
-    ".dashboard-heading, .dashboard-metrics > li, .dashboard-panel, .dashboard-shortcuts",
-  );
+  const scope = useReveal<HTMLDivElement>(".dashboard-heading h1, .dashboard-metrics > li");
   useEffect(() => {
     document.title = copy.title + " | CAPNEXA";
   }, []);

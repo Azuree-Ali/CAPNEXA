@@ -59,7 +59,9 @@ export function Sidebar({
                   onClick={onClose}
                   className={({ isActive }) => `portal-nav-item${isActive ? " is-active" : ""}`}
                 >
-                  <Icon size={20} strokeWidth={1.75} />
+                  <span className="portal-nav-icon" aria-hidden="true">
+                    <Icon size={18} strokeWidth={1.8} />
+                  </span>
                   <span>{label}</span>
                 </NavLink>
               ) : (

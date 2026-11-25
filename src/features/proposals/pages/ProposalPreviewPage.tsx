@@ -1,4 +1,8 @@
 import { useRef, useState } from "react";
+import {
+  applyPreviewChange,
+  previewProposalByTitle,
+} from "@/features/dashboard/hooks/operationsPreview";
 import { useNavigate } from "react-router-dom";
 import { WorkspaceView } from "@/components/data-table/WorkspaceView";
 import type { WorkspaceContent, WorkspaceRecord } from "@/components/data-table/workspace.content";
@@ -28,6 +32,14 @@ export function ProposalPreviewPage({
     setValue("");
     dialog.current?.showModal();
   };
+  const proposal = previewProposalByTitle(dossier.name);
+  const shownDecision =
+    proposal?.status === "Approved"
+      ? t.approved
+      : proposal?.status === "Rejected"
+        ? t.rejected
+        : decision;
+  const shownNotes = proposal?.review?.reason ?? notes;
   const projectNames = [
     ...content.records.map((record) => record.cells[0]),
     ...(decision === t.approved ? [dossier.name] : []),
@@ -43,6 +55,14 @@ export function ProposalPreviewPage({
     if ((action === "reject" || action === "revisions") && !value.trim()) {
       setError(dossier.requiredReason);
       return;
+    }
+    if ((action === "approve" || action === "reject") && proposal) {
+      try {
+        applyPreviewChange(action, String(proposal.projectId), value);
+      } catch (cause) {
+        setError(cause instanceof Error ? cause.message : dossier.requiredReason);
+        return;
+      }
     }
     if (action === "assign") allocations.set(project, value);
     else {
@@ -62,7 +82,7 @@ export function ProposalPreviewPage({
           description={content.description}
           parent={dossier.parent}
         >
-          <span className="academic-status academic-result">{decision}</span>
+          <span className="academic-status academic-result">{shownDecision}</span>
         </WorkspaceHeading>
       )}
       <WorkspaceView
@@ -92,11 +112,11 @@ export function ProposalPreviewPage({
                 {dossier.historyEntries.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
-                {notes && <li>{notes}</li>}
+                {shownNotes && <li>{shownNotes}</li>}
               </ol>
             </section>
           </div>
-          {decision === t.pending && (
+          {shownDecision === t.pending && (
             <div className="academic-tools">
               {(["approve", "reject", "revisions"] as const).map((a) => (
                 <button key={a} onClick={() => open(a, dossier.name)}>

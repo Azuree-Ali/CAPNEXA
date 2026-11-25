@@ -36,7 +36,7 @@ for (const width of [390, 768, 1440]) {
   });
 }
 test("canonical student edit returns to the same profile", async ({ page }) => {
-  await page.goto("/admin/students");
+  await page.goto("/admin/students?preview-tools");
   await page.getByRole("link", { name: "Alex Morgan" }).click();
   for (const name of ["Save changes", "Cancel", "Close"]) {
     await page.getByRole("button", { name: "Edit student details" }).click();

@@ -49,7 +49,7 @@ export function DashboardShell({ role, children }: { role: PortalRole; children:
     };
   }, [drawerOpen]);
   return (
-    <div className="portal-shell">
+    <div className="portal-shell" data-portal-role={role}>
       <a className="portal-skip" href="#portal-main">
         {copy.skip}
       </a>

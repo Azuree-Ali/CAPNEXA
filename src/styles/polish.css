@@ -849,3 +849,63 @@ dialog::backdrop {
 .portal-column > footer.site-footer nav {
   gap: 4px;
 }
+
+/* Administrative navigation and overview use the same visual rhythm. */
+[data-portal-role="Admin"] .portal-nav-item {
+  gap: 9px;
+}
+[data-portal-role="Admin"] .portal-nav-item::before {
+  inset-inline-start: 0;
+  background: var(--capnexa-brand-600);
+}
+[data-portal-role="Admin"] .portal-nav-item .portal-nav-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 28px;
+  inline-size: 28px;
+  block-size: 28px;
+  border-radius: var(--capnexa-control-radius);
+  color: var(--capnexa-body);
+}
+[data-portal-role="Admin"] .portal-nav-item.is-active {
+  font-weight: 650;
+}
+[data-portal-role="Admin"] .portal-nav-item.is-active .portal-nav-icon {
+  background: var(--capnexa-brand-100);
+  color: var(--capnexa-brand-700);
+}
+[data-portal-role="Admin"] .portal-nav-item .portal-nav-icon svg {
+  transform: none;
+}
+.admin-dashboard .dashboard-metric-icon,
+.admin-dashboard .dashboard-event-icon {
+  background: var(--capnexa-brand-50);
+  box-shadow: inset 0 0 0 1px var(--capnexa-brand-100);
+}
+.admin-dashboard [data-metric="overdue"] .dashboard-metric-icon {
+  background: var(--capnexa-danger-bg);
+  box-shadow: none;
+}
+.admin-dashboard .dashboard-metrics a::after {
+  background: var(--capnexa-brand-600);
+}
+.admin-dashboard [data-metric="overdue"]::after {
+  background: var(--capnexa-danger);
+}
+.dashboard-count {
+  font-variant-numeric: tabular-nums;
+}
+@media (hover: hover) and (pointer: fine) {
+  .admin-dashboard .dashboard-metrics a:hover .dashboard-metric-icon {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .admin-dashboard .dashboard-distribution span {
+    animation-duration: 340ms;
+    animation-delay: 0ms;
+  }
+  .admin-dashboard .dashboard-donut:not([data-empty="true"]) {
+    animation-duration: 430ms;
+  }
+}
