@@ -51,7 +51,8 @@ class AppScaffold extends StatelessWidget {
             AppTopBar(title: title, subtitle: subtitle, action: action),
             Expanded(child: body),
             if (bottom != null) bottom!,
-            if (showBottomNav && !Routes.standalone.contains(route)) AppBottomNav(active: tab),
+            if (showBottomNav && !Routes.standalone.contains(route))
+              AppBottomNav(active: tab),
           ],
         ),
       ),

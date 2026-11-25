@@ -26,10 +26,12 @@ class AppText {
   }
 
   /// `.screen-content h2`
-  static TextStyle get h2 => s(15, w: FontWeight.w700, color: AppColors.navy900, ls: -.3);
+  static TextStyle get h2 =>
+      s(15, w: FontWeight.w700, color: AppColors.navy900, ls: -.3);
 
   /// `.screen-content h3`
-  static TextStyle get h3 => s(13, w: FontWeight.w700, color: AppColors.navy900);
+  static TextStyle get h3 =>
+      s(13, w: FontWeight.w700, color: AppColors.navy900);
 
   /// `.screen-content p`
   static TextStyle get p => s(11, color: AppColors.muted, height: 1.6);

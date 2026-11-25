@@ -12,9 +12,21 @@ class MockSimilarityService implements SimilarityService {
       analyzedAt: 'Analyzed May 20, 2:38 PM',
       pages: 42,
       matches: [
-        SimilarityMatch(percent: 11, title: 'Mobile service discovery systems', location: 'Pages 8–10 · Academic publication', severity: MatchSeverity.high),
-        SimilarityMatch(percent: 9, title: 'University service architecture', location: 'Pages 17–19 · Student repository', severity: MatchSeverity.medium),
-        SimilarityMatch(percent: 7, title: 'Common technical terminology', location: 'Across 6 pages · Multiple sources', severity: MatchSeverity.low),
+        SimilarityMatch(
+            percent: 11,
+            title: 'Mobile service discovery systems',
+            location: 'Pages 8–10 · Academic publication',
+            severity: MatchSeverity.high),
+        SimilarityMatch(
+            percent: 9,
+            title: 'University service architecture',
+            location: 'Pages 17–19 · Student repository',
+            severity: MatchSeverity.medium),
+        SimilarityMatch(
+            percent: 7,
+            title: 'Common technical terminology',
+            location: 'Across 6 pages · Multiple sources',
+            severity: MatchSeverity.low),
       ],
     );
   }

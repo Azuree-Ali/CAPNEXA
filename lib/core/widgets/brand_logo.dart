@@ -16,16 +16,24 @@ class BrandLogo extends StatelessWidget {
     Widget bar(double h) => Container(
           width: 4,
           height: h,
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
+          decoration: BoxDecoration(
+              color: Colors.white, borderRadius: BorderRadius.circular(2)),
         );
     final mark = Container(
       width: 27,
       height: 27,
       padding: const EdgeInsets.all(5),
-      decoration: BoxDecoration(color: AppColors.blue600, borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(
+          color: AppColors.blue600, borderRadius: BorderRadius.circular(8)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
-        children: [bar(7), const SizedBox(width: 2), bar(14), const SizedBox(width: 2), bar(10)],
+        children: [
+          bar(7),
+          const SizedBox(width: 2),
+          bar(14),
+          const SizedBox(width: 2),
+          bar(10)
+        ],
       ),
     );
     return Row(
@@ -37,7 +45,9 @@ class BrandLogo extends StatelessWidget {
           Text(
             AppConstants.brandName,
             style: AppText.s(19,
-                w: FontWeight.w800, ls: -.5, color: inverse ? Colors.white : AppColors.navy900),
+                w: FontWeight.w800,
+                ls: -.5,
+                color: inverse ? Colors.white : AppColors.navy900),
           ),
         ],
       ],

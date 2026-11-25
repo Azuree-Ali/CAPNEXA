@@ -48,7 +48,8 @@ class ProfileScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(23),
                       ),
                       child: Text(s.initials,
-                          style: AppText.s(22, w: FontWeight.w800, color: Colors.white)),
+                          style: AppText.s(22,
+                              w: FontWeight.w800, color: Colors.white)),
                     ),
                     Positioned(
                       right: -3,
@@ -62,17 +63,20 @@ class ProfileScreen extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 3),
                         ),
-                        child: const AppIcon(AppIcons.check, size: 13, color: Colors.white),
+                        child: const AppIcon(AppIcons.check,
+                            size: 13, color: Colors.white),
                       ),
                     ),
                   ],
                 ),
               ),
               Text(s.fullName,
-                  style: AppText.s(19, w: FontWeight.w700, color: AppColors.navy900, ls: -.3)),
+                  style: AppText.s(19,
+                      w: FontWeight.w700, color: AppColors.navy900, ls: -.3)),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 3, 0, 8),
-                child: Text('${s.department} · ${s.academicYear}', style: AppText.p),
+                child: Text('${s.department} · ${s.academicYear}',
+                    style: AppText.p),
               ),
               const StatusBadge('Verified student', tone: BadgeTone.teal),
             ],
@@ -102,7 +106,8 @@ class ProfileScreen extends StatelessWidget {
               if (context.mounted) AppNav.go(context, Routes.login);
             },
           ),
-          Text('${AppConstants.brandName} Student · Version ${AppConstants.appVersion}',
+          Text(
+              '${AppConstants.brandName} Student · Version ${AppConstants.appVersion}',
               textAlign: TextAlign.center,
               style: AppText.s(7.5, color: AppColors.muted)),
         ],
@@ -126,7 +131,9 @@ class _InfoRow extends StatelessWidget {
         children: [
           Text(label, style: AppText.s(6.5, color: AppColors.muted, ls: .5)),
           const SizedBox(height: 3),
-          Text(value, style: AppText.s(9, w: FontWeight.w700, color: AppColors.navy900)),
+          Text(value,
+              style:
+                  AppText.s(9, w: FontWeight.w700, color: AppColors.navy900)),
         ],
       ),
     );

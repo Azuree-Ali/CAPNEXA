@@ -28,7 +28,8 @@ class AppBottomNav extends StatelessWidget {
     return Material(
       color: const Color.fromRGBO(255, 255, 255, .97),
       child: Container(
-        decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.line))),
+        decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: AppColors.line))),
         child: SafeArea(
           top: false,
           child: Padding(
@@ -110,7 +111,9 @@ class _NavButton extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 2),
                         ),
-                        child: Text('$badge', style: AppText.s(7, color: Colors.white, height: 1)),
+                        child: Text('$badge',
+                            style:
+                                AppText.s(7, color: Colors.white, height: 1)),
                       ),
                     ),
                 ],

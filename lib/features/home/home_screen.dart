@@ -29,8 +29,8 @@ class HomeScreen extends StatelessWidget {
       tab: AppTab.home,
       loader: ServiceLocator.home.getSummary,
       titleBuilder: (d) => 'Good morning, ${d.student.firstName}',
-      actionBuilder: (context, d) =>
-          AvatarBox(d.student.initials, onTap: () => AppNav.go(context, Routes.profile)),
+      actionBuilder: (context, d) => AvatarBox(d.student.initials,
+          onTap: () => AppNav.go(context, Routes.profile)),
       builder: (context, d) {
         void push(String route) => AppNav.push(context, route);
         final quick = <(AppIcons, String, String)>[
@@ -49,7 +49,9 @@ class HomeScreen extends StatelessWidget {
                     overline: 'NEXT UP',
                     actionLabel: 'View timeline',
                     onAction: () => push(Routes.milestones)),
-                DeadlineCard(detail: d.nextDeadline, onTap: () => push(Routes.milestone)),
+                DeadlineCard(
+                    detail: d.nextDeadline,
+                    onTap: () => push(Routes.milestone)),
               ],
             ),
             Column(
@@ -58,7 +60,8 @@ class HomeScreen extends StatelessWidget {
                 const SectionHeading('Quick actions'),
                 for (var i = 0; i < quick.length; i += 2)
                   Padding(
-                    padding: EdgeInsets.only(bottom: i + 2 < quick.length ? 8 : 0),
+                    padding:
+                        EdgeInsets.only(bottom: i + 2 < quick.length ? 8 : 0),
                     child: Row(
                       children: [
                         for (var j = i; j < i + 2; j++) ...[
@@ -80,7 +83,8 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SectionHeading('Latest supervisor feedback',
-                    actionLabel: 'View all', onAction: () => push(Routes.feedback)),
+                    actionLabel: 'View all',
+                    onAction: () => push(Routes.feedback)),
                 AppCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -98,11 +102,13 @@ class HomeScreen extends StatelessWidget {
                                     style: AppText.s(10, w: FontWeight.w700)),
                                 const SizedBox(height: 2),
                                 Text(d.latestFeedback.homeTimestamp,
-                                    style: AppText.s(8, color: AppColors.muted)),
+                                    style:
+                                        AppText.s(8, color: AppColors.muted)),
                               ],
                             ),
                           ),
-                          const StatusBadge('Action needed', tone: BadgeTone.orange),
+                          const StatusBadge('Action needed',
+                              tone: BadgeTone.orange),
                         ],
                       ),
                       Container(
@@ -113,7 +119,8 @@ class HomeScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(9),
                         ),
                         child: Text('“${d.latestFeedback.homeExcerpt}”',
-                            style: AppText.s(11, color: const Color(0xFF4C586A), height: 1.55)),
+                            style: AppText.s(11,
+                                color: const Color(0xFF4C586A), height: 1.55)),
                       ),
                     ],
                   ),

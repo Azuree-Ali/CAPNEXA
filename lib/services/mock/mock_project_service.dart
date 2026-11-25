@@ -65,7 +65,8 @@ class MockProjectService implements ProjectService {
       Future<void>.delayed(const Duration(milliseconds: 200));
 
   @override
-  Future<ProposalStatusInfo> getProposalStatus() => _wait(const ProposalStatusInfo(
+  Future<ProposalStatusInfo> getProposalStatus() =>
+      _wait(const ProposalStatusInfo(
         status: ProposalStatus.approved,
         projectTitle: 'Campus Connect',
         proposalId: 'PRJ-2025-084',
@@ -73,10 +74,22 @@ class MockProjectService implements ProjectService {
         rejectionReason:
             'The scope is too broad for one semester. Please narrow the problem statement and resubmit.',
         steps: [
-          ReviewStep(title: 'Proposal submitted', subtitle: 'May 8 · 10:24 AM', state: ReviewState.complete),
-          ReviewStep(title: 'Administrative review', subtitle: 'Reviewed by CS Department', state: ReviewState.complete),
-          ReviewStep(title: 'Proposal approved', subtitle: 'May 12 · 2:15 PM', state: ReviewState.current),
-          ReviewStep(title: 'Supervisor assignment', subtitle: 'Expected within 2–3 working days', state: ReviewState.pending),
+          ReviewStep(
+              title: 'Proposal submitted',
+              subtitle: 'May 8 · 10:24 AM',
+              state: ReviewState.complete),
+          ReviewStep(
+              title: 'Administrative review',
+              subtitle: 'Reviewed by CS Department',
+              state: ReviewState.complete),
+          ReviewStep(
+              title: 'Proposal approved',
+              subtitle: 'May 12 · 2:15 PM',
+              state: ReviewState.current),
+          ReviewStep(
+              title: 'Supervisor assignment',
+              subtitle: 'Expected within 2–3 working days',
+              state: ReviewState.pending),
         ],
       ));
 }

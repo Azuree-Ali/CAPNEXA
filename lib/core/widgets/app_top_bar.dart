@@ -8,7 +8,12 @@ import 'package:capnexa/core/widgets/app_icon.dart';
 
 /// `.appbar` – 65px sticky header: menu button, title/subtitle, action.
 class AppTopBar extends StatelessWidget {
-  const AppTopBar({super.key, required this.title, this.subtitle, this.action, this.showMenu = true});
+  const AppTopBar(
+      {super.key,
+      required this.title,
+      this.subtitle,
+      this.action,
+      this.showMenu = true});
 
   final String title;
   final String? subtitle;
@@ -47,7 +52,10 @@ class AppTopBar extends StatelessWidget {
                           title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppText.s(16, w: FontWeight.w700, color: AppColors.navy900, ls: -.25),
+                          style: AppText.s(16,
+                              w: FontWeight.w700,
+                              color: AppColors.navy900,
+                              ls: -.25),
                         ),
                         if (subtitle != null)
                           Padding(
@@ -94,7 +102,8 @@ class IconSquareButton extends StatelessWidget {
         side: const BorderSide(color: AppColors.line),
       ),
       child: InkWell(
-        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        customBorder:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onTap: onTap,
         child: SizedBox(
           width: 34,

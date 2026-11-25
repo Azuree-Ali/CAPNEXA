@@ -26,14 +26,20 @@ class DashedBorder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _DashedPainter(color: color, radius: radius, fill: fill, dash: dash, gap: gap),
+      painter: _DashedPainter(
+          color: color, radius: radius, fill: fill, dash: dash, gap: gap),
       child: Padding(padding: padding, child: child),
     );
   }
 }
 
 class _DashedPainter extends CustomPainter {
-  _DashedPainter({required this.color, required this.radius, this.fill, required this.dash, required this.gap});
+  _DashedPainter(
+      {required this.color,
+      required this.radius,
+      this.fill,
+      required this.dash,
+      required this.gap});
 
   final Color color;
   final double radius;

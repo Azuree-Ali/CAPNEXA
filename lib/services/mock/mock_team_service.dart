@@ -11,10 +11,16 @@ class MockTeamService implements TeamService {
     status: 'Active',
     maxMembers: 5,
     members: [
-      TeamMember(initials: 'LH', name: 'Lina Hassan', role: 'Team leader · Product', isLeader: true),
-      TeamMember(initials: 'AK', name: 'Adam Khalil', role: 'Mobile development'),
+      TeamMember(
+          initials: 'LH',
+          name: 'Lina Hassan',
+          role: 'Team leader · Product',
+          isLeader: true),
+      TeamMember(
+          initials: 'AK', name: 'Adam Khalil', role: 'Mobile development'),
       TeamMember(initials: 'SM', name: 'Sara Mansour', role: 'AI & data'),
-      TeamMember(initials: 'YN', name: 'Yousef Nader', role: 'Backend development'),
+      TeamMember(
+          initials: 'YN', name: 'Yousef Nader', role: 'Backend development'),
     ],
   );
 

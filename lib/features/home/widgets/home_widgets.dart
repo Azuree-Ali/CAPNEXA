@@ -35,11 +35,15 @@ class DeadlineCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    StatusBadge('Due in ${detail.milestone.daysLeft} days', tone: BadgeTone.orange),
+                    StatusBadge('Due in ${detail.milestone.daysLeft} days',
+                        tone: BadgeTone.orange),
                     const SizedBox(height: 6),
-                    Text('${detail.milestone.name} submission', style: AppText.h3),
+                    Text('${detail.milestone.name} submission',
+                        style: AppText.h3),
                     const SizedBox(height: 1),
-                    Text(detail.deadlineLabel, style: AppText.s(9, color: AppColors.muted, height: 1.6)),
+                    Text(detail.deadlineLabel,
+                        style:
+                            AppText.s(9, color: AppColors.muted, height: 1.6)),
                   ],
                 ),
               ),
@@ -54,7 +58,11 @@ class DeadlineCard extends StatelessWidget {
 
 /// One tile of the 2-column "Quick actions" grid.
 class QuickActionTile extends StatelessWidget {
-  const QuickActionTile({super.key, required this.icon, required this.label, required this.onTap});
+  const QuickActionTile(
+      {super.key,
+      required this.icon,
+      required this.label,
+      required this.onTap});
 
   final AppIcons icon;
   final String label;
@@ -65,7 +73,8 @@ class QuickActionTile extends StatelessWidget {
     final radius = BorderRadius.circular(13);
     return Material(
       color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: radius, side: const BorderSide(color: AppColors.line)),
+      shape: RoundedRectangleBorder(
+          borderRadius: radius, side: const BorderSide(color: AppColors.line)),
       child: InkWell(
         borderRadius: radius,
         onTap: onTap,
@@ -78,15 +87,19 @@ class QuickActionTile extends StatelessWidget {
                 width: 31,
                 height: 31,
                 alignment: Alignment.center,
-                decoration: BoxDecoration(color: AppColors.blue50, borderRadius: BorderRadius.circular(9)),
+                decoration: BoxDecoration(
+                    color: AppColors.blue50,
+                    borderRadius: BorderRadius.circular(9)),
                 child: AppIcon(icon, color: AppColors.blue700),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(label,
-                    style: AppText.s(9.5, w: FontWeight.w700, color: AppColors.navy900)),
+                    style: AppText.s(9.5,
+                        w: FontWeight.w700, color: AppColors.navy900)),
               ),
-              const AppIcon(AppIcons.chevron, size: 16, color: AppColors.chevron),
+              const AppIcon(AppIcons.chevron,
+                  size: 16, color: AppColors.chevron),
             ],
           ),
         ),

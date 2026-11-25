@@ -41,18 +41,21 @@ class AuthShell extends StatelessWidget {
                         children: [
                           const BrandLogo(inverse: true),
                           if (step != null)
-                            Text(step!, style: AppText.s(9, color: const Color(0xFF9FB0C8))),
+                            Text(step!,
+                                style: AppText.s(9,
+                                    color: const Color(0xFF9FB0C8))),
                         ],
                       ),
                     ),
                   ),
                   Expanded(
                     child: Container(
-                      padding: EdgeInsets.fromLTRB(
-                          23, 28, 23, 22 + MediaQuery.of(context).padding.bottom),
+                      padding: EdgeInsets.fromLTRB(23, 28, 23,
+                          22 + MediaQuery.of(context).padding.bottom),
                       decoration: const BoxDecoration(
                         color: AppColors.scaffold,
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(28)),
                       ),
                       child: child,
                     ),
@@ -69,7 +72,11 @@ class AuthShell extends StatelessWidget {
 
 /// `.auth-heading` – eyebrow, h1 and subtitle.
 class AuthHeading extends StatelessWidget {
-  const AuthHeading({super.key, required this.eyebrow, required this.title, required this.subtitle});
+  const AuthHeading(
+      {super.key,
+      required this.eyebrow,
+      required this.title,
+      required this.subtitle});
 
   final String eyebrow;
   final String title;
@@ -86,7 +93,8 @@ class AuthHeading extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 7, 0, 4),
             child: Text(title,
-                style: AppText.s(24, w: FontWeight.w700, color: AppColors.navy900, ls: -.8)),
+                style: AppText.s(24,
+                    w: FontWeight.w700, color: AppColors.navy900, ls: -.8)),
           ),
           Text(subtitle, style: AppText.s(11, color: AppColors.muted)),
         ],
@@ -97,7 +105,11 @@ class AuthHeading extends StatelessWidget {
 
 /// `.auth-switch` – "New here? Create account".
 class AuthSwitch extends StatelessWidget {
-  const AuthSwitch({super.key, required this.prompt, required this.action, required this.onTap});
+  const AuthSwitch(
+      {super.key,
+      required this.prompt,
+      required this.action,
+      required this.onTap});
 
   final String prompt;
   final String action;
@@ -115,7 +127,8 @@ class AuthSwitch extends StatelessWidget {
           GestureDetector(
             onTap: onTap,
             child: Text(action,
-                style: AppText.s(10, w: FontWeight.w800, color: AppColors.blue700)),
+                style: AppText.s(10,
+                    w: FontWeight.w800, color: AppColors.blue700)),
           ),
         ],
       ),

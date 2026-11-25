@@ -35,7 +35,8 @@ class AvatarBox extends StatelessWidget {
       child: Text(
         initials,
         style: AppText.s(fontSize,
-            w: FontWeight.w800, color: muted ? AppColors.navy800 : Colors.white),
+            w: FontWeight.w800,
+            color: muted ? AppColors.navy800 : Colors.white),
       ),
     );
     if (onTap == null) return tile;
@@ -45,7 +46,12 @@ class AvatarBox extends StatelessWidget {
 
 /// `.supervisor-photo` – gradient initials tile used for the supervisor.
 class SupervisorPhoto extends StatelessWidget {
-  const SupervisorPhoto(this.initials, {super.key, this.size = 74, this.radius = 22, this.fontSize = 21, this.bordered = true});
+  const SupervisorPhoto(this.initials,
+      {super.key,
+      this.size = 74,
+      this.radius = 22,
+      this.fontSize = 21,
+      this.bordered = true});
 
   final String initials;
   final double size;
@@ -68,10 +74,15 @@ class SupervisorPhoto extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
         border: bordered ? Border.all(color: Colors.white, width: 3) : null,
         boxShadow: const [
-          BoxShadow(color: Color.fromRGBO(20, 38, 68, .14), blurRadius: 20, offset: Offset(0, 7)),
+          BoxShadow(
+              color: Color.fromRGBO(20, 38, 68, .14),
+              blurRadius: 20,
+              offset: Offset(0, 7)),
         ],
       ),
-      child: Text(initials, style: AppText.s(fontSize, w: FontWeight.w800, color: AppColors.navy800)),
+      child: Text(initials,
+          style: AppText.s(fontSize,
+              w: FontWeight.w800, color: AppColors.navy800)),
     );
   }
 }
@@ -80,7 +91,12 @@ class SupervisorPhoto extends StatelessWidget {
 enum IconTone { blue, teal, orange, red }
 
 class ListIcon extends StatelessWidget {
-  const ListIcon({super.key, required this.child, this.tone = IconTone.blue, this.size = 32, this.radius = 9});
+  const ListIcon(
+      {super.key,
+      required this.child,
+      this.tone = IconTone.blue,
+      this.size = 32,
+      this.radius = 9});
 
   final Widget Function(Color color) child;
   final IconTone tone;
@@ -101,7 +117,8 @@ class ListIcon extends StatelessWidget {
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(radius)),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(radius)),
       child: child(fg),
     );
   }
@@ -127,9 +144,13 @@ class DateBlock extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(day, style: AppText.s(18, w: FontWeight.w700, color: AppColors.navy900, height: 1)),
+          Text(day,
+              style: AppText.s(18,
+                  w: FontWeight.w700, color: AppColors.navy900, height: 1)),
           const SizedBox(height: 4),
-          Text(month, style: AppText.s(8, w: FontWeight.w800, color: AppColors.orange700)),
+          Text(month,
+              style:
+                  AppText.s(8, w: FontWeight.w800, color: AppColors.orange700)),
         ],
       ),
     );

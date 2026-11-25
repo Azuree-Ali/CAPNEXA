@@ -41,7 +41,8 @@ class StatesScreen extends StatelessWidget {
           const StateCard(
             kind: StateKind.loading,
             title: 'Analyzing your submission',
-            message: 'This usually takes less than two minutes. You can safely leave this screen.',
+            message:
+                'This usually takes less than two minutes. You can safely leave this screen.',
           ),
           StateCard(
             kind: StateKind.empty,
@@ -54,7 +55,8 @@ class StatesScreen extends StatelessWidget {
           StateCard(
             kind: StateKind.error,
             title: 'We couldn’t upload your file',
-            message: 'Check your connection and make sure the file is under 50 MB.',
+            message:
+                'Check your connection and make sure the file is under 50 MB.',
             actionLabel: 'Try again',
             onAction: demo,
           ),

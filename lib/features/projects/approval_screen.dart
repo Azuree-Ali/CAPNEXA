@@ -35,7 +35,8 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
       loader: ServiceLocator.projects.getProposalStatus,
       subtitleBuilder: (s) => s.projectTitle,
       builder: (context, info) {
-        final rejected = _previewRejected || info.status == ProposalStatus.rejected;
+        final rejected =
+            _previewRejected || info.status == ProposalStatus.rejected;
         return ScreenBody(
           children: [
             rejected ? _RejectedHero(info: info) : _ApprovedHero(info: info),
@@ -49,7 +50,8 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                     child: Column(
                       children: [
                         for (var i = 0; i < info.steps.length; i++)
-                          _reviewStep(info.steps[i], i, i == info.steps.length - 1),
+                          _reviewStep(
+                              info.steps[i], i, i == info.steps.length - 1),
                       ],
                     ),
                   ),
@@ -57,7 +59,8 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
               ),
               const InfoNote(
                 icon: AppIcons.bell,
-                message: 'We’ll notify every team member when a supervisor has been assigned.',
+                message:
+                    'We’ll notify every team member when a supervisor has been assigned.',
               ),
               AppButton(
                 label: 'Continue',
@@ -89,10 +92,13 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                     ),
                   ),
                   AppButton(
-                    label: _previewRejected ? 'Back to approved state' : 'Preview rejected state',
+                    label: _previewRejected
+                        ? 'Back to approved state'
+                        : 'Preview rejected state',
                     icon: AppIcons.edit,
                     variant: ButtonVariant.text,
-                    onPressed: () => setState(() => _previewRejected = !_previewRejected),
+                    onPressed: () =>
+                        setState(() => _previewRejected = !_previewRejected),
                   ),
                 ],
               ),
@@ -126,7 +132,8 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
           children: [
             Text(step.title, style: AppText.s(10, w: FontWeight.w700)),
             const SizedBox(height: 1),
-            Text(step.subtitle, style: AppText.s(8.5, color: AppColors.muted, height: 1.6)),
+            Text(step.subtitle,
+                style: AppText.s(8.5, color: AppColors.muted, height: 1.6)),
           ],
         ),
       ),
@@ -165,7 +172,8 @@ class _ApprovedHero extends StatelessWidget {
           const SizedBox(height: 9),
           Text('Your proposal is approved',
               textAlign: TextAlign.center,
-              style: AppText.s(19, w: FontWeight.w700, color: AppColors.navy900, ls: -.3)),
+              style: AppText.s(19,
+                  w: FontWeight.w700, color: AppColors.navy900, ls: -.3)),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 6, 0, 14),
             child: Text(
@@ -207,18 +215,23 @@ class _RejectedHero extends StatelessWidget {
               color: AppColors.red700,
               borderRadius: BorderRadius.circular(17),
             ),
-            child: const AppIcon(AppIcons.warning, size: 31, color: Colors.white),
+            child:
+                const AppIcon(AppIcons.warning, size: 31, color: Colors.white),
           ),
           const SizedBox(height: 11),
           const StatusBadge('Rejected', tone: BadgeTone.red),
           const SizedBox(height: 9),
           Text('Your proposal needs changes',
               textAlign: TextAlign.center,
-              style: AppText.s(19, w: FontWeight.w700, color: AppColors.navy900, ls: -.3)),
+              style: AppText.s(19,
+                  w: FontWeight.w700, color: AppColors.navy900, ls: -.3)),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 6, 0, 14),
-            child: Text(info.rejectionReason ?? 'Please review the feedback and resubmit.',
-                textAlign: TextAlign.center, style: AppText.p),
+            child: Text(
+                info.rejectionReason ??
+                    'Please review the feedback and resubmit.',
+                textAlign: TextAlign.center,
+                style: AppText.p),
           ),
           _Reference(id: info.proposalId, borderColor: const Color(0xFFF1D5D7)),
         ],
@@ -238,13 +251,16 @@ class _Reference extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.only(top: 11),
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: borderColor))),
+      decoration:
+          BoxDecoration(border: Border(top: BorderSide(color: borderColor))),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text('Proposal ID', style: AppText.s(8.5, color: AppColors.muted)),
           const SizedBox(width: 5),
-          Text(id, style: AppText.s(8.5, w: FontWeight.w700, color: AppColors.navy900)),
+          Text(id,
+              style:
+                  AppText.s(8.5, w: FontWeight.w700, color: AppColors.navy900)),
         ],
       ),
     );

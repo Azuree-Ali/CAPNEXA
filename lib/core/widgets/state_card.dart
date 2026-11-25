@@ -44,15 +44,24 @@ class StateCard extends StatelessWidget {
       );
     } else {
       final (icon, fg, bg) = switch (kind) {
-        StateKind.error => (AppIcons.warning, AppColors.red700, AppColors.red100),
-        StateKind.success => (AppIcons.check, AppColors.teal700, AppColors.teal100),
+        StateKind.error => (
+            AppIcons.warning,
+            AppColors.red700,
+            AppColors.red100
+          ),
+        StateKind.success => (
+            AppIcons.check,
+            AppColors.teal700,
+            AppColors.teal100
+          ),
         _ => (AppIcons.file, AppColors.blue700, AppColors.blue100),
       };
       symbol = Container(
         width: 40,
         height: 40,
         alignment: Alignment.center,
-        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(11)),
+        decoration:
+            BoxDecoration(color: bg, borderRadius: BorderRadius.circular(11)),
         child: AppIcon(icon, color: fg),
       );
     }
@@ -71,7 +80,9 @@ class StateCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppText.s(11, w: FontWeight.w700, color: AppColors.navy900)),
+                Text(title,
+                    style: AppText.s(11,
+                        w: FontWeight.w700, color: AppColors.navy900)),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 3),
                   child: Text(message, style: AppText.p),

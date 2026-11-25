@@ -27,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _remember = true;
   bool _busy = false;
   SocialProvider? _connecting;
+  bool _needsConfirmation = false;
 
   @override
   void dispose() {
@@ -50,30 +51,43 @@ class _LoginScreenState extends State<LoginScreen> {
   //   if (!mounted) return;
   //   AppNav.go(context, Routes.home);
   // }
-    Future<void> _signIn() async {
-      if (_busy) return;
-      setState(() => _busy = true);
-      try {
-        await ServiceLocator.auth
-            .signIn(email: _email.text.trim(), password: _password.text);
-        if (!mounted) return;
-        AppNav.go(context, Routes.home);
-      } on ApiException catch (e) {
-        _showError(e.message);
-      } catch (_) {
-        _showError('Something went wrong. Please try again.');
-      } finally {
-        if (mounted) setState(() => _busy = false);
+  Future<void> _signIn() async {
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _needsConfirmation = false;
+    });
+    try {
+      final student = await ServiceLocator.auth
+          .signIn(email: _email.text.trim(), password: _password.text);
+      if (!mounted) return;
+      AppNav.go(
+        context,
+        student.academicProfileComplete ? Routes.home : Routes.academicSetup,
+      );
+    } on ApiException catch (e) {
+      // الباك اند بيرجع 400 لو الإيميل لسه مش متأكد
+      if (e.statusCode == 400 && _email.text.trim().isNotEmpty && mounted) {
+        setState(() => _needsConfirmation = true);
       }
+      _showError(e.message);
+    } catch (_) {
+      _showError('Something went wrong. Please try again.');
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
+  }
 
   Future<void> _social(SocialProvider provider) async {
     if (_connecting != null) return;
     setState(() => _connecting = provider);
     try {
-      await ServiceLocator.auth.signInWithProvider(provider);
+      final student = await ServiceLocator.auth.signInWithProvider(provider);
       if (!mounted) return;
-      AppNav.go(context, Routes.home);
+      AppNav.go(
+        context,
+        student.academicProfileComplete ? Routes.home : Routes.academicSetup,
+      );
     } on ApiException catch (e) {
       _showError(e.message);
     } catch (_) {
@@ -84,10 +98,23 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showError(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+    if (mounted) showAppSnack(context, message);
+  }
+
+  Future<void> _resend() async {
+    final email = _email.text.trim();
+    if (email.isEmpty) {
+      _showError('Enter your email first.');
+      return;
+    }
+    try {
+      await ServiceLocator.auth.resendConfirmation(email);
+      _showError('If this account needs confirmation, a new email was sent.');
+    } on ApiException catch (e) {
+      _showError(e.message);
+    } catch (_) {
+      _showError('Something went wrong. Please try again.');
+    }
   }
 
   String _name(SocialProvider p) => switch (p) {
@@ -140,32 +167,53 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: BoxDecoration(
                         color: _remember ? AppColors.blue700 : Colors.white,
                         borderRadius: BorderRadius.circular(4),
-                        border: _remember ? null : Border.all(color: AppColors.fieldBorder),
+                        border: _remember
+                            ? null
+                            : Border.all(color: AppColors.fieldBorder),
                       ),
                       child: _remember
-                          ? const AppIcon(AppIcons.check, size: 10, color: Colors.white)
+                          ? const AppIcon(AppIcons.check,
+                              size: 10, color: Colors.white)
                           : null,
                     ),
                     const SizedBox(width: 7),
-                    Text('Remember me', style: AppText.s(9.5, color: AppColors.muted)),
+                    Text('Remember me',
+                        style: AppText.s(9.5, color: AppColors.muted)),
                   ],
                 ),
               ),
               GestureDetector(
-                onTap: () => showAppSnack(context, 'Password reset will be available with the API.'),
+                onTap: () => showAppSnack(
+                    context, 'Password reset will be available with the API.'),
                 child: Text('Forgot password?',
-                    style: AppText.s(9.5, w: FontWeight.w800, color: AppColors.blue700)),
+                    style: AppText.s(9.5,
+                        w: FontWeight.w800, color: AppColors.blue700)),
               ),
             ],
           ),
           const SizedBox(height: 14),
-          AppButton(label: 'Sign in securely', icon: AppIcons.arrow, full: true, onPressed: _signIn),
+          AppButton(
+              label: 'Sign in securely',
+              icon: AppIcons.arrow,
+              full: true,
+              onPressed: _signIn),
+          if (_needsConfirmation) ...[
+            const SizedBox(height: 10),
+            AppButton(
+              label: 'Resend confirmation email',
+              variant: ButtonVariant.outline,
+              full: true,
+              onPressed: _resend,
+            ),
+          ],
           const SizedBox(height: 14),
           const _OrDivider(),
           const SizedBox(height: 14),
           for (final p in SocialProvider.values) ...[
             _ProviderButton(
-              label: _connecting == p ? 'Connecting to ${_name(p)}…' : 'Sign in with ${_name(p)}',
+              label: _connecting == p
+                  ? 'Connecting to ${_name(p)}…'
+                  : 'Sign in with ${_name(p)}',
               provider: _icon(p),
               connecting: _connecting == p,
               disabled: _connecting != null && _connecting != p,
@@ -181,11 +229,13 @@ class _LoginScreenState extends State<LoginScreen> {
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.only(top: 15),
-            decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.line))),
+            decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: AppColors.line))),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const AppIcon(AppIcons.shield, size: 16, color: AppColors.iconMuted),
+                const AppIcon(AppIcons.shield,
+                    size: 16, color: AppColors.iconMuted),
                 const SizedBox(width: 6),
                 Text('Protected by your university identity',
                     style: AppText.s(9, color: AppColors.iconMuted)),
@@ -209,7 +259,8 @@ class _OrDivider extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 11),
           child: Text('OR CONTINUE WITH',
-              style: AppText.s(8, w: FontWeight.w700, color: const Color(0xFF909BAC), ls: .25)),
+              style: AppText.s(8,
+                  w: FontWeight.w700, color: const Color(0xFF909BAC), ls: .25)),
         ),
         const Expanded(child: Divider(height: 1, color: AppColors.line)),
       ],
@@ -241,7 +292,9 @@ class _ProviderButton extends StatelessWidget {
         color: connecting ? AppColors.blue50 : Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: radius,
-          side: BorderSide(color: connecting ? const Color(0xFFACBEEB) : AppColors.fieldBorder),
+          side: BorderSide(
+              color:
+                  connecting ? const Color(0xFFACBEEB) : AppColors.fieldBorder),
         ),
         child: InkWell(
           borderRadius: radius,
@@ -277,10 +330,12 @@ class _ProviderButton extends StatelessWidget {
                     label,
                     style: AppText.s(9.5,
                         w: FontWeight.w700,
-                        color: connecting ? AppColors.blue700 : AppColors.navy900),
+                        color:
+                            connecting ? AppColors.blue700 : AppColors.navy900),
                   ),
                 ),
-                const AppIcon(AppIcons.arrow, size: 15, color: Color(0xFF9AA5B5)),
+                const AppIcon(AppIcons.arrow,
+                    size: 15, color: Color(0xFF9AA5B5)),
               ],
             ),
           ),

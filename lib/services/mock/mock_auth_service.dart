@@ -13,7 +13,19 @@ class MockAuthService implements AuthService {
   );
 
   @override
-  Future<Student> signIn({required String email, required String password}) async {
+  Future<Student> completeProfile({
+    required String studentNumber,
+    required String department,
+    required String academicYear,
+    String? level,
+  }) async {
+    await Future<void>.delayed(AppConstants.mockLatency);
+    return _student;
+  }
+
+  @override
+  Future<Student> signIn(
+      {required String email, required String password}) async {
     await Future<void>.delayed(AppConstants.mockLatency);
     return _student;
   }
@@ -25,15 +37,38 @@ class MockAuthService implements AuthService {
   }
 
   @override
-  Future<Student> register(RegistrationData data) async {
+  Future<RegistrationResult> register(RegistrationData data) async {
     await Future<void>.delayed(AppConstants.mockLatency);
-    return _student;
+    return const RegistrationResult(
+      message: 'Account created. Check your email to confirm it.',
+      emailConfirmationSent: true,
+    );
+  }
+
+  @override
+  Future<void> resendConfirmation(String email) async {
+    await Future<void>.delayed(AppConstants.mockLatency);
   }
 
   @override
   Future<Student> currentStudent() async {
     await Future<void>.delayed(AppConstants.mockLatency);
     return _student;
+  }
+
+    @override
+  Future<void> requestPasswordReset(String email) async {
+    await Future<void>.delayed(AppConstants.mockLatency);
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String email,
+    required String otp,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    await Future<void>.delayed(AppConstants.mockLatency);
   }
 
   @override

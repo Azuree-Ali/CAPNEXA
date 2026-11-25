@@ -45,12 +45,15 @@ class NotificationCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(notification.title,
-                        style: AppText.s(9.5, w: FontWeight.w700, color: AppColors.navy900)),
+                        style: AppText.s(9.5,
+                            w: FontWeight.w700, color: AppColors.navy900)),
                     const SizedBox(height: 2),
                     Text(notification.message,
-                        style: AppText.s(8, color: AppColors.muted, height: 1.4)),
+                        style:
+                            AppText.s(8, color: AppColors.muted, height: 1.4)),
                     const SizedBox(height: 4),
-                    Text(notification.time, style: AppText.s(7, color: const Color(0xFF9CA5B2))),
+                    Text(notification.time,
+                        style: AppText.s(7, color: const Color(0xFF9CA5B2))),
                   ],
                 ),
               ),
@@ -59,7 +62,8 @@ class NotificationCard extends StatelessWidget {
                   width: 6,
                   height: 6,
                   margin: const EdgeInsets.only(top: 5),
-                  decoration: const BoxDecoration(color: AppColors.blue600, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(
+                      color: AppColors.blue600, shape: BoxShape.circle),
                 ),
             ],
           ),
@@ -98,8 +102,11 @@ class CompactUpdateRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppText.s(9.5, w: FontWeight.w700, color: AppColors.navy900)),
-                Text(subtitle, style: AppText.s(8, color: AppColors.muted, height: 1.6)),
+                Text(title,
+                    style: AppText.s(9.5,
+                        w: FontWeight.w700, color: AppColors.navy900)),
+                Text(subtitle,
+                    style: AppText.s(8, color: AppColors.muted, height: 1.6)),
               ],
             ),
           ),

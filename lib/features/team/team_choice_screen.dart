@@ -59,12 +59,14 @@ class _TeamChoiceScreenState extends State<TeamChoiceScreen> {
                     color: AppColors.blue100,
                     borderRadius: BorderRadius.circular(17),
                   ),
-                  child: const AppIcon(AppIcons.team, size: 32, color: AppColors.blue700),
+                  child: const AppIcon(AppIcons.team,
+                      size: 32, color: AppColors.blue700),
                 ),
                 const SizedBox(height: 14),
                 Text('Projects are better together',
                     textAlign: TextAlign.center,
-                    style: AppText.s(19, w: FontWeight.w700, color: AppColors.navy900, ls: -.3)),
+                    style: AppText.s(19,
+                        w: FontWeight.w700, color: AppColors.navy900, ls: -.3)),
                 const SizedBox(height: 6),
                 Text(
                   'Create a team and invite classmates, or join an existing team with an invitation code.',
@@ -103,10 +105,16 @@ class _TeamChoiceScreenState extends State<TeamChoiceScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                AppTextField(label: 'Invitation code', hint: 'e.g. GF-24X8Q', controller: _code),
+                AppTextField(
+                    label: 'Invitation code',
+                    hint: 'e.g. GF-24X8Q',
+                    controller: _code),
                 const SizedBox(height: 10),
                 AppButton(
-                    label: 'Join team', variant: ButtonVariant.outline, full: true, onPressed: _join),
+                    label: 'Join team',
+                    variant: ButtonVariant.outline,
+                    full: true,
+                    onPressed: _join),
               ],
             ),
           ),
@@ -147,7 +155,8 @@ class _ChoiceCard extends StatelessWidget {
       color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: radius,
-        side: BorderSide(color: selected ? const Color(0xFFAEBFEE) : AppColors.line),
+        side: BorderSide(
+            color: selected ? const Color(0xFFAEBFEE) : AppColors.line),
       ),
       elevation: 0,
       child: InkWell(
@@ -159,7 +168,9 @@ class _ChoiceCard extends StatelessWidget {
             boxShadow: selected
                 ? const [
                     BoxShadow(
-                        color: Color.fromRGBO(44, 83, 180, .08), blurRadius: 20, offset: Offset(0, 6)),
+                        color: Color.fromRGBO(44, 83, 180, .08),
+                        blurRadius: 20,
+                        offset: Offset(0, 6)),
                   ]
                 : null,
           ),
@@ -176,7 +187,8 @@ class _ChoiceCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(11),
                 ),
                 child: AppIcon(icon,
-                    size: 25, color: pale ? const Color(0xFF52627A) : AppColors.blue700),
+                    size: 25,
+                    color: pale ? const Color(0xFF52627A) : AppColors.blue700),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -186,15 +198,20 @@ class _ChoiceCard extends StatelessWidget {
                     Text(title, style: AppText.h3),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 4, 0, 8),
-                      child: Text(text, style: AppText.s(11, color: AppColors.muted, height: 1.5)),
+                      child: Text(text,
+                          style: AppText.s(11,
+                              color: AppColors.muted, height: 1.5)),
                     ),
                     if (cta != null)
                       Row(
                         children: [
                           Text(cta!,
-                              style: AppText.s(9.5, w: FontWeight.w700, color: AppColors.blue700)),
+                              style: AppText.s(9.5,
+                                  w: FontWeight.w700,
+                                  color: AppColors.blue700)),
                           const SizedBox(width: 5),
-                          const AppIcon(AppIcons.arrow, size: 16, color: AppColors.blue700),
+                          const AppIcon(AppIcons.arrow,
+                              size: 16, color: AppColors.blue700),
                         ],
                       ),
                   ],

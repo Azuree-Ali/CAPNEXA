@@ -27,7 +27,8 @@ class FeedbackScreen extends StatelessWidget {
       tab: AppTab.project,
       loader: ServiceLocator.feedback.getLatestFeedback,
       subtitleBuilder: (f) => f.versionLabel,
-      actionBuilder: (_, __) => const StatusBadge('Revision needed', tone: BadgeTone.orange),
+      actionBuilder: (_, __) =>
+          const StatusBadge('Revision needed', tone: BadgeTone.orange),
       builder: (context, f) => _FeedbackBody(feedback: f),
     );
   }
@@ -43,7 +44,9 @@ class _FeedbackBody extends StatefulWidget {
 }
 
 class _FeedbackBodyState extends State<_FeedbackBody> {
-  late final List<bool> _done = [for (final c in widget.feedback.changes) c.done];
+  late final List<bool> _done = [
+    for (final c in widget.feedback.changes) c.done
+  ];
   final _reply = TextEditingController();
 
   @override
@@ -70,7 +73,8 @@ class _FeedbackBodyState extends State<_FeedbackBody> {
       children: [
         Row(
           children: [
-            SupervisorPhoto(f.authorInitials, size: 45, radius: 13, fontSize: 12, bordered: true),
+            SupervisorPhoto(f.authorInitials,
+                size: 45, radius: 13, fontSize: 12, bordered: true),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,14 +106,17 @@ class _FeedbackBodyState extends State<_FeedbackBody> {
                         color: const Color(0xFF6683AA))),
               ),
               const SizedBox(height: 7),
-              Text(f.message, style: AppText.s(10, color: const Color(0xFFD3DAE4), height: 1.6)),
+              Text(f.message,
+                  style: AppText.s(10,
+                      color: const Color(0xFFD3DAE4), height: 1.6)),
             ],
           ),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SectionHeading('Required changes', trailing: '${f.changes.length} items'),
+            SectionHeading('Required changes',
+                trailing: '${f.changes.length} items'),
             DividedList(
               radius: 13,
               children: [
@@ -126,13 +133,17 @@ class _FeedbackBodyState extends State<_FeedbackBody> {
                             height: 19,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: _done[i] ? AppColors.teal700 : Colors.white,
+                              color:
+                                  _done[i] ? AppColors.teal700 : Colors.white,
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                  color: _done[i] ? AppColors.teal700 : const Color(0xFFCBD3DF)),
+                                  color: _done[i]
+                                      ? AppColors.teal700
+                                      : const Color(0xFFCBD3DF)),
                             ),
                             child: _done[i]
-                                ? const AppIcon(AppIcons.check, size: 14, color: Colors.white)
+                                ? const AppIcon(AppIcons.check,
+                                    size: 14, color: Colors.white)
                                 : null,
                           ),
                           const SizedBox(width: 9),
@@ -141,9 +152,12 @@ class _FeedbackBodyState extends State<_FeedbackBody> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(f.changes[i].title,
-                                    style: AppText.s(9, w: FontWeight.w700, color: AppColors.navy900)),
+                                    style: AppText.s(9,
+                                        w: FontWeight.w700,
+                                        color: AppColors.navy900)),
                                 Text(f.changes[i].location,
-                                    style: AppText.s(7.5, color: AppColors.muted, height: 1.6)),
+                                    style: AppText.s(7.5,
+                                        color: AppColors.muted, height: 1.6)),
                               ],
                             ),
                           ),

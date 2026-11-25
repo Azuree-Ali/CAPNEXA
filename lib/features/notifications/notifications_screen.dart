@@ -19,7 +19,8 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  late Future<List<AppNotification>> _future = ServiceLocator.notifications.getNotifications();
+  late Future<List<AppNotification>> _future =
+      ServiceLocator.notifications.getNotifications();
   List<AppNotification>? _items;
   NotificationFilter _filter = NotificationFilter.all;
 
@@ -30,12 +31,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     NotificationFilter.deadlines: 'Deadlines',
   };
 
-  void _retry() => setState(() => _future = ServiceLocator.notifications.getNotifications());
+  void _retry() =>
+      setState(() => _future = ServiceLocator.notifications.getNotifications());
 
   Future<void> _markAllRead() async {
     await ServiceLocator.notifications.markAllRead();
     if (!mounted) return;
-    setState(() => _items = [for (final n in _items ?? const <AppNotification>[]) n.copyWith(unread: false)]);
+    setState(() => _items = [
+          for (final n in _items ?? const <AppNotification>[])
+            n.copyWith(unread: false)
+        ]);
   }
 
   String? _routeFor(NotificationKind kind) => switch (kind) {
@@ -117,7 +122,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           )
         else
           Container(
-            decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.line))),
+            decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: AppColors.line))),
             child: Column(
               children: [
                 for (final n in visible)
@@ -152,10 +158,12 @@ class _Chip extends StatelessWidget {
         decoration: BoxDecoration(
           color: active ? AppColors.navy900 : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: active ? AppColors.navy900 : AppColors.line),
+          border:
+              Border.all(color: active ? AppColors.navy900 : AppColors.line),
         ),
         child: Text(label,
-            style: AppText.s(8, color: active ? Colors.white : AppColors.muted)),
+            style:
+                AppText.s(8, color: active ? Colors.white : AppColors.muted)),
       ),
     );
   }

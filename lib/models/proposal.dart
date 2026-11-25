@@ -32,7 +32,8 @@ class ProposalDraft {
 enum ReviewState { complete, current, pending }
 
 class ReviewStep {
-  const ReviewStep({required this.title, required this.subtitle, required this.state});
+  const ReviewStep(
+      {required this.title, required this.subtitle, required this.state});
 
   final String title;
   final String subtitle;

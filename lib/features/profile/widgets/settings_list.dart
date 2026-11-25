@@ -23,7 +23,8 @@ class SettingsList extends StatelessWidget {
       children: [
         for (final item in _items)
           InkWell(
-            onTap: () => showAppSnack(context, '${item.$2} will be available with the API.'),
+            onTap: () => showAppSnack(
+                context, '${item.$2} will be available with the API.'),
             child: Padding(
               padding: const EdgeInsets.all(10),
               child: Row(
@@ -44,8 +45,11 @@ class SettingsList extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(item.$2,
-                            style: AppText.s(9, w: FontWeight.w700, color: AppColors.navy900)),
-                        Text(item.$3, style: AppText.s(7.5, color: AppColors.muted, height: 1.6)),
+                            style: AppText.s(9,
+                                w: FontWeight.w700, color: AppColors.navy900)),
+                        Text(item.$3,
+                            style: AppText.s(7.5,
+                                color: AppColors.muted, height: 1.6)),
                       ],
                     ),
                   ),

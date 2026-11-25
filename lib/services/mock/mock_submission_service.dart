@@ -11,8 +11,10 @@ class MockSubmissionService implements SubmissionService {
       version: 3,
       submittedBy: 'Lina Hassan',
       files: [
-        SubmissionFile(name: 'system-design-v3.pdf', kind: FileKind.pdf, sizeMb: 8.4),
-        SubmissionFile(name: 'architecture-source.zip', kind: FileKind.zip, sizeMb: 14.2),
+        SubmissionFile(
+            name: 'system-design-v3.pdf', kind: FileKind.pdf, sizeMb: 8.4),
+        SubmissionFile(
+            name: 'architecture-source.zip', kind: FileKind.zip, sizeMb: 14.2),
       ],
     );
   }
@@ -50,10 +52,11 @@ class MockSubmissionService implements SubmissionService {
   }
 
   @override
-  Future<SubmissionFile> addFile() async =>
-      const SubmissionFile(name: 'appendix-notes.docx', kind: FileKind.doc, sizeMb: 1.1);
+  Future<SubmissionFile> addFile() async => const SubmissionFile(
+      name: 'appendix-notes.docx', kind: FileKind.doc, sizeMb: 1.1);
 
   @override
-  Future<void> submit({required String note, required List<SubmissionFile> files}) =>
+  Future<void> submit(
+          {required String note, required List<SubmissionFile> files}) =>
       Future<void>.delayed(const Duration(milliseconds: 300));
 }

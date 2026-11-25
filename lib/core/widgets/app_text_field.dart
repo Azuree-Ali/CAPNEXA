@@ -44,7 +44,8 @@ class _AppTextFieldState extends State<AppTextField> {
   late bool _hidden = widget.obscure;
 
   TextEditingController get _controller =>
-      widget.controller ?? (_own ??= TextEditingController(text: widget.initialValue));
+      widget.controller ??
+      (_own ??= TextEditingController(text: widget.initialValue));
 
   @override
   void dispose() {
@@ -65,7 +66,8 @@ class _AppTextFieldState extends State<AppTextField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(widget.label, style: AppText.s(10, w: FontWeight.w700, color: AppColors.navy900)),
+        Text(widget.label,
+            style: AppText.s(10, w: FontWeight.w700, color: AppColors.navy900)),
         const SizedBox(height: 6),
         AnimatedContainer(
           duration: const Duration(milliseconds: 120),
@@ -80,12 +82,15 @@ class _AppTextFieldState extends State<AppTextField> {
                 : null,
           ),
           child: Row(
-            crossAxisAlignment: widget.textarea ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+            crossAxisAlignment: widget.textarea
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.center,
             children: [
               if (widget.icon != null) ...[
                 Padding(
                   padding: EdgeInsets.only(top: widget.textarea ? 12 : 0),
-                  child: AppIcon(widget.icon!, size: 18, color: AppColors.iconMuted),
+                  child: AppIcon(widget.icon!,
+                      size: 18, color: AppColors.iconMuted),
                 ),
                 const SizedBox(width: 8),
               ],
@@ -96,17 +101,22 @@ class _AppTextFieldState extends State<AppTextField> {
                   obscureText: _hidden,
                   minLines: widget.textarea ? 4 : 1,
                   maxLines: widget.textarea ? 6 : 1,
-                  keyboardType: widget.textarea ? TextInputType.multiline : widget.keyboardType,
+                  keyboardType: widget.textarea
+                      ? TextInputType.multiline
+                      : widget.keyboardType,
                   inputFormatters: widget.inputFormatters,
                   onChanged: widget.onChanged,
                   cursorColor: AppColors.blue600,
-                  style: AppText.s(10.5, color: AppColors.ink, height: widget.textarea ? 1.5 : null),
+                  style: AppText.s(10.5,
+                      color: AppColors.ink,
+                      height: widget.textarea ? 1.5 : null),
                   decoration: InputDecoration(
                     isDense: true,
                     border: InputBorder.none,
                     hintText: widget.hint,
                     hintStyle: AppText.s(10.5, color: AppColors.hint),
-                    contentPadding: EdgeInsets.symmetric(vertical: widget.textarea ? 10 : 12),
+                    contentPadding: EdgeInsets.symmetric(
+                        vertical: widget.textarea ? 10 : 12),
                   ),
                 ),
               ),
@@ -116,7 +126,8 @@ class _AppTextFieldState extends State<AppTextField> {
                   behavior: HitTestBehavior.opaque,
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8),
-                    child: AppIcon(AppIcons.eye, size: 18, color: AppColors.iconMuted),
+                    child: AppIcon(AppIcons.eye,
+                        size: 18, color: AppColors.iconMuted),
                   ),
                 ),
             ],

@@ -24,7 +24,8 @@ class ProposalScreen extends StatelessWidget {
       tab: AppTab.project,
       loader: ServiceLocator.projects.getProposalDraft,
       subtitleBuilder: (d) => d.lastSaved,
-      actionBuilder: (_, __) => const StatusBadge('Draft', tone: BadgeTone.gray),
+      actionBuilder: (_, __) =>
+          const StatusBadge('Draft', tone: BadgeTone.gray),
       builder: (context, draft) => _ProposalForm(draft: draft),
     );
   }
@@ -41,15 +42,25 @@ class _ProposalForm extends StatefulWidget {
 
 class _ProposalFormState extends State<_ProposalForm> {
   late final _title = TextEditingController(text: widget.draft.title);
-  late final _description = TextEditingController(text: widget.draft.description);
-  late final _problem = TextEditingController(text: widget.draft.problemStatement);
-  late final _solution = TextEditingController(text: widget.draft.proposedSolution);
+  late final _description =
+      TextEditingController(text: widget.draft.description);
+  late final _problem =
+      TextEditingController(text: widget.draft.problemStatement);
+  late final _solution =
+      TextEditingController(text: widget.draft.proposedSolution);
   late final _tech = TextEditingController(text: widget.draft.technologies);
   late final _category = TextEditingController(text: widget.draft.category);
 
   @override
   void dispose() {
-    for (final c in [_title, _description, _problem, _solution, _tech, _category]) {
+    for (final c in [
+      _title,
+      _description,
+      _problem,
+      _solution,
+      _tech,
+      _category
+    ]) {
       c.dispose();
     }
     super.dispose();
@@ -91,15 +102,25 @@ class _ProposalFormState extends State<_ProposalForm> {
                 children: [
                   AppTextField(label: 'Project title', controller: _title),
                   const SizedBox(height: 14),
-                  AppTextField(label: 'Project description', textarea: true, controller: _description),
+                  AppTextField(
+                      label: 'Project description',
+                      textarea: true,
+                      controller: _description),
                   const SizedBox(height: 14),
-                  AppTextField(label: 'Problem statement', textarea: true, controller: _problem),
+                  AppTextField(
+                      label: 'Problem statement',
+                      textarea: true,
+                      controller: _problem),
                   const SizedBox(height: 14),
-                  AppTextField(label: 'Proposed solution', textarea: true, controller: _solution),
+                  AppTextField(
+                      label: 'Proposed solution',
+                      textarea: true,
+                      controller: _solution),
                   const SizedBox(height: 14),
                   AppTextField(label: 'Technologies', controller: _tech),
                   const SizedBox(height: 14),
-                  AppTextField(label: 'Project category', controller: _category),
+                  AppTextField(
+                      label: 'Project category', controller: _category),
                 ],
               ),
               Container(
@@ -111,7 +132,8 @@ class _ProposalFormState extends State<_ProposalForm> {
                 child: Row(
                   children: [
                     Text('TEAM MEMBERS',
-                        style: AppText.s(8, w: FontWeight.w800, color: AppColors.muted)),
+                        style: AppText.s(8,
+                            w: FontWeight.w800, color: AppColors.muted)),
                     const SizedBox(width: 9),
                     SizedBox(
                       height: 25,
@@ -128,7 +150,8 @@ class _ProposalFormState extends State<_ProposalForm> {
                                 decoration: BoxDecoration(
                                   color: AppColors.navy800,
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white, width: 2),
+                                  border:
+                                      Border.all(color: Colors.white, width: 2),
                                 ),
                                 child: Text(members[i],
                                     style: AppText.s(7, color: Colors.white)),
@@ -154,13 +177,19 @@ class _ProposalFormState extends State<_ProposalForm> {
               Expanded(
                 flex: 10,
                 child: AppButton(
-                    label: 'Save draft', variant: ButtonVariant.outline, onPressed: _save, full: true),
+                    label: 'Save draft',
+                    variant: ButtonVariant.outline,
+                    onPressed: _save,
+                    full: true),
               ),
               const SizedBox(width: 8),
               Expanded(
                 flex: 15,
                 child: AppButton(
-                    label: 'Review proposal', icon: AppIcons.arrow, onPressed: _review, full: true),
+                    label: 'Review proposal',
+                    icon: AppIcons.arrow,
+                    onPressed: _review,
+                    full: true),
               ),
             ],
           ),
@@ -197,12 +226,14 @@ class _StepProgress extends StatelessWidget {
               ),
               child: Text('${i + 1}',
                   style: AppText.s(9,
-                      w: FontWeight.w800, color: isActive ? Colors.white : AppColors.chevron)),
+                      w: FontWeight.w800,
+                      color: isActive ? Colors.white : AppColors.chevron)),
             ),
             const SizedBox(height: 4),
             Text(_labels[i],
                 style: AppText.s(7,
-                    w: FontWeight.w700, color: isActive ? AppColors.blue700 : AppColors.chevron)),
+                    w: FontWeight.w700,
+                    color: isActive ? AppColors.blue700 : AppColors.chevron)),
           ],
         ),
       );
@@ -213,9 +244,17 @@ class _StepProgress extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         step(0),
-        Container(width: 55, height: 1, margin: const EdgeInsets.only(top: 12), color: const Color(0xFFDFE4EC)),
+        Container(
+            width: 55,
+            height: 1,
+            margin: const EdgeInsets.only(top: 12),
+            color: const Color(0xFFDFE4EC)),
         step(1),
-        Container(width: 55, height: 1, margin: const EdgeInsets.only(top: 12), color: const Color(0xFFDFE4EC)),
+        Container(
+            width: 55,
+            height: 1,
+            margin: const EdgeInsets.only(top: 12),
+            color: const Color(0xFFDFE4EC)),
         step(2),
       ],
     );

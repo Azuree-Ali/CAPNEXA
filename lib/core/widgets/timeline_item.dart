@@ -43,7 +43,8 @@ class TimelineMarker extends StatelessWidget {
       ),
       child: filled
           ? const AppIcon(AppIcons.check, size: 14, color: Colors.white)
-          : Text('$index', style: AppText.s(8, w: FontWeight.w800, color: pendingText)),
+          : Text('$index',
+              style: AppText.s(8, w: FontWeight.w800, color: pendingText)),
     );
   }
 }

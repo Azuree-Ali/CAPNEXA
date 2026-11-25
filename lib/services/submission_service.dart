@@ -7,5 +7,6 @@ abstract class SubmissionService {
   Future<SubmissionDraft> getDraft();
   Future<List<SubmissionVersion>> getVersions();
   Future<SubmissionFile> addFile();
-  Future<void> submit({required String note, required List<SubmissionFile> files});
+  Future<void> submit(
+      {required String note, required List<SubmissionFile> files});
 }

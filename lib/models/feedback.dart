@@ -1,5 +1,6 @@
 class RequiredChange {
-  const RequiredChange({required this.title, required this.location, this.done = false});
+  const RequiredChange(
+      {required this.title, required this.location, this.done = false});
 
   final String title;
   final String location;

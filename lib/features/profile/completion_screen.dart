@@ -73,7 +73,8 @@ class CompletionScreen extends StatelessWidget {
                                   offset: Offset(0, 10)),
                             ],
                           ),
-                          child: const AppIcon(AppIcons.school, size: 36, color: Colors.white),
+                          child: const AppIcon(AppIcons.school,
+                              size: 36, color: Colors.white),
                         ),
                         Positioned(
                           right: -5,
@@ -87,7 +88,8 @@ class CompletionScreen extends StatelessWidget {
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.white, width: 3),
                             ),
-                            child: const AppIcon(AppIcons.check, size: 17, color: Colors.white),
+                            child: const AppIcon(AppIcons.check,
+                                size: 17, color: Colors.white),
                           ),
                         ),
                       ],
@@ -97,7 +99,10 @@ class CompletionScreen extends StatelessWidget {
                   const StatusBadge('Project completed', tone: BadgeTone.teal),
                   const SizedBox(height: 9),
                   Text('Campus Connect',
-                      style: AppText.s(21, w: FontWeight.w700, color: AppColors.navy900, ls: -.3)),
+                      style: AppText.s(21,
+                          w: FontWeight.w700,
+                          color: AppColors.navy900,
+                          ls: -.3)),
                   const SizedBox(height: 5),
                   Text(
                     'Your graduation project journey is complete. All milestones, reviews, and final evaluations have been recorded.',
@@ -119,12 +124,16 @@ class CompletionScreen extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('FINAL EVALUATION', style: AppText.s(7, color: const Color(0xFF8FA3C0))),
+                      Text('FINAL EVALUATION',
+                          style: AppText.s(7, color: const Color(0xFF8FA3C0))),
                       const SizedBox(height: 4),
-                      Text('Excellent', style: AppText.s(17, w: FontWeight.w700, color: Colors.white)),
+                      Text('Excellent',
+                          style: AppText.s(17,
+                              w: FontWeight.w700, color: Colors.white)),
                       const SizedBox(height: 2),
                       Text('92 out of 100',
-                          style: AppText.s(8, color: const Color(0xFFB0BFD3), height: 1.6)),
+                          style: AppText.s(8,
+                              color: const Color(0xFFB0BFD3), height: 1.6)),
                     ],
                   ),
                   Container(
@@ -136,7 +145,9 @@ class CompletionScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text('A',
-                        style: AppText.s(27, w: FontWeight.w800, color: const Color(0xFF86E0CE))),
+                        style: AppText.s(27,
+                            w: FontWeight.w800,
+                            color: const Color(0xFF86E0CE))),
                   ),
                 ],
               ),
@@ -157,9 +168,11 @@ class CompletionScreen extends StatelessWidget {
                           padding: const EdgeInsets.all(11),
                           child: Column(
                             children: [
-                              Text(_stats[i].$1, style: AppText.s(11, w: FontWeight.w700)),
+                              Text(_stats[i].$1,
+                                  style: AppText.s(11, w: FontWeight.w700)),
                               const SizedBox(height: 2),
-                              Text(_stats[i].$2, style: AppText.s(7, color: AppColors.muted)),
+                              Text(_stats[i].$2,
+                                  style: AppText.s(7, color: AppColors.muted)),
                             ],
                           ),
                         ),
@@ -176,11 +189,14 @@ class CompletionScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SectionHeading('Project summary', trailingWidget: StatusBadge('Archived', tone: BadgeTone.teal)),
+                  const SectionHeading('Project summary',
+                      trailingWidget:
+                          StatusBadge('Archived', tone: BadgeTone.teal)),
                   Container(
                     padding: const EdgeInsets.only(bottom: 10),
                     decoration: const BoxDecoration(
-                        border: Border(bottom: BorderSide(color: AppColors.line))),
+                        border:
+                            Border(bottom: BorderSide(color: AppColors.line))),
                     child: Text(
                       'Campus Connect is an AI-powered mobile platform that unifies campus services and delivers personalized recommendations to students.',
                       style: AppText.p,
@@ -196,13 +212,15 @@ class CompletionScreen extends StatelessWidget {
               label: 'Download final report',
               icon: AppIcons.file,
               full: true,
-              onPressed: () => showAppSnack(context, 'The final report will be available with the API.'),
+              onPressed: () => showAppSnack(
+                  context, 'The final report will be available with the API.'),
             ),
             AppButton(
               label: 'View project archive',
               variant: ButtonVariant.outline,
               full: true,
-              onPressed: () => showAppSnack(context, 'The project archive will be available with the API.'),
+              onPressed: () => showAppSnack(context,
+                  'The project archive will be available with the API.'),
             ),
           ],
         ),

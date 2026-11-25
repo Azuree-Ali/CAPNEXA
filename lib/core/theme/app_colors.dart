@@ -40,12 +40,21 @@ class AppShadows {
   AppShadows._();
 
   static const card = [
-    BoxShadow(color: Color.fromRGBO(20, 38, 68, .04), blurRadius: 15, offset: Offset(0, 5)),
+    BoxShadow(
+        color: Color.fromRGBO(20, 38, 68, .04),
+        blurRadius: 15,
+        offset: Offset(0, 5)),
   ];
   static const hero = [
-    BoxShadow(color: Color.fromRGBO(11, 31, 58, .17), blurRadius: 25, offset: Offset(0, 12)),
+    BoxShadow(
+        color: Color.fromRGBO(11, 31, 58, .17),
+        blurRadius: 25,
+        offset: Offset(0, 12)),
   ];
   static const button = [
-    BoxShadow(color: Color.fromRGBO(11, 31, 58, .16), blurRadius: 15, offset: Offset(0, 7)),
+    BoxShadow(
+        color: Color.fromRGBO(11, 31, 58, .16),
+        blurRadius: 15,
+        offset: Offset(0, 7)),
   ];
 }

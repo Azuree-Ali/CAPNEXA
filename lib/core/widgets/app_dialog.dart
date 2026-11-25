@@ -32,7 +32,9 @@ Future<bool> showAppDialog(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(title, style: AppText.s(15, w: FontWeight.w700, color: AppColors.navy900, ls: -.3)),
+            Text(title,
+                style: AppText.s(15,
+                    w: FontWeight.w700, color: AppColors.navy900, ls: -.3)),
             const SizedBox(height: 6),
             Text(message, style: AppText.p),
             if (content != null) ...[const SizedBox(height: 12), content],
@@ -52,7 +54,9 @@ Future<bool> showAppDialog(
                 Expanded(
                   child: AppButton(
                     label: confirmLabel,
-                    variant: destructive ? ButtonVariant.danger : ButtonVariant.primary,
+                    variant: destructive
+                        ? ButtonVariant.danger
+                        : ButtonVariant.primary,
                     onPressed: () => Navigator.of(ctx).pop(true),
                   ),
                 ),
@@ -78,7 +82,8 @@ void showAppSnack(BuildContext context, String message) {
         margin: const EdgeInsets.fromLTRB(17, 0, 17, 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 2),
-        content: Text(message, style: AppText.s(10, w: FontWeight.w600, color: Colors.white)),
+        content: Text(message,
+            style: AppText.s(10, w: FontWeight.w600, color: Colors.white)),
       ),
     );
 }

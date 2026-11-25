@@ -73,7 +73,8 @@ class _SubmissionBodyState extends State<_SubmissionBody> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SectionHeading('Required documents', trailing: '${_files.length} of ${_files.length} ready'),
+            SectionHeading('Required documents',
+                trailing: '${_files.length} of ${_files.length} ready'),
             for (var i = 0; i < _files.length; i++) ...[
               if (i > 0) const SizedBox(height: 8),
               _FileCard(file: _files[i]),
@@ -97,13 +98,16 @@ class _SubmissionBodyState extends State<_SubmissionBody> {
                     color: AppColors.blue100,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const AppIcon(AppIcons.upload, size: 25, color: AppColors.blue700),
+                  child: const AppIcon(AppIcons.upload,
+                      size: 25, color: AppColors.blue700),
                 ),
                 const SizedBox(height: 7),
                 Text('Add another file',
-                    style: AppText.s(9.5, w: FontWeight.w700, color: AppColors.ink)),
+                    style: AppText.s(9.5,
+                        w: FontWeight.w700, color: AppColors.ink)),
                 const SizedBox(height: 2),
-                Text('PDF, DOCX, or ZIP · Max 50 MB', style: AppText.s(8, color: AppColors.muted)),
+                Text('PDF, DOCX, or ZIP · Max 50 MB',
+                    style: AppText.s(8, color: AppColors.muted)),
               ],
             ),
           ),
@@ -122,9 +126,11 @@ class _SubmissionBodyState extends State<_SubmissionBody> {
           ),
           child: Column(
             children: [
-              _SummaryRow('Submission version', 'Version ${widget.draft.version}'),
+              _SummaryRow(
+                  'Submission version', 'Version ${widget.draft.version}'),
               const SizedBox(height: 8),
-              _SummaryRow('Files', '${_files.length} files · ${total.toStringAsFixed(1)} MB'),
+              _SummaryRow('Files',
+                  '${_files.length} files · ${total.toStringAsFixed(1)} MB'),
               const SizedBox(height: 8),
               _SummaryRow('Submitted by', widget.draft.submittedBy),
             ],
@@ -133,7 +139,11 @@ class _SubmissionBodyState extends State<_SubmissionBody> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            AppButton(label: 'Submit for review', icon: AppIcons.upload, full: true, onPressed: _submit),
+            AppButton(
+                label: 'Submit for review',
+                icon: AppIcons.upload,
+                full: true,
+                onPressed: _submit),
             const SizedBox(height: 20),
             AppButton(
               label: 'View previous versions',
@@ -160,7 +170,9 @@ class _SummaryRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: AppText.s(8.5, color: AppColors.muted)),
-        Text(value, style: AppText.s(8.5, w: FontWeight.w700, color: AppColors.navy900)),
+        Text(value,
+            style:
+                AppText.s(8.5, w: FontWeight.w700, color: AppColors.navy900)),
       ],
     );
   }
@@ -191,8 +203,10 @@ class _FileCard extends StatelessWidget {
             width: 38,
             height: 41,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8)),
-            child: Text(file.label, style: AppText.s(7, w: FontWeight.w800, color: fg)),
+            decoration: BoxDecoration(
+                color: bg, borderRadius: BorderRadius.circular(8)),
+            child: Text(file.label,
+                style: AppText.s(7, w: FontWeight.w800, color: fg)),
           ),
           const SizedBox(width: 9),
           Expanded(
@@ -202,7 +216,9 @@ class _FileCard extends StatelessWidget {
                 Text(file.name, style: AppText.s(9, w: FontWeight.w700)),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 1, 0, 5),
-                  child: Text(file.meta, style: AppText.s(7.5, color: AppColors.muted, height: 1.6)),
+                  child: Text(file.meta,
+                      style:
+                          AppText.s(7.5, color: AppColors.muted, height: 1.6)),
                 ),
                 AppProgress(value: file.progress, height: 3),
               ],
@@ -213,8 +229,10 @@ class _FileCard extends StatelessWidget {
             width: 20,
             height: 20,
             alignment: Alignment.center,
-            decoration: const BoxDecoration(color: AppColors.teal100, shape: BoxShape.circle),
-            child: const AppIcon(AppIcons.check, size: 15, color: AppColors.teal700),
+            decoration: const BoxDecoration(
+                color: AppColors.teal100, shape: BoxShape.circle),
+            child: const AppIcon(AppIcons.check,
+                size: 15, color: AppColors.teal700),
           ),
         ],
       ),

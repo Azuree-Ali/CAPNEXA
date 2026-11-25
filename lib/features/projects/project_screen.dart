@@ -60,9 +60,14 @@ class ProjectScreen extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 7, 0, 3),
                           child: Text(p.title,
-                              style: AppText.s(20, w: FontWeight.w700, color: Colors.white, ls: -.3)),
+                              style: AppText.s(20,
+                                  w: FontWeight.w700,
+                                  color: Colors.white,
+                                  ls: -.3)),
                         ),
-                        Text(p.tagline, style: AppText.s(9, color: const Color(0xFF9FB0C8))),
+                        Text(p.tagline,
+                            style:
+                                AppText.s(9, color: const Color(0xFF9FB0C8))),
                       ],
                     ),
                   ),
@@ -80,7 +85,8 @@ class ProjectScreen extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text('${p.progress.round()}%',
-                            style: AppText.s(11, w: FontWeight.w700, color: Colors.white)),
+                            style: AppText.s(11,
+                                w: FontWeight.w700, color: Colors.white)),
                       ),
                     ),
                   ),
@@ -107,7 +113,9 @@ class ProjectScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: t == 'Overview' ? AppColors.blue700 : Colors.transparent,
+                                color: t == 'Overview'
+                                    ? AppColors.blue700
+                                    : Colors.transparent,
                                 width: 2,
                               ),
                             ),
@@ -115,7 +123,9 @@ class ProjectScreen extends StatelessWidget {
                           child: Text(t,
                               style: AppText.s(8.5,
                                   w: FontWeight.w700,
-                                  color: t == 'Overview' ? AppColors.blue700 : AppColors.muted)),
+                                  color: t == 'Overview'
+                                      ? AppColors.blue700
+                                      : AppColors.muted)),
                         ),
                       ),
                     ),
@@ -141,7 +151,8 @@ class ProjectScreen extends StatelessWidget {
                       children: [
                         SectionHeading(p.currentMilestone,
                             overline: 'CURRENT MILESTONE',
-                            trailingWidget: const StatusBadge('In progress', tone: BadgeTone.orange)),
+                            trailingWidget: const StatusBadge('In progress',
+                                tone: BadgeTone.orange)),
                         const AppProgress(value: 70),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 10, 0, 13),
@@ -150,13 +161,18 @@ class ProjectScreen extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  const AppIcon(AppIcons.calendar, size: 17, color: AppColors.muted),
+                                  const AppIcon(AppIcons.calendar,
+                                      size: 17, color: AppColors.muted),
                                   const SizedBox(width: 5),
-                                  Text(p.dueLabel, style: AppText.s(8.5, color: AppColors.muted)),
+                                  Text(p.dueLabel,
+                                      style: AppText.s(8.5,
+                                          color: AppColors.muted)),
                                 ],
                               ),
                               Text('${p.daysLeft} days left',
-                                  style: AppText.s(8.5, w: FontWeight.w800, color: AppColors.orange700)),
+                                  style: AppText.s(8.5,
+                                      w: FontWeight.w800,
+                                      color: AppColors.orange700)),
                             ],
                           ),
                         ),
@@ -165,7 +181,8 @@ class ProjectScreen extends StatelessWidget {
                           icon: AppIcons.arrow,
                           variant: ButtonVariant.outline,
                           full: true,
-                          onPressed: () => AppNav.push(context, Routes.milestone),
+                          onPressed: () =>
+                              AppNav.push(context, Routes.milestone),
                         ),
                       ],
                     ),
@@ -174,17 +191,33 @@ class ProjectScreen extends StatelessWidget {
                   const SectionHeading('Project overview'),
                   Row(
                     children: [
-                      Expanded(child: _OverviewCell(icon: AppIcons.user, label: 'Supervisor', value: p.supervisorName)),
+                      Expanded(
+                          child: _OverviewCell(
+                              icon: AppIcons.user,
+                              label: 'Supervisor',
+                              value: p.supervisorName)),
                       const SizedBox(width: 8),
-                      Expanded(child: _OverviewCell(icon: AppIcons.team, label: 'Team', value: '${p.teamSize} members')),
+                      Expanded(
+                          child: _OverviewCell(
+                              icon: AppIcons.team,
+                              label: 'Team',
+                              value: '${p.teamSize} members')),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Expanded(child: _OverviewCell(icon: AppIcons.calendar, label: 'Final deadline', value: p.finalDeadline)),
+                      Expanded(
+                          child: _OverviewCell(
+                              icon: AppIcons.calendar,
+                              label: 'Final deadline',
+                              value: p.finalDeadline)),
                       const SizedBox(width: 8),
-                      Expanded(child: _OverviewCell(icon: AppIcons.file, label: 'Submissions', value: '${p.submissionCount} versions')),
+                      Expanded(
+                          child: _OverviewCell(
+                              icon: AppIcons.file,
+                              label: 'Submissions',
+                              value: '${p.submissionCount} versions')),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -217,12 +250,16 @@ class ProjectScreen extends StatelessWidget {
                                   Text('New supervisor feedback',
                                       style: AppText.s(9, w: FontWeight.w700)),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 1),
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 1),
                                     child: Text('System Design · Version 2',
-                                        style: AppText.s(8, color: AppColors.muted, height: 1.6)),
+                                        style: AppText.s(8,
+                                            color: AppColors.muted,
+                                            height: 1.6)),
                                   ),
                                   Text('Today, 9:42 AM',
-                                      style: AppText.s(8, color: const Color(0xFF97A1B0))),
+                                      style: AppText.s(8,
+                                          color: const Color(0xFF97A1B0))),
                                 ],
                               ),
                             ),
@@ -243,7 +280,8 @@ class ProjectScreen extends StatelessWidget {
 }
 
 class _OverviewCell extends StatelessWidget {
-  const _OverviewCell({required this.icon, required this.label, required this.value});
+  const _OverviewCell(
+      {required this.icon, required this.label, required this.value});
 
   final AppIcons icon;
   final String label;
@@ -266,9 +304,12 @@ class _OverviewCell extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: AppText.s(7.5, color: AppColors.muted, height: 1.6)),
+                Text(label,
+                    style: AppText.s(7.5, color: AppColors.muted, height: 1.6)),
                 const SizedBox(height: 2),
-                Text(value, style: AppText.s(8.5, w: FontWeight.w700, color: AppColors.navy900)),
+                Text(value,
+                    style: AppText.s(8.5,
+                        w: FontWeight.w700, color: AppColors.navy900)),
               ],
             ),
           ),

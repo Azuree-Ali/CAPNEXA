@@ -36,10 +36,12 @@ class SupervisorScreen extends StatelessWidget {
                 const StatusBadge('Assigned', tone: BadgeTone.teal),
                 const SizedBox(height: 8),
                 Text(s.name,
-                    style: AppText.s(19, w: FontWeight.w700, color: AppColors.navy900, ls: -.3)),
+                    style: AppText.s(19,
+                        w: FontWeight.w700, color: AppColors.navy900, ls: -.3)),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 3),
-                  child: Text(s.title, textAlign: TextAlign.center, style: AppText.p),
+                  child: Text(s.title,
+                      textAlign: TextAlign.center, style: AppText.p),
                 ),
                 const SizedBox(height: 7),
                 Wrap(
@@ -49,12 +51,15 @@ class SupervisorScreen extends StatelessWidget {
                   children: [
                     for (final tag in s.specialties)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 4),
                         decoration: BoxDecoration(
                           color: const Color(0xFFEEF1F5),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text(tag, style: AppText.s(7, color: const Color(0xFF59677A))),
+                        child: Text(tag,
+                            style:
+                                AppText.s(7, color: const Color(0xFF59677A))),
                       ),
                   ],
                 ),
@@ -71,17 +76,27 @@ class SupervisorScreen extends StatelessWidget {
                   child: Text('Contact & office', style: AppText.h3),
                 ),
                 const Divider(height: 1, color: AppColors.line),
-                _DetailRow(icon: AppIcons.mail, label: 'University email', value: s.email),
-                _DetailRow(icon: AppIcons.school, label: 'Office', value: s.office),
-                _DetailRow(icon: AppIcons.clock, label: 'Office hours', value: s.officeHours),
+                _DetailRow(
+                    icon: AppIcons.mail,
+                    label: 'University email',
+                    value: s.email),
+                _DetailRow(
+                    icon: AppIcons.school, label: 'Office', value: s.office),
+                _DetailRow(
+                    icon: AppIcons.clock,
+                    label: 'Office hours',
+                    value: s.officeHours),
               ],
             ),
           ),
           Row(
             children: [
-              Expanded(child: _InfoTile(label: 'ASSIGNMENT DATE', value: s.assignmentDate)),
+              Expanded(
+                  child: _InfoTile(
+                      label: 'ASSIGNMENT DATE', value: s.assignmentDate)),
               const SizedBox(width: 8),
-              Expanded(child: _InfoTile(label: 'SUPERVISION GROUP', value: s.group)),
+              Expanded(
+                  child: _InfoTile(label: 'SUPERVISION GROUP', value: s.group)),
             ],
           ),
           AppButton(
@@ -108,12 +123,15 @@ class SupervisorScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const StatusBadge('Alternative state', tone: BadgeTone.orange),
+                      const StatusBadge('Alternative state',
+                          tone: BadgeTone.orange),
                       const SizedBox(height: 7),
-                      Text('Waiting for supervisor assignment', style: AppText.h3),
+                      Text('Waiting for supervisor assignment',
+                          style: AppText.h3),
                       const SizedBox(height: 2),
                       Text('Your approved project is in the assignment queue.',
-                          style: AppText.s(8.5, color: AppColors.muted, height: 1.6)),
+                          style: AppText.s(8.5,
+                              color: AppColors.muted, height: 1.6)),
                     ],
                   ),
                 ),
@@ -127,7 +145,8 @@ class SupervisorScreen extends StatelessWidget {
 }
 
 class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.icon, required this.label, required this.value});
+  const _DetailRow(
+      {required this.icon, required this.label, required this.value});
 
   final AppIcons icon;
   final String label;
@@ -145,9 +164,12 @@ class _DetailRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: AppText.s(7.5, color: AppColors.muted, height: 1.6)),
+                Text(label,
+                    style: AppText.s(7.5, color: AppColors.muted, height: 1.6)),
                 const SizedBox(height: 2),
-                Text(value, style: AppText.s(9, w: FontWeight.w700, color: AppColors.navy900)),
+                Text(value,
+                    style: AppText.s(9,
+                        w: FontWeight.w700, color: AppColors.navy900)),
               ],
             ),
           ),
@@ -176,7 +198,9 @@ class _InfoTile extends StatelessWidget {
         children: [
           Text(label, style: AppText.s(7, color: AppColors.muted)),
           const SizedBox(height: 4),
-          Text(value, style: AppText.s(9, w: FontWeight.w700, color: AppColors.navy900)),
+          Text(value,
+              style:
+                  AppText.s(9, w: FontWeight.w700, color: AppColors.navy900)),
         ],
       ),
     );

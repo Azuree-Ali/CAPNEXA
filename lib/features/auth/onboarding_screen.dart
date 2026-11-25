@@ -77,7 +77,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         child: Padding(
                           padding: const EdgeInsets.all(6),
                           child: Text('Skip',
-                              style: AppText.s(9.5, w: FontWeight.w800, color: AppColors.blue700)),
+                              style: AppText.s(9.5,
+                                  w: FontWeight.w800,
+                                  color: AppColors.blue700)),
                         ),
                       ),
                     ],
@@ -100,7 +102,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         child: Text(
                           slide.number,
                           style: AppText.s(160,
-                              w: FontWeight.w800, color: const Color(0xFFE5ECFC), ls: -15, height: 1.2),
+                              w: FontWeight.w800,
+                              color: const Color(0xFFE5ECFC),
+                              ls: -15,
+                              height: 1.2),
                         ),
                       ),
                       Transform.rotate(
@@ -144,7 +149,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   color: AppColors.blue100,
                                   borderRadius: BorderRadius.circular(18),
                                 ),
-                                child: AppIcon(slide.icon, size: 36, color: AppColors.blue700),
+                                child: AppIcon(slide.icon,
+                                    size: 36, color: AppColors.blue700),
                               ),
                             ),
                             const SizedBox(height: 35),
@@ -180,10 +186,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         child: Text(
                           slide.title,
                           style: AppText.s(26,
-                              w: FontWeight.w700, color: AppColors.navy900, height: 1.2, ls: -.9),
+                              w: FontWeight.w700,
+                              color: AppColors.navy900,
+                              height: 1.2,
+                              ls: -.9),
                         ),
                       ),
-                      Text(slide.text, style: AppText.s(11, color: AppColors.muted, height: 1.7)),
+                      Text(slide.text,
+                          style: AppText.s(11,
+                              color: AppColors.muted, height: 1.7)),
                       const SizedBox(height: 28),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -197,7 +208,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   height: 6,
                                   margin: const EdgeInsets.only(right: 5),
                                   decoration: BoxDecoration(
-                                    color: i == _index ? AppColors.blue600 : const Color(0xFFD1D8E3),
+                                    color: i == _index
+                                        ? AppColors.blue600
+                                        : const Color(0xFFD1D8E3),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                 ),
@@ -213,7 +226,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 width: 48,
                                 height: 48,
                                 child: Center(
-                                    child: AppIcon(AppIcons.arrow, color: Colors.white)),
+                                    child: AppIcon(AppIcons.arrow,
+                                        color: Colors.white)),
                               ),
                             ),
                           ),

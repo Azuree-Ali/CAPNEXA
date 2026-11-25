@@ -23,13 +23,15 @@ class CapNexaApp extends StatelessWidget {
         // keeps its layout, and centre/cap the content on tablets & foldables.
         return MediaQuery(
           data: mq.copyWith(
-            textScaler: mq.textScaler.clamp(minScaleFactor: 0.9, maxScaleFactor: 1.2),
+            textScaler:
+                mq.textScaler.clamp(minScaleFactor: 0.9, maxScaleFactor: 1.2),
           ),
           child: ColoredBox(
             color: AppColors.canvas,
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: AppLayout.maxContentWidth),
+                constraints:
+                    const BoxConstraints(maxWidth: AppLayout.maxContentWidth),
                 child: child,
               ),
             ),

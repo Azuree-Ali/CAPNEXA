@@ -25,7 +25,8 @@ class TeamScreen extends StatelessWidget {
     await showAppDialog(
       context,
       title: 'Invite a teammate',
-      message: 'Share this code with your classmates so they can join ${team.projectTitle}.',
+      message:
+          'Share this code with your classmates so they can join ${team.projectTitle}.',
       confirmLabel: 'Copy code',
       cancelLabel: 'Close',
       content: Container(
@@ -36,7 +37,8 @@ class TeamScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(11),
         ),
         child: Text(team.inviteCode,
-            style: AppText.s(22, w: FontWeight.w700, color: AppColors.navy900, ls: 1.5)),
+            style: AppText.s(22,
+                w: FontWeight.w700, color: AppColors.navy900, ls: 1.5)),
       ),
     ).then((copy) async {
       if (copy) {
@@ -50,7 +52,8 @@ class TeamScreen extends StatelessWidget {
     final ok = await showAppDialog(
       context,
       title: 'Leave team?',
-      message: 'You will lose access to the team workspace and its submissions.',
+      message:
+          'You will lose access to the team workspace and its submissions.',
       confirmLabel: 'Leave team',
       destructive: true,
     );
@@ -93,10 +96,13 @@ class TeamScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 3),
                         child: Text(team.inviteCode,
                             style: AppText.s(22,
-                                w: FontWeight.w700, color: Colors.white, ls: 1.5)),
+                                w: FontWeight.w700,
+                                color: Colors.white,
+                                ls: 1.5)),
                       ),
                       Text('Share this code with your classmates',
-                          style: AppText.s(8.5, color: const Color(0xFF9FB0C8))),
+                          style:
+                              AppText.s(8.5, color: const Color(0xFF9FB0C8))),
                     ],
                   ),
                 ),
@@ -109,8 +115,10 @@ class TeamScreen extends StatelessWidget {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(9),
                     onTap: () async {
-                      await Clipboard.setData(ClipboardData(text: team.inviteCode));
-                      if (context.mounted) showAppSnack(context, 'Invitation code copied');
+                      await Clipboard.setData(
+                          ClipboardData(text: team.inviteCode));
+                      if (context.mounted)
+                        showAppSnack(context, 'Invitation code copied');
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(8),
@@ -119,7 +127,8 @@ class TeamScreen extends StatelessWidget {
                         children: [
                           const AppIcon(AppIcons.copy, color: Colors.white),
                           const SizedBox(width: 5),
-                          Text('Copy', style: AppText.s(9, color: Colors.white)),
+                          Text('Copy',
+                              style: AppText.s(9, color: Colors.white)),
                         ],
                       ),
                     ),
@@ -137,7 +146,8 @@ class TeamScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SectionHeading('Team members',
-                  trailing: '${team.members.length} of ${team.maxMembers} seats'),
+                  trailing:
+                      '${team.members.length} of ${team.maxMembers} seats'),
               DividedList(
                 children: [
                   for (final m in team.members)
@@ -151,9 +161,12 @@ class TeamScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(m.name, style: AppText.s(10, w: FontWeight.w700)),
+                                Text(m.name,
+                                    style: AppText.s(10, w: FontWeight.w700)),
                                 const SizedBox(height: 2),
-                                Text(m.role, style: AppText.s(8, color: AppColors.muted)),
+                                Text(m.role,
+                                    style:
+                                        AppText.s(8, color: AppColors.muted)),
                               ],
                             ),
                           ),
@@ -182,7 +195,8 @@ class TeamScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Center(
                 child: Text('Leave team',
-                    style: AppText.s(9, w: FontWeight.w700, color: AppColors.red700)),
+                    style: AppText.s(9,
+                        w: FontWeight.w700, color: AppColors.red700)),
               ),
             ),
           ),
@@ -213,18 +227,22 @@ class _StatRow extends StatelessWidget {
             for (var i = 0; i < stats.length; i++) ...[
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 11),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 11),
                   child: Column(
                     children: [
                       Text(stats[i].$1,
-                          style: AppText.s(11, w: FontWeight.w700, color: AppColors.navy900)),
+                          style: AppText.s(11,
+                              w: FontWeight.w700, color: AppColors.navy900)),
                       const SizedBox(height: 3),
-                      Text(stats[i].$2, style: AppText.s(7.5, color: AppColors.muted)),
+                      Text(stats[i].$2,
+                          style: AppText.s(7.5, color: AppColors.muted)),
                     ],
                   ),
                 ),
               ),
-              if (i < stats.length - 1) const VerticalDivider(width: 1, color: AppColors.line),
+              if (i < stats.length - 1)
+                const VerticalDivider(width: 1, color: AppColors.line),
             ],
           ],
         ),

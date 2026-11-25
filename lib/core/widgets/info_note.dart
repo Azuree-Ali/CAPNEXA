@@ -49,8 +49,12 @@ class InfoNote extends StatelessWidget {
                 if (title != null)
                   TextSpan(
                       text: '$title\n',
-                      style: AppText.s(9, w: FontWeight.w700, color: titleColor, height: 1.5)),
-                TextSpan(text: message, style: AppText.s(bordered ? 8.5 : 9, color: textColor, height: 1.5)),
+                      style: AppText.s(9,
+                          w: FontWeight.w700, color: titleColor, height: 1.5)),
+                TextSpan(
+                    text: message,
+                    style: AppText.s(bordered ? 8.5 : 9,
+                        color: textColor, height: 1.5)),
               ]),
             ),
           ),

@@ -38,8 +38,9 @@ class ServiceLocator {
   static late NotificationService notifications;
   static late SimilarityService similarity;
   static late HomeService home;
-    /// true = بيانات وهمية، false = الباك اند الحقيقي
-  static const bool _mockAuth = true;
+
+  /// true = بيانات وهمية، false = الباك اند الحقيقي
+  static const bool _mockAuth = true; 
 
   static late TokenStorage tokenStorage;
   static late ApiClient apiClient;

@@ -25,7 +25,8 @@ class MilestoneDetailScreen extends StatelessWidget {
       loader: ServiceLocator.milestones.getCurrentMilestoneDetail,
       titleBuilder: (d) => d.milestone.name,
       subtitleBuilder: (d) => 'Milestone ${d.number} of ${d.total}',
-      actionBuilder: (_, __) => const StatusBadge('In progress', tone: BadgeTone.orange),
+      actionBuilder: (_, __) =>
+          const StatusBadge('In progress', tone: BadgeTone.orange),
       builder: (context, d) => ScreenBody(
         children: [
           Container(
@@ -49,7 +50,10 @@ class MilestoneDetailScreen extends StatelessWidget {
                         child: Text(d.deadlineLabel, style: AppText.h2),
                       ),
                       Text(d.remainingLabel,
-                          style: AppText.s(11, w: FontWeight.w700, color: AppColors.orange700, height: 1.6)),
+                          style: AppText.s(11,
+                              w: FontWeight.w700,
+                              color: AppColors.orange700,
+                              height: 1.6)),
                     ],
                   ),
                 ),
@@ -80,10 +84,13 @@ class MilestoneDetailScreen extends StatelessWidget {
                           padding: const EdgeInsets.all(3),
                           decoration: const BoxDecoration(
                               color: AppColors.teal100, shape: BoxShape.circle),
-                          child: const AppIcon(AppIcons.check, size: 12, color: AppColors.teal700),
+                          child: const AppIcon(AppIcons.check,
+                              size: 12, color: AppColors.teal700),
                         ),
                         const SizedBox(width: 8),
-                        Expanded(child: Text(d.requirements[i], style: AppText.s(9.5))),
+                        Expanded(
+                            child:
+                                Text(d.requirements[i], style: AppText.s(9.5))),
                       ],
                     ),
                   ],
@@ -114,7 +121,8 @@ class MilestoneDetailScreen extends StatelessWidget {
                       GestureDetector(
                         onTap: () => AppNav.push(context, Routes.feedback),
                         child: Text('View previous feedback',
-                            style: AppText.s(8.5, w: FontWeight.w800, color: AppColors.blue700)),
+                            style: AppText.s(8.5,
+                                w: FontWeight.w800, color: AppColors.blue700)),
                       ),
                     ],
                   ),
@@ -145,7 +153,8 @@ class _Block extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(bottom: 17),
-      decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.line))),
+      decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: AppColors.line))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [Text(title, style: AppText.h2), child],

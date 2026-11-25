@@ -36,7 +36,9 @@ class JourneyDrawer extends StatelessWidget {
               height: 72,
               padding: const EdgeInsets.symmetric(horizontal: 28),
               decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Color.fromRGBO(255, 255, 255, .1))),
+                border: Border(
+                    bottom:
+                        BorderSide(color: Color.fromRGBO(255, 255, 255, .1))),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -61,11 +63,13 @@ class JourneyDrawer extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(0, 7, 0, 5),
                     child: Text('End-to-end journey',
-                        style: AppText.s(20, w: FontWeight.w700, color: Colors.white, ls: -.5)),
+                        style: AppText.s(20,
+                            w: FontWeight.w700, color: Colors.white, ls: -.5)),
                   ),
                   Text(
                     'Explore every stage of the ${AppConstants.brandName} experience.',
-                    style: AppText.s(12, color: const Color(0xFF9AABC3), height: 1.5),
+                    style: AppText.s(12,
+                        color: const Color(0xFF9AABC3), height: 1.5),
                   ),
                 ],
               ),
@@ -79,10 +83,14 @@ class JourneyDrawer extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(11, 15, 11, 6),
                       child: Text(
                         group.toUpperCase(),
-                        style: AppText.s(9, w: FontWeight.w800, color: const Color(0xFF7186A4), ls: 1.2),
+                        style: AppText.s(9,
+                            w: FontWeight.w800,
+                            color: const Color(0xFF7186A4),
+                            ls: 1.2),
                       ),
                     ),
-                    for (final item in journeyItems.where((i) => i.group == group))
+                    for (final item
+                        in journeyItems.where((i) => i.group == group))
                       _JourneyButton(
                         index: journeyItems.indexOf(item) + 1,
                         item: item,
@@ -95,11 +103,13 @@ class JourneyDrawer extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 17),
               decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: Color.fromRGBO(255, 255, 255, .1))),
+                border: Border(
+                    top: BorderSide(color: Color.fromRGBO(255, 255, 255, .1))),
               ),
               child: Row(
                 children: [
-                  const AppIcon(AppIcons.shield, size: 16, color: Color(0xFF8FA2BD)),
+                  const AppIcon(AppIcons.shield,
+                      size: 16, color: Color(0xFF8FA2BD)),
                   const SizedBox(width: 8),
                   Text('Secure academic workspace',
                       style: AppText.s(11, color: const Color(0xFF8FA2BD))),
@@ -114,7 +124,8 @@ class JourneyDrawer extends StatelessWidget {
 }
 
 class _JourneyButton extends StatelessWidget {
-  const _JourneyButton({required this.index, required this.item, required this.active});
+  const _JourneyButton(
+      {required this.index, required this.item, required this.active});
 
   final int index;
   final JourneyItem item;
@@ -139,7 +150,10 @@ class _JourneyButton extends StatelessWidget {
               SizedBox(
                 width: 18,
                 child: Text('$index',
-                    style: AppText.s(10, color: active ? const Color(0xFF8CACF3) : const Color(0xFF617795))),
+                    style: AppText.s(10,
+                        color: active
+                            ? const Color(0xFF8CACF3)
+                            : const Color(0xFF617795))),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -151,7 +165,8 @@ class _JourneyButton extends StatelessWidget {
                       color: active ? Colors.white : const Color(0xFFAEBBD0)),
                 ),
               ),
-              if (active) const AppIcon(AppIcons.chevron, size: 15, color: Colors.white),
+              if (active)
+                const AppIcon(AppIcons.chevron, size: 15, color: Colors.white),
             ],
           ),
         ),

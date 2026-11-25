@@ -6,6 +6,7 @@ class Student {
     required this.email,
     required this.department,
     required this.academicYear,
+    this.academicProfileComplete = true,
   });
 
   final String id;
@@ -14,6 +15,7 @@ class Student {
   final String email;
   final String department;
   final String academicYear;
+  final bool academicProfileComplete;
 
   String get firstName => fullName.split(' ').first;
 
@@ -23,13 +25,16 @@ class Student {
     return (parts.first[0] + parts.last[0]).toUpperCase();
   }
 
+  /// بيقرا رد GET /api/Student/Profile
   factory Student.fromJson(Map<String, dynamic> json) => Student(
-        id: json['id'] as String,
-        fullName: json['fullName'] as String,
-        universityId: json['universityId'] as String,
-        email: json['email'] as String,
-        department: json['department'] as String,
-        academicYear: json['academicYear'] as String,
+        id: json['userId'].toString(),
+        fullName: '${json['firstName'] ?? ''} ${json['lastName'] ?? ''}'.trim(),
+        universityId: (json['studentNumber'] ?? '').toString(),
+        email: (json['email'] ?? '').toString(),
+        department: (json['department'] ?? '').toString(),
+        academicYear: (json['academicYear'] ?? '').toString(),
+        academicProfileComplete:
+            json['academicProfileComplete'] as bool? ?? true,
       );
 
   Map<String, dynamic> toJson() => {
@@ -39,32 +44,39 @@ class Student {
         'email': email,
         'department': department,
         'academicYear': academicYear,
+        'academicProfileComplete': academicProfileComplete,
       };
 }
 
 class RegistrationData {
   const RegistrationData({
-    required this.fullName,
+    required this.firstName,
+    required this.lastName,
     required this.universityId,
     required this.email,
     required this.department,
     required this.academicYear,
     required this.password,
+    required this.confirmPassword,
   });
 
-  final String fullName;
+  final String firstName;
+  final String lastName;
   final String universityId;
   final String email;
   final String department;
   final String academicYear;
   final String password;
+  final String confirmPassword;
 
   Map<String, dynamic> toJson() => {
-        'fullName': fullName,
-        'universityId': universityId,
+        'firstName': firstName,
+        'lastName': lastName,
         'email': email,
+        'studentNumber': universityId,
         'department': department,
         'academicYear': academicYear,
         'password': password,
+        'confirmPassword': confirmPassword,
       };
 }

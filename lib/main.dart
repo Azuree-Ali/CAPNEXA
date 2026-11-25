@@ -10,4 +10,5 @@ Future<void> main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   ServiceLocator.setup(); // swap mock services for API services here
   runApp(const CapNexaApp());
-}
+} 
+ 

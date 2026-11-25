@@ -21,7 +21,8 @@ class MilestonesScreen extends StatelessWidget {
       title: 'Project milestones',
       tab: AppTab.project,
       loader: ServiceLocator.milestones.getPlan,
-      subtitleBuilder: (p) => '${p.inProgressNumber} of ${p.milestones.length} in progress',
+      subtitleBuilder: (p) =>
+          '${p.inProgressNumber} of ${p.milestones.length} in progress',
       builder: (context, plan) => ScreenBody(
         children: [
           Container(
@@ -38,8 +39,10 @@ class MilestonesScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text('${plan.overallProgress.round()}%',
-                        style: AppText.s(24, w: FontWeight.w700, color: Colors.white)),
-                    Text('Overall progress', style: AppText.s(8, color: AppColors.heroSub)),
+                        style: AppText.s(24,
+                            w: FontWeight.w700, color: Colors.white)),
+                    Text('Overall progress',
+                        style: AppText.s(8, color: AppColors.heroSub)),
                   ],
                 ),
                 const SizedBox(height: 11),
@@ -51,7 +54,8 @@ class MilestonesScreen extends StatelessWidget {
                 const SizedBox(height: 11),
                 Row(
                   children: [
-                    const AppIcon(AppIcons.calendar, size: 16, color: Color(0xFFBDC8D8)),
+                    const AppIcon(AppIcons.calendar,
+                        size: 16, color: Color(0xFFBDC8D8)),
                     const SizedBox(width: 5),
                     Text('Final submission · ${plan.finalSubmission}',
                         style: AppText.s(8.5, color: const Color(0xFFBDC8D8))),
@@ -69,9 +73,10 @@ class MilestonesScreen extends StatelessWidget {
                     milestone: plan.milestones[i],
                     index: i,
                     isLast: i == plan.milestones.length - 1,
-                    onTap: plan.milestones[i].status == MilestoneStatus.inProgress
-                        ? () => AppNav.push(context, Routes.milestone)
-                        : null,
+                    onTap:
+                        plan.milestones[i].status == MilestoneStatus.inProgress
+                            ? () => AppNav.push(context, Routes.milestone)
+                            : null,
                   ),
               ],
             ),

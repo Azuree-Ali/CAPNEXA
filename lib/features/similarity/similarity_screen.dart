@@ -49,14 +49,17 @@ class SimilarityScreen extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text('${r.score}%',
-                            style: AppText.s(27, w: FontWeight.w700, color: AppColors.navy900)),
-                        Text('Similarity', style: AppText.s(8, color: AppColors.muted)),
+                            style: AppText.s(27,
+                                w: FontWeight.w700, color: AppColors.navy900)),
+                        Text('Similarity',
+                            style: AppText.s(8, color: AppColors.muted)),
                       ],
                     ),
                   ),
                 ),
               ),
-              const StatusBadge('Moderate review recommended', tone: BadgeTone.orange),
+              const StatusBadge('Moderate review recommended',
+                  tone: BadgeTone.orange),
               const SizedBox(height: 9),
               Text('Analysis completed', style: AppText.h2),
               const SizedBox(height: 5),
@@ -73,7 +76,8 @@ class SimilarityScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(9),
             decoration: const BoxDecoration(
-              border: Border.symmetric(horizontal: BorderSide(color: AppColors.line)),
+              border: Border.symmetric(
+                  horizontal: BorderSide(color: AppColors.line)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -84,7 +88,8 @@ class SimilarityScreen extends StatelessWidget {
                 const SizedBox(width: 15),
                 const AppIcon(AppIcons.file, color: AppColors.muted),
                 const SizedBox(width: 4),
-                Text('${r.pages} pages', style: AppText.s(8, color: AppColors.muted)),
+                Text('${r.pages} pages',
+                    style: AppText.s(8, color: AppColors.muted)),
               ],
             ),
           ),
@@ -93,8 +98,8 @@ class SimilarityScreen extends StatelessWidget {
             children: [
               SectionHeading('Potentially similar content',
                   actionLabel: 'View report',
-                  onAction: () =>
-                      showAppSnack(context, 'The detailed report will be available with the API.')),
+                  onAction: () => showAppSnack(context,
+                      'The detailed report will be available with the API.')),
               DividedList(
                 radius: 13,
                 children: [for (final m in r.matches) _MatchRow(match: m)],
@@ -108,7 +113,8 @@ class SimilarityScreen extends StatelessWidget {
             padding: 12,
             radius: 12,
             title: 'Use this insight responsibly',
-            message: 'Review citations, paraphrasing, and quoted material before final submission.',
+            message:
+                'Review citations, paraphrasing, and quoted material before final submission.',
             textColor: AppColors.muted,
             titleColor: AppColors.muted,
           ),
@@ -133,7 +139,10 @@ class _MatchRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final (fg, bg) = switch (match.severity) {
       MatchSeverity.high => (AppColors.orange700, AppColors.orange100),
-      MatchSeverity.medium => (const Color(0xFF8B6711), const Color(0xFFFFF7DC)),
+      MatchSeverity.medium => (
+          const Color(0xFF8B6711),
+          const Color(0xFFFFF7DC)
+        ),
       MatchSeverity.low => (AppColors.blue700, AppColors.blue100),
     };
     return Padding(
@@ -144,16 +153,21 @@ class _MatchRow extends StatelessWidget {
             width: 36,
             height: 36,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(9)),
-            child: Text('${match.percent}%', style: AppText.s(8, w: FontWeight.w800, color: fg)),
+            decoration: BoxDecoration(
+                color: bg, borderRadius: BorderRadius.circular(9)),
+            child: Text('${match.percent}%',
+                style: AppText.s(8, w: FontWeight.w800, color: fg)),
           ),
           const SizedBox(width: 9),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(match.title, style: AppText.s(8.5, w: FontWeight.w700, color: AppColors.navy900)),
-                Text(match.location, style: AppText.s(7, color: AppColors.muted, height: 1.6)),
+                Text(match.title,
+                    style: AppText.s(8.5,
+                        w: FontWeight.w700, color: AppColors.navy900)),
+                Text(match.location,
+                    style: AppText.s(7, color: AppColors.muted, height: 1.6)),
               ],
             ),
           ),

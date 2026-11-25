@@ -12,12 +12,37 @@ class MockMilestoneService implements MilestoneService {
       daysLeft: 4);
 
   static const _milestones = [
-    Milestone(id: 'm1', name: 'Proposal', dateRange: 'May 1 – May 12', progress: 100, status: MilestoneStatus.completed),
-    Milestone(id: 'm2', name: 'Analysis', dateRange: 'May 13 – May 18', progress: 100, status: MilestoneStatus.completed),
+    Milestone(
+        id: 'm1',
+        name: 'Proposal',
+        dateRange: 'May 1 – May 12',
+        progress: 100,
+        status: MilestoneStatus.completed),
+    Milestone(
+        id: 'm2',
+        name: 'Analysis',
+        dateRange: 'May 13 – May 18',
+        progress: 100,
+        status: MilestoneStatus.completed),
     _systemDesign,
-    Milestone(id: 'm4', name: 'Implementation', dateRange: 'May 25 – Jun 20', progress: 0, status: MilestoneStatus.upcoming),
-    Milestone(id: 'm5', name: 'Testing', dateRange: 'Jun 21 – Jul 4', progress: 0, status: MilestoneStatus.upcoming),
-    Milestone(id: 'm6', name: 'Final Report', dateRange: 'Jul 5 – Jul 18', progress: 0, status: MilestoneStatus.upcoming),
+    Milestone(
+        id: 'm4',
+        name: 'Implementation',
+        dateRange: 'May 25 – Jun 20',
+        progress: 0,
+        status: MilestoneStatus.upcoming),
+    Milestone(
+        id: 'm5',
+        name: 'Testing',
+        dateRange: 'Jun 21 – Jul 4',
+        progress: 0,
+        status: MilestoneStatus.upcoming),
+    Milestone(
+        id: 'm6',
+        name: 'Final Report',
+        dateRange: 'Jul 5 – Jul 18',
+        progress: 0,
+        status: MilestoneStatus.upcoming),
   ];
 
   @override

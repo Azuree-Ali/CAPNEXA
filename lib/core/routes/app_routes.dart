@@ -25,9 +25,11 @@ class Routes {
   static const settings = '/settings';
   static const completion = '/completion';
   static const states = '/states';
+  static const academicSetup = '/academic-setup';
+  static const forgotPassword = '/forgot-password';
 
   /// Screens shown without the bottom navigation bar.
-  static const standalone = {splash, onboarding, register, login};
+    static const standalone = {splash, onboarding, register, login, academicSetup, forgotPassword};
 }
 
 /// Entry of the "All screens" journey drawer (same list/groups as the

@@ -29,7 +29,8 @@ class HistoryScreen extends StatelessWidget {
             children: [
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 170),
-                child: Text('All submitted versions are securely archived.', style: AppText.p),
+                child: Text('All submitted versions are securely archived.',
+                    style: AppText.p),
               ),
               AppButton(
                 label: 'New version',
@@ -46,7 +47,10 @@ class HistoryScreen extends StatelessWidget {
                 _VersionCard(
                   version: versions[i],
                   onTap: () => AppNav.push(
-                      context, versions[i].isLatest ? Routes.similarity : Routes.feedback),
+                      context,
+                      versions[i].isLatest
+                          ? Routes.similarity
+                          : Routes.feedback),
                 ),
               ],
             ],
@@ -72,15 +76,20 @@ class _VersionCard extends StatelessWidget {
       VersionStatus.replaced => BadgeTone.gray,
       VersionStatus.approved => BadgeTone.teal,
     };
-    Widget stat(String label, Widget value, {bool first = false, bool last = false}) => Container(
+    Widget stat(String label, Widget value,
+            {bool first = false, bool last = false}) =>
+        Container(
           padding: EdgeInsets.only(left: first ? 0 : 8),
           decoration: BoxDecoration(
-            border: last ? null : const Border(right: BorderSide(color: AppColors.line)),
+            border: last
+                ? null
+                : const Border(right: BorderSide(color: AppColors.line)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: AppText.s(6.5, color: const Color(0xFF929DAD))),
+              Text(label,
+                  style: AppText.s(6.5, color: const Color(0xFF929DAD))),
               const SizedBox(height: 4),
               value,
             ],
@@ -90,11 +99,15 @@ class _VersionCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: v.isLatest ? const Color(0xFFB8C8ED) : AppColors.line),
+        border: Border.all(
+            color: v.isLatest ? const Color(0xFFB8C8ED) : AppColors.line),
         borderRadius: BorderRadius.circular(14),
         boxShadow: v.isLatest
             ? const [
-                BoxShadow(color: Color.fromRGBO(39, 84, 197, .07), blurRadius: 18, offset: Offset(0, 6)),
+                BoxShadow(
+                    color: Color.fromRGBO(39, 84, 197, .07),
+                    blurRadius: 18,
+                    offset: Offset(0, 6)),
               ]
             : null,
       ),
@@ -113,13 +126,17 @@ class _VersionCard extends StatelessWidget {
                       height: 34,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: v.isLatest ? AppColors.blue100 : const Color(0xFFEEF1F6),
+                        color: v.isLatest
+                            ? AppColors.blue100
+                            : const Color(0xFFEEF1F6),
                         borderRadius: BorderRadius.circular(9),
                       ),
                       child: Text('V${v.number}',
                           style: AppText.s(9,
                               w: FontWeight.w800,
-                              color: v.isLatest ? AppColors.blue700 : AppColors.navy800)),
+                              color: v.isLatest
+                                  ? AppColors.blue700
+                                  : AppColors.navy800)),
                     ),
                     const SizedBox(width: 9),
                     Expanded(
@@ -129,21 +146,27 @@ class _VersionCard extends StatelessWidget {
                           Row(
                             children: [
                               Text('Version ${v.number}',
-                                  style: AppText.s(10, w: FontWeight.w700, color: AppColors.navy900)),
+                                  style: AppText.s(10,
+                                      w: FontWeight.w700,
+                                      color: AppColors.navy900)),
                               if (v.isLatest)
                                 Container(
                                   margin: const EdgeInsets.only(left: 4),
-                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 5, vertical: 3),
                                   decoration: BoxDecoration(
                                     color: AppColors.blue100,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Text('Latest', style: AppText.s(7, color: AppColors.blue700)),
+                                  child: Text('Latest',
+                                      style: AppText.s(7,
+                                          color: AppColors.blue700)),
                                 ),
                             ],
                           ),
                           const SizedBox(height: 2),
-                          Text(v.date, style: AppText.s(7.5, color: AppColors.muted)),
+                          Text(v.date,
+                              style: AppText.s(7.5, color: AppColors.muted)),
                         ],
                       ),
                     ),
@@ -152,7 +175,8 @@ class _VersionCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
                 decoration: const BoxDecoration(
                   color: Color(0xFFFAFBFC),
                   border: Border(top: BorderSide(color: AppColors.line)),
@@ -163,22 +187,30 @@ class _VersionCard extends StatelessWidget {
                     children: [
                       Expanded(
                         flex: 14,
-                        child: stat('STATUS',
-                            Align(alignment: Alignment.centerLeft, child: StatusBadge(v.statusLabel, tone: tone)),
+                        child: stat(
+                            'STATUS',
+                            Align(
+                                alignment: Alignment.centerLeft,
+                                child: StatusBadge(v.statusLabel, tone: tone)),
                             first: true),
                       ),
                       Expanded(
                         flex: 8,
-                        child: stat('SIMILARITY',
+                        child: stat(
+                            'SIMILARITY',
                             Text(v.similarity,
-                                style: AppText.s(8, w: FontWeight.w700, color: AppColors.navy900))),
+                                style: AppText.s(8,
+                                    w: FontWeight.w700,
+                                    color: AppColors.navy900))),
                       ),
                       Expanded(
                         flex: 10,
                         child: stat(
                             'REVIEW',
                             Text(v.review,
-                                style: AppText.s(8, w: FontWeight.w700, color: AppColors.navy900)),
+                                style: AppText.s(8,
+                                    w: FontWeight.w700,
+                                    color: AppColors.navy900)),
                             last: true),
                       ),
                     ],

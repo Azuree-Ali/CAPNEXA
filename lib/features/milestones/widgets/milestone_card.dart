@@ -84,9 +84,12 @@ class MilestoneTimelineCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Submission pending', style: AppText.s(8, color: AppColors.muted)),
+                        Text('Submission pending',
+                            style: AppText.s(8, color: AppColors.muted)),
                         Text('${m.daysLeft} days left',
-                            style: AppText.s(8, w: FontWeight.w700, color: AppColors.orange700)),
+                            style: AppText.s(8,
+                                w: FontWeight.w700,
+                                color: AppColors.orange700)),
                       ],
                     ),
                   ],

@@ -93,7 +93,8 @@ class RingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final strokeWidth = size.width * strokeRatio;
     final radius = size.width * radiusRatio;
-    final rect = Rect.fromCircle(center: size.center(Offset.zero), radius: radius);
+    final rect =
+        Rect.fromCircle(center: size.center(Offset.zero), radius: radius);
     final track = Paint()
       ..color = trackColor
       ..style = PaintingStyle.stroke

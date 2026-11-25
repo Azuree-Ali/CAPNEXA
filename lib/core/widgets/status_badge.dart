@@ -26,7 +26,8 @@ class StatusBadge extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(minHeight: 21),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -37,7 +38,8 @@ class StatusBadge extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Flexible(
-            child: Text(label, style: AppText.s(8.5, w: FontWeight.w800, color: fg)),
+            child: Text(label,
+                style: AppText.s(8.5, w: FontWeight.w800, color: fg)),
           ),
         ],
       ),

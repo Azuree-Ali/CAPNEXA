@@ -36,7 +36,8 @@ class SectionHeading extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (overline != null) Text(overline!, style: AppText.overline),
+                  if (overline != null)
+                    Text(overline!, style: AppText.overline),
                   Text(title, style: AppText.h2),
                 ],
               ),
@@ -48,7 +49,8 @@ class SectionHeading extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Text(actionLabel!,
-                      style: AppText.s(10, w: FontWeight.w700, color: AppColors.blue700)),
+                      style: AppText.s(10,
+                          w: FontWeight.w700, color: AppColors.blue700)),
                 ),
               ),
             if (trailing != null)

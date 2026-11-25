@@ -26,7 +26,8 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
       if (mounted) setState(() => _stage = 1);
     }));
     _timers.add(Timer(const Duration(milliseconds: 3200), () {
-      if (mounted) Navigator.of(context).pushReplacementNamed(Routes.similarity);
+      if (mounted)
+        Navigator.of(context).pushReplacementNamed(Routes.similarity);
     }));
   }
 
@@ -50,13 +51,15 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
             const StateCard(
               kind: StateKind.loading,
               title: 'Running security scan',
-              message: 'Checking your files before analysis. This only takes a moment.',
+              message:
+                  'Checking your files before analysis. This only takes a moment.',
             )
           else
             const StateCard(
               kind: StateKind.loading,
               title: 'Analyzing your submission',
-              message: 'This usually takes less than two minutes. You can safely leave this screen.',
+              message:
+                  'This usually takes less than two minutes. You can safely leave this screen.',
             ),
         ],
       ),
