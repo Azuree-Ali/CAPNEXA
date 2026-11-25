@@ -1,3 +1,4 @@
+import { connected } from "@/lib/api/api-client";
 import { TableSkeleton } from "@/components/feedback/Skeleton";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, CheckCircle2, X } from "lucide-react";
@@ -149,10 +150,11 @@ export function OperationsDetail({
   }
 
   const action = target?.action ?? null;
+  const DialogIcon = action ? copy.actionIcons[action] : null;
   const dialogHeading = target?.isSubrecord ? t.reassign : action ? t[action] : "";
 
   return (
-    <section className="academic-workspace connected-workspace">
+    <section className="academic-workspace connected-workspace operation-detail">
       <header className="academic-heading">
         <button type="button" onClick={() => onClose()} className="operation-back">
           <ArrowLeft size={16} aria-hidden="true" />
@@ -164,18 +166,30 @@ export function OperationsDetail({
         <p>{operationPages[domain].description}</p>
         {data && data.actions.length > 0 && (
           <div className="operation-actions">
-            {data.actions.map((item) => (
-              <button type="button" key={item} data-action={item} onClick={() => openChange(item)}>
-                {t[item]}
-              </button>
-            ))}
+            {data.actions.map((item) => {
+              const Icon = copy.actionIcons[item];
+              return (
+                <button
+                  type="button"
+                  key={item}
+                  data-action={item}
+                  onClick={() => openChange(item)}
+                >
+                  <Icon size={16} aria-hidden="true" />
+                  {t[item]}
+                </button>
+              );
+            })}
           </div>
         )}
       </header>
       {subSuccess && (
         <div className="operation-success" role="status">
           <CheckCircle2 size={18} aria-hidden="true" />
-          <span>{subSuccess}</span>
+          <span>
+            {subSuccess}
+            {!connected && ` ${t.preview}`}
+          </span>
         </div>
       )}
       {!result && (
@@ -271,7 +285,14 @@ export function OperationsDetail({
           }}
         >
           <div className="operation-dialog-head">
-            <h2 id="change-title">{dialogHeading}</h2>
+            <div className="operation-dialog-title">
+              {DialogIcon && (
+                <span className="operation-dialog-icon" data-action={action} aria-hidden="true">
+                  <DialogIcon size={20} strokeWidth={1.8} />
+                </span>
+              )}
+              <h2 id="change-title">{dialogHeading}</h2>
+            </div>
             <button
               type="button"
               className="dialog-close"
@@ -282,12 +303,20 @@ export function OperationsDetail({
               <X size={18} aria-hidden="true" />
             </button>
           </div>
-          <p>
+          <p className="operation-dialog-record">
             <strong>{target?.title ?? data?.title ?? row.title}</strong>
           </p>
-          <p id="change-description">{action && copy.confirmation[action]}</p>
+          <p id="change-description">
+            {action && copy.confirmation[action]}
+            {!connected && <span className="operation-secondary">{t.preview}</span>}
+          </p>
           {action === "assign" && (
-            <SupervisorPicker value={value} onChange={setValue} busy={busy} />
+            <SupervisorPicker
+              value={value}
+              onChange={setValue}
+              busy={busy}
+              excludedId={target?.isSubrecord ? Number(row.id) : undefined}
+            />
           )}
           {action === "capacity" && (
             <label>

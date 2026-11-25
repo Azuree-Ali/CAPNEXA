@@ -1,3 +1,14 @@
+import { connected } from "@/lib/api/api-client";
+import {
+  applyPreviewChange,
+  previewStudents,
+  previewStudent,
+  previewSupervisors,
+  previewSupervisor,
+  previewProposals,
+  previewProposal,
+  previewUnassigned,
+} from "./operationsPreview";
 import {
   listStudents,
   studentProfile,
@@ -47,22 +58,24 @@ export async function loadList(
   signal: AbortSignal,
   filters: OperationFilters = {},
 ): Promise<Listing> {
-  const query = { search, page, pageSize: 20 };
+  const query = { search, page, pageSize: connected ? 20 : 5 };
+  signal.throwIfAborted();
   switch (domain) {
     case "students": {
+      const criteria = {
+        ...query,
+        isActive: filters.isActive,
+        department: filters.department,
+        academicYear: filters.academicYear,
+      };
       // [BACKEND-API] List students. GET /api/Admin/Students. AdminStudentQueryDto -> AdminStudentListDto.
-      const result = await listStudents(
-        {
-          ...query,
-          ...(filters.isActive !== undefined ? { isActive: filters.isActive } : {}),
-        },
-        signal,
-      );
+      const result = connected ? await listStudents(criteria, signal) : previewStudents(criteria);
       return {
         ...result,
         items: result.items.map((s) => ({
           id: s.userId,
           title: s.firstName + " " + s.lastName,
+          secondary: s.email ?? undefined,
           cells: [
             s.studentNumber ?? t.missing,
             s.department ?? t.missing,
@@ -73,20 +86,22 @@ export async function loadList(
       };
     }
     case "supervisors": {
+      const criteria = {
+        ...query,
+        isActive: filters.isActive,
+        hasCapacity: filters.hasCapacity,
+        department: filters.department,
+      };
       // [BACKEND-API] List faculty. GET /api/Admin/Supervisors. AdminSupervisorQueryDto -> AdminSupervisorListDto.
-      const result = await listSupervisors(
-        {
-          ...query,
-          ...(filters.isActive !== undefined ? { isActive: filters.isActive } : {}),
-          ...(filters.hasCapacity !== undefined ? { hasCapacity: filters.hasCapacity } : {}),
-        },
-        signal,
-      );
+      const result = connected
+        ? await listSupervisors(criteria, signal)
+        : previewSupervisors(criteria);
       return {
         ...result,
         items: result.items.map((s) => ({
           id: String(s.supervisorId),
           title: s.firstName + " " + s.lastName,
+          secondary: s.email ?? undefined,
           cells: [
             s.department ?? t.missing,
             s.specialization ?? t.missing,
@@ -99,10 +114,9 @@ export async function loadList(
     }
     case "proposals": {
       // [BACKEND-API] Review queue. GET /api/Admin/ProjectProposals. AdminProposalQueryDto -> AdminProposalListDto.
-      const result = await listProposals(
-        { ...query, status: filters.status ?? "PendingReview" },
-        signal,
-      );
+      const result = connected
+        ? await listProposals({ ...query, status: filters.status ?? "PendingReview" }, signal)
+        : previewProposals({ ...query, status: filters.status ?? "PendingReview" });
       return {
         ...result,
         items: result.items.map((s) => ({
@@ -119,7 +133,7 @@ export async function loadList(
     }
     case "assignments": {
       // [BACKEND-API] Allocation queue. GET /api/Admin/ProjectAssignments/unassigned. AdminUnassignedProjectsQueryDto -> AdminUnassignedProjectListDto.
-      const result = await listUnassigned(query, signal);
+      const result = connected ? await listUnassigned(query, signal) : previewUnassigned(query);
       return {
         ...result,
         items: result.items.map((s) => ({
@@ -144,10 +158,11 @@ export async function loadDetail(
   row: Entry,
   signal: AbortSignal,
 ): Promise<Detail> {
+  signal.throwIfAborted();
   switch (domain) {
     case "students": {
       // [BACKEND-API] Inspect student. GET /api/Admin/Students/{userId}/profile. userId -> StudentProfileDto.
-      const s = await studentProfile(row.id, signal);
+      const s = connected ? await studentProfile(row.id, signal) : previewStudent(row.id);
       return {
         title: s.firstName + " " + s.lastName,
         fields: [
@@ -184,7 +199,9 @@ export async function loadDetail(
     }
     case "supervisors": {
       // [BACKEND-API] Inspect faculty load. GET /api/Admin/Supervisors/{supervisorId}. supervisorId -> AdminSupervisorDetailDto.
-      const s = await supervisorDetails(Number(row.id), signal);
+      const s = connected
+        ? await supervisorDetails(Number(row.id), signal)
+        : previewSupervisor(Number(row.id));
       return {
         title: s.firstName + " " + s.lastName,
         fields: [
@@ -229,7 +246,9 @@ export async function loadDetail(
     }
     case "proposals": {
       // [BACKEND-API] Read proposal. GET /api/Admin/ProjectProposals/{projectId}. projectId -> AdminProposalDetailDto.
-      const s = await proposalDetails(Number(row.id), signal);
+      const s = connected
+        ? await proposalDetails(Number(row.id), signal)
+        : previewProposal(Number(row.id));
       return {
         title: s.title,
         fields: [
@@ -288,6 +307,8 @@ export async function loadDetail(
 }
 
 export async function applyChange(action: Change, id: string, value: string, signal: AbortSignal) {
+  signal.throwIfAborted();
+  if (!connected) return applyPreviewChange(action, id, value);
   switch (action) {
     case "activate":
     case "deactivate":

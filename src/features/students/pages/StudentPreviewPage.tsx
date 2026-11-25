@@ -10,21 +10,7 @@ import {
 } from "../content/studentProfile.content";
 import { studentsContent, studentDirectoryMetrics as metrics } from "../content/students.content";
 import { WorkspaceView } from "@/components/data-table/WorkspaceView";
-let records: StudentRecord[] = [exampleStudent];
-const listeners = new Set<() => void>();
-function subscribe(fn: () => void) {
-  listeners.add(fn);
-  return () => {
-    listeners.delete(fn);
-  };
-}
-const snapshot = () => records;
-function save(student: StudentRecord) {
-  records = records.some((r) => r.id === student.id)
-    ? records.map((r) => (r.id === student.id ? student : r))
-    : [...records, student];
-  listeners.forEach((fn) => fn());
-}
+import { subscribe, snapshot, save } from "../hooks/studentPreview";
 type Mode = "add" | "edit" | "team" | "project";
 export function StudentPreviewPage() {
   const students = useSyncExternalStore(subscribe, snapshot);

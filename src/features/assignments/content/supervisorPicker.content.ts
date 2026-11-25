@@ -10,6 +10,7 @@ export interface SupervisorPickerContent {
   previous: string;
   next: string;
   slots: string;
+  assigned: string;
 }
 export const supervisorPickerContent: SupervisorPickerContent = {
   label: "Available supervisor",
@@ -23,4 +24,5 @@ export const supervisorPickerContent: SupervisorPickerContent = {
   previous: "Previous",
   next: "Next",
   slots: "available slots",
+  assigned: "Assigned / maximum projects",
 };

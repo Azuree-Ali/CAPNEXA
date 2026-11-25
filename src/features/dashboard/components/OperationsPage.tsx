@@ -1,5 +1,9 @@
+import { assignmentsContent } from "@/features/assignments/content/assignments.content";
+import { connected } from "@/lib/api/api-client";
+import { StudentPreviewPage } from "@/features/students/pages/StudentPreviewPage";
+import "./operations.css";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -32,6 +36,16 @@ function badgeTone(value: string): "success" | "danger" | "pending" | null {
 }
 
 export function OperationsPage({ domain }: { domain: OperationDomain }) {
+  const [params] = useSearchParams();
+  if (!connected && domain === "students" && params.has("preview-tools"))
+    return <StudentPreviewPage />;
+  return <OperationsDirectory domain={domain} />;
+}
+
+function OperationsDirectory({ domain }: { domain: OperationDomain }) {
+  const [department, setDepartment] = useState("");
+  const [year, setYear] = useState("");
+  const [academicFilters, setAcademicFilters] = useState({ department: "", academicYear: "" });
   const [row, select] = useState<Entry | null>(null);
   const [page, setPage] = useState(1);
   const [proposalStatus, setProposalStatus] = useState<ProposalStatus>("PendingReview");
@@ -51,6 +65,7 @@ export function OperationsPage({ domain }: { domain: OperationDomain }) {
     // [BACKEND-API] Read the selected domain's existing GET list. See operations.ts for query and list DTOs.
     loadList(domain, query, page, abort.signal, {
       status: proposalStatus,
+      ...academicFilters,
       isActive: isActiveFilter === "" ? undefined : isActiveFilter === "true",
       hasCapacity: hasCapacityFilter === "" ? undefined : hasCapacityFilter === "true",
     }).then(
@@ -63,7 +78,17 @@ export function OperationsPage({ domain }: { domain: OperationDomain }) {
       },
     );
     return () => abort.abort();
-  }, [domain, query, page, revision, proposalStatus, isActiveFilter, hasCapacityFilter, row]);
+  }, [
+    domain,
+    query,
+    page,
+    revision,
+    proposalStatus,
+    isActiveFilter,
+    hasCapacityFilter,
+    academicFilters,
+    row,
+  ]);
 
   useEffect(() => {
     document.title = (row?.title ?? title) + " | CAPNEXA";
@@ -81,6 +106,9 @@ export function OperationsPage({ domain }: { domain: OperationDomain }) {
 
   function clearFilters() {
     setCompleted(null);
+    setDepartment("");
+    setYear("");
+    setAcademicFilters({ department: "", academicYear: "" });
     setSearch("");
     setQuery("");
     setIsActiveFilter("");
@@ -92,7 +120,7 @@ export function OperationsPage({ domain }: { domain: OperationDomain }) {
 
   const count = result && "data" in result ? result.data.totalCount : null;
   const hasActiveFilter =
-    Boolean(query) ||
+    Boolean(query || academicFilters.department || academicFilters.academicYear) ||
     isActiveFilter !== "" ||
     hasCapacityFilter !== "" ||
     (domain === "proposals" && proposalStatus !== "PendingReview");
@@ -131,14 +159,32 @@ export function OperationsPage({ domain }: { domain: OperationDomain }) {
           {title}
         </h1>
         <p>{operationPages[domain].description}</p>
-        <small className="academic-status" data-connected="true">
-          {t.live}
+        <small className="academic-status" data-connected={connected}>
+          {connected ? t.live : t.preview}
         </small>
+        {!connected && (
+          <nav className="operation-preview-links">
+            {domain === "students" && <Link to="?preview-tools">{t.previewTools}</Link>}
+            {domain === "supervisors" && (
+              <Link to="/admin/supervisors/olivia-bennett">{t.supervisorDemo}</Link>
+            )}
+            {domain === "proposals" && <Link to="/admin/proposals/review">{t.proposalDemo}</Link>}
+            {domain === "assignments" &&
+              assignmentsContent.links.map((link) => (
+                <Link to={link.route} key={link.route}>
+                  {link.label}
+                </Link>
+              ))}
+          </nav>
+        )}
       </header>
       {completed && (
         <div className="operation-success" role="status">
           <CheckCircle2 size={18} aria-hidden="true" />
-          <span>{copy.success[completed]}</span>
+          <span>
+            {copy.success[completed]}
+            {!connected && ` ${t.preview}`}
+          </span>
           {completed === "approve" && (
             <Link to="/admin/assignments">{operationPages.assignments.title}</Link>
           )}
@@ -152,6 +198,7 @@ export function OperationsPage({ domain }: { domain: OperationDomain }) {
             event.preventDefault();
             setCompleted(null);
             setQuery(search.trim());
+            setAcademicFilters({ department: department.trim(), academicYear: year.trim() });
             setPage(1);
             refresh();
           }}
@@ -186,6 +233,18 @@ export function OperationsPage({ domain }: { domain: OperationDomain }) {
                 <option value="true">{t.active}</option>
                 <option value="false">{t.inactive}</option>
               </select>
+            </label>
+          )}
+          {(domain === "students" || domain === "supervisors") && (
+            <label>
+              <span>{t.department}</span>
+              <input value={department} onChange={(event) => setDepartment(event.target.value)} />
+            </label>
+          )}
+          {domain === "students" && (
+            <label>
+              <span>{t.year}</span>
+              <input value={year} onChange={(event) => setYear(event.target.value)} />
             </label>
           )}
           {domain === "supervisors" && (
@@ -234,6 +293,11 @@ export function OperationsPage({ domain }: { domain: OperationDomain }) {
               </select>
             </label>
           )}
+          {hasActiveFilter && (
+            <button type="button" className="operation-clear" onClick={clearFilters}>
+              {t.clearFilters}
+            </button>
+          )}
           <button type="button" onClick={refresh} disabled={!result} className="operation-refresh">
             <RefreshCw size={15} aria-hidden="true" />
             {t.refresh}
@@ -257,11 +321,6 @@ export function OperationsPage({ domain }: { domain: OperationDomain }) {
             {result.data.items.length === 0 ? (
               <div className="academic-empty" role="status">
                 <p>{t.empty}</p>
-                {hasActiveFilter && (
-                  <button type="button" onClick={clearFilters}>
-                    {t.clearFilters}
-                  </button>
-                )}
               </div>
             ) : (
               <div
@@ -288,6 +347,9 @@ export function OperationsPage({ domain }: { domain: OperationDomain }) {
                           <button type="button" onClick={() => select(item)}>
                             {item.title}
                           </button>
+                          {item.secondary && (
+                            <small className="operation-secondary">{item.secondary}</small>
+                          )}
                         </th>
                         {item.cells.map((cell, index) => {
                           const tone = badgeTone(cell);

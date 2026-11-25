@@ -1,3 +1,4 @@
+import { Check, CircleSlash, Gauge, Link2, UserCheck, UserX, type LucideIcon } from "lucide-react";
 import type {
   Change,
   OperationDomain,
@@ -21,8 +22,15 @@ export const operationPages: Record<OperationDomain, OperationListContent> = {
 export interface OperationsContent {
   proposalStatuses: Record<ProposalStatus, string>;
   confirmation: Record<Change, string>;
+  actionIcons: Record<Change, LucideIcon>;
   success: Record<Change, string>;
   text: Record<
+    | "preview"
+    | "previewMissing"
+    | "previewUnavailable"
+    | "previewTools"
+    | "proposalDemo"
+    | "supervisorDemo"
     | "search"
     | "retry"
     | "loading"
@@ -114,6 +122,14 @@ export interface OperationsContent {
 }
 export const operations: OperationsContent = {
   proposalStatuses: { PendingReview: "Pending review", Approved: "Approved", Rejected: "Rejected" },
+  actionIcons: {
+    activate: UserCheck,
+    deactivate: UserX,
+    capacity: Gauge,
+    approve: Check,
+    reject: CircleSlash,
+    assign: Link2,
+  },
   confirmation: {
     activate: "Restore this student's account access.",
     deactivate: "Disable this student's account access.",
@@ -131,6 +147,12 @@ export const operations: OperationsContent = {
     assign: "Supervisor assigned.",
   },
   text: {
+    preview: "Demonstration data · Changes stay in this tab until reload.",
+    previewMissing: "This demonstration record is unavailable.",
+    previewUnavailable: "This demonstration change is no longer available. Refresh and try again.",
+    previewTools: "Add or edit demonstration students",
+    proposalDemo: "Demonstration proposal dossier",
+    supervisorDemo: "Demonstration faculty profile",
     search: "Search records",
     retry: "Retry",
     loading: "Loading records…",

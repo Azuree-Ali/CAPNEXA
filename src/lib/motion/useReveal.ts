@@ -12,10 +12,10 @@ export function useReveal<T extends HTMLElement>(selector = "[data-reveal]", del
       if (reduced()) return;
       gsap.from(selector, {
         autoAlpha: 0,
-        y: 16,
-        duration: 0.5,
+        y: 8,
+        duration: 0.24,
         ease: "power2.out",
-        stagger: 0.06,
+        stagger: 0.025,
         delay,
         clearProps: "transform,opacity,visibility",
       });

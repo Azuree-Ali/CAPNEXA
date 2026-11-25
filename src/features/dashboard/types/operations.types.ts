@@ -3,6 +3,8 @@ export type ProposalStatus = "PendingReview" | "Approved" | "Rejected";
 export type Change = "activate" | "deactivate" | "capacity" | "approve" | "reject" | "assign";
 export interface OperationFilters {
   status?: ProposalStatus;
+  department?: string;
+  academicYear?: string;
   isActive?: boolean;
   hasCapacity?: boolean;
 }
@@ -15,6 +17,7 @@ export interface Entry {
   id: string;
   title: string;
   cells: readonly string[];
+  secondary?: string;
   fields?: RecordField[];
 }
 export interface Listing {

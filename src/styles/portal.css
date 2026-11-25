@@ -1867,12 +1867,30 @@
 .operation-tools label {
   padding: 0 12px;
   min-block-size: 44px;
+  max-inline-size: 100%;
+  min-inline-size: 0;
   border: 1px solid var(--capnexa-border);
   border-radius: var(--capnexa-control-radius);
   background: var(--capnexa-canvas);
   font-size: 13px;
   font-weight: 500;
   color: var(--capnexa-body);
+}
+.operation-tools label > span {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.operation-tools label > input {
+  min-inline-size: 5.5rem;
+  flex: 1 1 6rem;
+}
+.connected-workspace .academic-heading h1[tabindex="-1"]:focus:not(:focus-visible) {
+  outline: none;
+}
+.connected-workspace .academic-heading h1[tabindex="-1"]:focus-visible {
+  outline: 2px solid var(--capnexa-brand-600);
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 .operation-tools select {
   border: 0;

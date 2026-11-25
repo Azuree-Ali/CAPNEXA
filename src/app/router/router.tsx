@@ -39,11 +39,10 @@ function workspaceElement(
   content: WorkspaceContent | { title: string; description: string },
 ) {
   if (
-    connected &&
-    (path === "students" ||
-      path === "supervisors" ||
-      path === "proposals" ||
-      path === "assignments")
+    path === "students" ||
+    path === "supervisors" ||
+    path === "proposals" ||
+    path === "assignments"
   ) {
     return <OperationsPage key={path} domain={path} />;
   }
@@ -85,8 +84,6 @@ function workspaceElement(
       return <DashboardPage />;
     case "reports":
       return <ReportsPage />;
-    case "students":
-      return <StudentPreviewPage />;
     case "settings":
       return <AcademicConfigurationPage />;
     case "settings/permissions":
@@ -107,10 +104,6 @@ function workspaceElement(
       if ("columns" in content)
         return <ProposalPreviewPage key={path} route={path} content={content} />;
       break;
-    case "proposals":
-    case "assignments":
-      if (!("columns" in content)) break;
-      return <ProposalPreviewPage key={path} route={path} content={content} />;
     default:
       if ("columns" in content) return <WorkspaceView key={path} route={path} content={content} />;
   }

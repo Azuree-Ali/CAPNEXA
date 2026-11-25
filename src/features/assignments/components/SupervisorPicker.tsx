@@ -1,4 +1,5 @@
-import { ApiHttpError } from "@/lib/api/api-client";
+import { previewSupervisors } from "@/features/dashboard/hooks/operationsPreview";
+import { ApiHttpError, connected } from "@/lib/api/api-client";
 import { useEffect, useState } from "react";
 import { listSupervisors } from "@/features/supervisors/api/supervisors.api";
 import type { AdminSupervisorListDto } from "@/features/supervisors/types/supervisors.types";
@@ -9,10 +10,12 @@ export function SupervisorPicker({
   value,
   onChange,
   busy,
+  excludedId,
 }: {
   value: string;
   onChange: (id: string) => void;
   busy: boolean;
+  excludedId?: number;
 }) {
   const [input, setInput] = useState("");
   const [request, setRequest] = useState({ search: "", page: 1 });
@@ -20,9 +23,10 @@ export function SupervisorPicker({
   useEffect(() => {
     const controller = new AbortController();
     // [BACKEND-API] Find eligible faculty. GET /api/Admin/Supervisors. AdminSupervisorQueryDto -> AdminSupervisorListDto.
-    listSupervisors(
-      { ...request, pageSize: 20, isActive: true, hasCapacity: true },
-      controller.signal,
+    const query = { ...request, pageSize: 20, isActive: true, hasCapacity: true };
+    (connected
+      ? listSupervisors(query, controller.signal)
+      : Promise.resolve(previewSupervisors(query))
     )
       .then((data) => {
         if (!controller.signal.aborted) setResult({ data });
@@ -40,7 +44,11 @@ export function SupervisorPicker({
     setRequest({ search, page });
   }
 
-  const options = result && "data" in result ? result.data.items : [];
+  const options =
+    result && "data" in result
+      ? result.data.items.filter((candidate) => candidate.supervisorId !== excludedId)
+      : [];
+  const selected = options.find((candidate) => String(candidate.supervisorId) === value);
   return (
     <div className="academic-picker">
       <div className="academic-inline-actions">
@@ -89,6 +97,20 @@ export function SupervisorPicker({
             ))}
           </select>
         </label>
+      )}
+      {selected && (
+        <dl className="operation-picker-load">
+          <div>
+            <dt>{copy.assigned}</dt>
+            <dd>
+              {selected.assignedProjectsCount} / {selected.maxProjects}
+            </dd>
+          </div>
+          <div>
+            <dt>{copy.slots}</dt>
+            <dd>{selected.availableCapacity}</dd>
+          </div>
+        </dl>
       )}
       {result && "data" in result && result.data.totalPages > 1 && (
         <div className="academic-inline-actions">
