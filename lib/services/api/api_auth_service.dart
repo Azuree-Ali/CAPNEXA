@@ -68,6 +68,22 @@ class ApiAuthService implements AuthService {
 
 
   @override
+  Future<Student?> restoreSession() async {
+    final access = await _api.tokenStorage.readToken();
+    final refresh = await _api.tokenStorage.readRefreshToken();
+    if (access == null && refresh == null) return null;
+    try {
+      return await currentStudent();
+    } on ApiException catch (e) {
+      // 401 بعد فشل الـ refresh، أو 403 حساب معطّل: الـ session ما بقتش صالحة
+      if (e.isUnauthorized || e.statusCode == 403) {
+        await _api.tokenStorage.clear();
+      }
+      return null; // لو مفيش نت منمسحش الـ tokens
+    }
+  }
+
+  @override
   Future<RegistrationResult> register(RegistrationData data) async {
     final res = await _api.post(ApiEndpoints.register, body: data.toJson());
     final map = res is Map ? res : const {};

@@ -20,6 +20,8 @@ abstract class AuthService {
   Future<void> resendConfirmation(String email);
   Future<Student> currentStudent();
   Future<void> signOut();
+    /// بيرجّع الطالب لو في session صالحة، وإلا null
+  Future<Student?> restoreSession();
   Future<Student> completeProfile({
     required String studentNumber,
     required String department,

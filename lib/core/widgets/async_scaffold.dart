@@ -4,6 +4,7 @@ import 'package:capnexa/core/theme/app_colors.dart';
 import 'package:capnexa/core/widgets/app_bottom_nav.dart';
 import 'package:capnexa/core/widgets/app_scaffold.dart';
 import 'package:capnexa/core/widgets/state_card.dart';
+import 'package:capnexa/core/network/api_exception.dart';
 
 /// Loads data from a service and renders an [AppScaffold] around it.
 /// Shows the shared loading state while waiting and the shared error state
@@ -71,7 +72,9 @@ class _AsyncScaffoldState<T> extends State<AsyncScaffold<T>> {
                 child: StateCard(
                   kind: StateKind.error,
                   title: 'We couldn’t load this screen',
-                  message: 'Check your connection and try again.',
+                  message: snap.error is ApiException
+                      ? (snap.error as ApiException).message
+                      : 'Check your connection and try again.',
                   actionLabel: 'Try again',
                   onAction: _retry,
                 ),

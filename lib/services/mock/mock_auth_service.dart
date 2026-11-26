@@ -73,4 +73,7 @@ class MockAuthService implements AuthService {
 
   @override
   Future<void> signOut() async {}
+
+  @override
+  Future<Student?> restoreSession() async => null;
 }

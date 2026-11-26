@@ -9,9 +9,42 @@ import 'package:capnexa/core/widgets/app_button.dart';
 import 'package:capnexa/core/widgets/app_icon.dart';
 import 'package:capnexa/core/widgets/brand_logo.dart';
 import 'package:capnexa/core/widgets/full_height_scroll.dart';
+import 'package:capnexa/models/student.dart';
+import 'package:capnexa/services/service_locator.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  bool _checking = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _restore();
+  }
+
+  Future<void> _restore() async {
+    Student? student;
+    try {
+      student = await ServiceLocator.auth.restoreSession();
+    } catch (_) {
+      student = null;
+    }
+    if (!mounted) return;
+    if (student != null) {
+      AppNav.go(
+        context,
+        student.academicProfileComplete ? Routes.home : Routes.academicSetup,
+      );
+      return;
+    }
+    setState(() => _checking = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,8 +139,9 @@ class SplashScreen extends StatelessWidget {
                             icon: AppIcons.arrow,
                             variant: ButtonVariant.secondary,
                             full: true,
-                            onPressed: () =>
-                                AppNav.replace(context, Routes.onboarding),
+                              onPressed: _checking
+                                ? null
+                                : () => AppNav.replace(context, Routes.onboarding),
                           ),
                         ],
                       ),

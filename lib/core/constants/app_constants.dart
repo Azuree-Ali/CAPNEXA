@@ -13,7 +13,7 @@ class AppConstants {
   /// Placeholder for the future ASP.NET Core Web API.
   static const apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:5001',
+    defaultValue: 'https://api.capnexa.local',
   );
 
   /// Simulated network latency used by the mock services.

@@ -19,6 +19,7 @@ import 'package:capnexa/services/team_service.dart';
 import 'package:capnexa/core/network/api_client.dart';
 import 'package:capnexa/core/network/token_storage.dart';
 import 'package:capnexa/services/api/api_auth_service.dart';
+import 'package:capnexa/core/routes/app_navigator.dart';
 
 /// Minimal service locator (no extra dependency).
 ///
@@ -48,7 +49,10 @@ class ServiceLocator {
   static void setup() {
     //auth = MockAuthService();
     tokenStorage = TokenStorage();
-    apiClient = ApiClient(tokenStorage: tokenStorage);
+    apiClient = ApiClient(
+      tokenStorage: tokenStorage,
+      onSessionExpired: AppNav.toLogin,
+    );
 
     auth = _mockAuth ? MockAuthService() : ApiAuthService(apiClient);
     team = MockTeamService();

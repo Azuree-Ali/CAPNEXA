@@ -24,4 +24,10 @@ class AppNav {
   /// Replace the current screen (splash → onboarding → login …).
   static void replace(BuildContext context, String route) =>
       Navigator.of(context).pushReplacementNamed(route);
+
+  static final navigatorKey = GlobalKey<NavigatorState>();
+
+  /// يوجّه للـ login من أي مكان (مثلًا لما الـ refresh token ينتهي)
+  static void toLogin() => navigatorKey.currentState
+      ?.pushNamedAndRemoveUntil(Routes.login, (_) => false);
 }

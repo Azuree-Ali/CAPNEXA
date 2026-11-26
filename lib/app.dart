@@ -5,6 +5,7 @@ import 'package:capnexa/core/routes/app_router.dart';
 import 'package:capnexa/core/routes/app_routes.dart';
 import 'package:capnexa/core/theme/app_colors.dart';
 import 'package:capnexa/core/theme/app_theme.dart';
+import 'package:capnexa/core/routes/app_navigator.dart';
 
 class CapNexaApp extends StatelessWidget {
   const CapNexaApp({super.key});
@@ -12,6 +13,7 @@ class CapNexaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: AppNav.navigatorKey,
       title: AppConstants.brandName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
