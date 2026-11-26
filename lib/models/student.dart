@@ -7,6 +7,8 @@ class Student {
     required this.department,
     required this.academicYear,
     this.academicProfileComplete = true,
+    this.givenName = '',
+    this.familyName = '',
   });
 
   final String id;
@@ -16,6 +18,8 @@ class Student {
   final String department;
   final String academicYear;
   final bool academicProfileComplete;
+  final String givenName;
+  final String familyName;
 
   String get firstName => fullName.split(' ').first;
 
@@ -35,6 +39,8 @@ class Student {
         academicYear: (json['academicYear'] ?? '').toString(),
         academicProfileComplete:
             json['academicProfileComplete'] as bool? ?? true,
+        givenName: (json['firstName'] ?? '').toString(),
+        familyName: (json['lastName'] ?? '').toString(),    
       );
 
   Map<String, dynamic> toJson() => {

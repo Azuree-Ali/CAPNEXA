@@ -26,6 +26,7 @@ import 'package:capnexa/features/team/team_choice_screen.dart';
 import 'package:capnexa/features/team/team_screen.dart';
 import 'package:capnexa/features/auth/academic_setup_screen.dart';
 import 'package:capnexa/features/auth/forgot_password_screen.dart';
+import 'package:capnexa/features/profile/account_screens.dart';
 
 class AppRouter {
   AppRouter._();
@@ -56,6 +57,9 @@ class AppRouter {
     Routes.completion: (_) => const CompletionScreen(),
     Routes.states: (_) => const StatesScreen(),
     Routes.academicSetup: (_) => const AcademicSetupScreen(),
+    Routes.editProfile: (_) => const EditProfileScreen(),
+    Routes.changePassword: (_) => const ChangePasswordScreen(),
+    Routes.changeEmail: (_) => const ChangeEmailScreen(),
   };
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {

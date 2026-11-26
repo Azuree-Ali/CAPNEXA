@@ -27,6 +27,9 @@ class Routes {
   static const states = '/states';
   static const academicSetup = '/academic-setup';
   static const forgotPassword = '/forgot-password';
+  static const editProfile = '/edit-profile';
+  static const changePassword = '/change-password';
+  static const changeEmail = '/change-email';
 
   /// Screens shown without the bottom navigation bar.
     static const standalone = {splash, onboarding, register, login, academicSetup, forgotPassword};

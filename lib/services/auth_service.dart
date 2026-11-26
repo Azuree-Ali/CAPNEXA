@@ -35,4 +35,12 @@ abstract class AuthService {
     required String newPassword,
     required String confirmPassword,
   });
+
+  Future<Student> updateProfile({required String firstName, required String lastName});
+  Future<void> changePassword({
+    String? currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  });
+  Future<void> requestEmailChange(String newEmail);
 }

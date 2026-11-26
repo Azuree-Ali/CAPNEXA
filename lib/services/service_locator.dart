@@ -45,7 +45,7 @@ class ServiceLocator {
   static late HomeService home;
 
   /// true = بيانات وهمية، false = الباك اند الحقيقي
-  static const bool _mockAuth = true; 
+  static const bool _mockAuth = false; 
   static const bool _mockHome = false;
   static const bool _mockMilestones = false;
   static const bool _mockTeam = false;

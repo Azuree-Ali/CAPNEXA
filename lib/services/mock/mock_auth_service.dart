@@ -76,4 +76,24 @@ class MockAuthService implements AuthService {
 
   @override
   Future<Student?> restoreSession() async => null;
+
+  @override
+  Future<Student> updateProfile({required String firstName, required String lastName}) async {
+    await Future<void>.delayed(AppConstants.mockLatency);
+    return _student;
+  }
+
+  @override
+  Future<void> changePassword({
+    String? currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    await Future<void>.delayed(AppConstants.mockLatency);
+  }
+
+  @override
+  Future<void> requestEmailChange(String newEmail) async {
+    await Future<void>.delayed(AppConstants.mockLatency);
+  }
 }

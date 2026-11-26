@@ -199,4 +199,33 @@ class ApiAuthService implements AuthService {
     await _api.tokenStorage
         .saveTokens(accessToken: access, refreshToken: refresh);
   }
+
+  @override
+  Future<Student> updateProfile({
+    required String firstName,
+    required String lastName,
+  }) async {
+    await _api.put(ApiEndpoints.profile,
+        body: {'firstName': firstName, 'lastName': lastName});
+    return currentStudent();
+  }
+
+  @override
+  Future<void> changePassword({
+    String? currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    await _api.post(ApiEndpoints.changePassword, body: {
+      if (currentPassword != null && currentPassword.isNotEmpty)
+        'currentPassword': currentPassword,
+      'newPassword': newPassword,
+      'confirmPassword': confirmPassword,
+    });
+  }
+
+  @override
+  Future<void> requestEmailChange(String newEmail) async {
+    await _api.post(ApiEndpoints.emailChange, body: {'newEmail': newEmail});
+  }
 }
