@@ -10,6 +10,7 @@ import 'package:capnexa/core/widgets/app_scaffold.dart';
 import 'package:capnexa/core/widgets/async_scaffold.dart';
 import 'package:capnexa/core/widgets/avatar_box.dart';
 import 'package:capnexa/core/widgets/section_heading.dart';
+import 'package:capnexa/core/widgets/state_card.dart';
 import 'package:capnexa/core/widgets/status_badge.dart';
 import 'package:capnexa/features/home/widgets/home_widgets.dart';
 import 'package:capnexa/features/notifications/widgets/notification_card.dart';
@@ -29,10 +30,13 @@ class HomeScreen extends StatelessWidget {
       tab: AppTab.home,
       loader: ServiceLocator.home.getSummary,
       titleBuilder: (d) => 'Good morning, ${d.student.firstName}',
-      actionBuilder: (context, d) => AvatarBox(d.student.initials,
-          onTap: () => AppNav.go(context, Routes.profile)),
+      actionBuilder: (context, d) =>
+          AvatarBox(d.student.initials, onTap: () => AppNav.go(context, Routes.profile)),
       builder: (context, d) {
         void push(String route) => AppNav.push(context, route);
+        final project = d.project;
+        final deadline = d.nextDeadline;
+        final feedback = d.latestFeedback;
         final quick = <(AppIcons, String, String)>[
           (AppIcons.project, 'View project', Routes.project),
           (AppIcons.upload, 'Submit report', Routes.submission),
@@ -41,27 +45,25 @@ class HomeScreen extends StatelessWidget {
         ];
         return ScreenBody(
           children: [
-            ProjectHeroCard(project: d.project),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SectionHeading('Upcoming deadline',
-                    overline: 'NEXT UP',
-                    actionLabel: 'View timeline',
-                    onAction: () => push(Routes.milestones)),
-                DeadlineCard(
-                    detail: d.nextDeadline,
-                    onTap: () => push(Routes.milestone)),
-              ],
-            ),
+            if (project != null) ProjectHeroCard(project: project) else _journey(context, d),
+            if (deadline != null)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SectionHeading('Upcoming deadline',
+                      overline: 'NEXT UP',
+                      actionLabel: 'View timeline',
+                      onAction: () => push(Routes.milestones)),
+                  DeadlineCard(detail: deadline, onTap: () => push(Routes.milestone)),
+                ],
+              ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SectionHeading('Quick actions'),
                 for (var i = 0; i < quick.length; i += 2)
                   Padding(
-                    padding:
-                        EdgeInsets.only(bottom: i + 2 < quick.length ? 8 : 0),
+                    padding: EdgeInsets.only(bottom: i + 2 < quick.length ? 8 : 0),
                     child: Row(
                       children: [
                         for (var j = i; j < i + 2; j++) ...[
@@ -79,78 +81,132 @@ class HomeScreen extends StatelessWidget {
                   ),
               ],
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SectionHeading('Latest supervisor feedback',
-                    actionLabel: 'View all',
-                    onAction: () => push(Routes.feedback)),
-                AppCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          AvatarBox(d.latestFeedback.authorInitials,
-                              size: 32, radius: 10),
-                          const SizedBox(width: 9),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(d.latestFeedback.authorName,
-                                    style: AppText.s(10, w: FontWeight.w700)),
-                                const SizedBox(height: 2),
-                                Text(d.latestFeedback.homeTimestamp,
-                                    style:
-                                        AppText.s(8, color: AppColors.muted)),
-                              ],
+            if (feedback != null)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SectionHeading('Latest supervisor feedback',
+                      actionLabel: 'View all', onAction: () => push(Routes.feedback)),
+                  AppCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            AvatarBox(feedback.authorInitials, size: 32, radius: 10),
+                            const SizedBox(width: 9),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(feedback.authorName,
+                                      style: AppText.s(10, w: FontWeight.w700)),
+                                  const SizedBox(height: 2),
+                                  Text(feedback.homeTimestamp,
+                                      style: AppText.s(8, color: AppColors.muted)),
+                                ],
+                              ),
                             ),
-                          ),
-                          const StatusBadge('Action needed',
-                              tone: BadgeTone.orange),
-                        ],
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(top: 11),
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF7F8FB),
-                          borderRadius: BorderRadius.circular(9),
+                            const StatusBadge('Action needed', tone: BadgeTone.orange),
+                          ],
                         ),
-                        child: Text('“${d.latestFeedback.homeExcerpt}”',
-                            style: AppText.s(11,
-                                color: const Color(0xFF4C586A), height: 1.55)),
-                      ),
+                        Container(
+                          margin: const EdgeInsets.only(top: 11),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF7F8FB),
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                          child: Text('“${feedback.homeExcerpt}”',
+                              style: AppText.s(11, color: const Color(0xFF4C586A), height: 1.55)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            if (d.updates.isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SectionHeading('Recent updates',
+                      actionLabel: 'All notifications',
+                      onAction: () => AppNav.go(context, Routes.notifications)),
+                  DividedList(
+                    children: [
+                      for (final u in d.updates)
+                        CompactUpdateRow(
+                          icon: _updateStyle(u.kind).$1,
+                          tone: _updateStyle(u.kind).$2,
+                          title: u.title,
+                          subtitle: u.subtitle,
+                          time: u.time,
+                        ),
                     ],
                   ),
-                ),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SectionHeading('Recent updates',
-                    actionLabel: 'All notifications',
-                    onAction: () => AppNav.go(context, Routes.notifications)),
-                DividedList(
-                  children: [
-                    for (final u in d.updates)
-                      CompactUpdateRow(
-                        icon: _updateStyle(u.kind).$1,
-                        tone: _updateStyle(u.kind).$2,
-                        title: u.title,
-                        subtitle: u.subtitle,
-                        time: u.time,
-                      ),
-                  ],
-                ),
-              ],
-            ),
+                ],
+              ),
           ],
         );
       },
     );
+  }
+
+  /// بدل الـ project card قبل ما يبقى في مشروع معتمد.
+  Widget _journey(BuildContext context, HomeSummary d) {
+    void to(String route) => AppNav.push(context, route);
+    if (d.teamName == null) {
+      return StateCard(
+        kind: StateKind.empty,
+        title: 'Start by setting up your team',
+        message: 'Create a team or join one with an invitation code.',
+        actionLabel: 'Set up team',
+        actionIcon: AppIcons.arrow,
+        onAction: () => to(Routes.teamChoice),
+      );
+    }
+    return switch (d.proposalStatus) {
+      null => StateCard(
+          kind: StateKind.empty,
+          title: 'Write your project proposal',
+          message: 'Your team ${d.teamName} is ready. Describe your project idea.',
+          actionLabel: 'Start proposal',
+          actionIcon: AppIcons.arrow,
+          onAction: () => to(Routes.proposal),
+        ),
+      'Draft' => StateCard(
+          kind: StateKind.empty,
+          title: 'Your proposal is a draft',
+          message: 'Finish it and ask your team leader to submit it for review.',
+          actionLabel: 'Continue draft',
+          actionIcon: AppIcons.arrow,
+          onAction: () => to(Routes.proposal),
+        ),
+      'PendingReview' => StateCard(
+          kind: StateKind.empty,
+          title: 'Proposal under review',
+          message: 'We’ll let you know when the department makes a decision.',
+          actionLabel: 'View status',
+          actionIcon: AppIcons.arrow,
+          onAction: () => to(Routes.approval),
+        ),
+      'Rejected' => StateCard(
+          kind: StateKind.error,
+          title: 'Your proposal needs changes',
+          message: d.rejectionReason ?? 'Review the feedback and submit a new proposal.',
+          actionLabel: 'Create a new proposal',
+          actionIcon: AppIcons.arrow,
+          onAction: () => to(Routes.proposal),
+        ),
+      _ => StateCard(
+          kind: StateKind.success,
+          title: 'Proposal approved',
+          message: 'Your project will appear here once it is set up.',
+          actionLabel: 'View status',
+          actionIcon: AppIcons.arrow,
+          onAction: () => to(Routes.approval),
+        ),
+    };
   }
 }
 

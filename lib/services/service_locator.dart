@@ -20,6 +20,8 @@ import 'package:capnexa/core/network/api_client.dart';
 import 'package:capnexa/core/network/token_storage.dart';
 import 'package:capnexa/services/api/api_auth_service.dart';
 import 'package:capnexa/core/routes/app_navigator.dart';
+import 'package:capnexa/services/api/api_home_service.dart';
+import 'package:capnexa/services/api/api_milestone_service.dart';
 
 /// Minimal service locator (no extra dependency).
 ///
@@ -42,6 +44,8 @@ class ServiceLocator {
 
   /// true = بيانات وهمية، false = الباك اند الحقيقي
   static const bool _mockAuth = true; 
+  static const bool _mockHome = false;
+  static const bool _mockMilestones = false;
 
   static late TokenStorage tokenStorage;
   static late ApiClient apiClient;
@@ -57,16 +61,19 @@ class ServiceLocator {
     auth = _mockAuth ? MockAuthService() : ApiAuthService(apiClient);
     team = MockTeamService();
     projects = MockProjectService();
-    milestones = MockMilestoneService();
+    milestones = _mockMilestones ? MockMilestoneService() : ApiMilestoneService(apiClient);
+    
     submissions = MockSubmissionService();
     feedback = MockFeedbackService();
     notifications = MockNotificationService();
     similarity = MockSimilarityService();
-    home = MockHomeService(
-      auth: auth,
-      projects: projects,
-      milestones: milestones,
-      feedback: feedback,
-    );
+    home = _mockHome
+        ? MockHomeService(
+            auth: auth,
+            projects: projects,
+            milestones: milestones,
+            feedback: feedback,
+          )
+        : ApiHomeService(apiClient, auth);
   }
 }

@@ -21,15 +21,27 @@ class RecentUpdate {
 class HomeSummary {
   const HomeSummary({
     required this.student,
-    required this.project,
-    required this.nextDeadline,
-    required this.latestFeedback,
-    required this.updates,
+    this.teamName,
+    this.proposalStatus,
+    this.rejectionReason,
+    this.project,
+    this.nextDeadline,
+    this.latestFeedback,
+    this.updates = const [],
   });
 
   final Student student;
-  final Project project;
-  final MilestoneDetail nextDeadline;
-  final SupervisorFeedback latestFeedback;
+
+  /// null = الطالب لسه ملوش فريق
+  final String? teamName;
+
+  /// Draft / PendingReview / Rejected / Approved، أو null لو مفيش proposal
+  final String? proposalStatus;
+  final String? rejectionReason;
+
+  /// null لحد ما الـ proposal يتوافق عليه
+  final Project? project;
+  final MilestoneDetail? nextDeadline;
+  final SupervisorFeedback? latestFeedback;
   final List<RecentUpdate> updates;
 }
