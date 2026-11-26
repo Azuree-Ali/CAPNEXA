@@ -57,8 +57,10 @@ class MockProjectService implements ProjectService {
       ));
 
   @override
-  Future<void> saveProposalDraft(ProposalDraft draft) =>
-      Future<void>.delayed(const Duration(milliseconds: 200));
+  Future<ProposalDraft> saveProposalDraft(ProposalDraft draft) async {
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    return draft;
+  }
 
   @override
   Future<void> submitProposal(ProposalDraft draft) =>

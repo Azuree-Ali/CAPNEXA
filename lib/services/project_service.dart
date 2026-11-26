@@ -9,7 +9,7 @@ abstract class ProjectService {
   Future<Project> getCurrentProject();
   Future<Supervisor> getSupervisor();
   Future<ProposalDraft> getProposalDraft();
-  Future<void> saveProposalDraft(ProposalDraft draft);
+  Future<ProposalDraft> saveProposalDraft(ProposalDraft draft);
   Future<void> submitProposal(ProposalDraft draft);
   Future<ProposalStatusInfo> getProposalStatus();
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:capnexa/core/network/api_exception.dart';
 import 'package:capnexa/core/routes/app_navigator.dart';
 import 'package:capnexa/core/routes/app_routes.dart';
 import 'package:capnexa/core/theme/app_colors.dart';
@@ -10,6 +11,7 @@ import 'package:capnexa/core/widgets/app_icon.dart';
 import 'package:capnexa/core/widgets/app_scaffold.dart';
 import 'package:capnexa/core/widgets/app_text_field.dart';
 import 'package:capnexa/core/widgets/async_scaffold.dart';
+import 'package:capnexa/core/widgets/state_card.dart';
 import 'package:capnexa/core/widgets/status_badge.dart';
 import 'package:capnexa/models/proposal.dart';
 import 'package:capnexa/services/service_locator.dart';
@@ -24,9 +26,25 @@ class ProposalScreen extends StatelessWidget {
       tab: AppTab.project,
       loader: ServiceLocator.projects.getProposalDraft,
       subtitleBuilder: (d) => d.lastSaved,
-      actionBuilder: (_, __) =>
-          const StatusBadge('Draft', tone: BadgeTone.gray),
-      builder: (context, draft) => _ProposalForm(draft: draft),
+      actionBuilder: (_, d) =>
+          StatusBadge(d.projectId == null ? 'New' : 'Draft', tone: BadgeTone.gray),
+      builder: (context, draft) {
+        if (draft.status == 'PendingReview' || draft.status == 'Approved') {
+          return ScreenBody(
+            children: [
+              StateCard(
+                kind: StateKind.success,
+                title: draft.status == 'Approved' ? 'Proposal approved' : 'Proposal submitted',
+                message: 'This proposal can no longer be edited.',
+                actionLabel: 'View status',
+                actionIcon: AppIcons.arrow,
+                onAction: () => AppNav.push(context, Routes.approval),
+              ),
+            ],
+          );
+        }
+        return _ProposalForm(draft: draft);
+      },
     );
   }
 }
@@ -42,50 +60,62 @@ class _ProposalForm extends StatefulWidget {
 
 class _ProposalFormState extends State<_ProposalForm> {
   late final _title = TextEditingController(text: widget.draft.title);
-  late final _description =
-      TextEditingController(text: widget.draft.description);
-  late final _problem =
-      TextEditingController(text: widget.draft.problemStatement);
-  late final _solution =
-      TextEditingController(text: widget.draft.proposedSolution);
-  late final _tech = TextEditingController(text: widget.draft.technologies);
-  late final _category = TextEditingController(text: widget.draft.category);
+  late final _description = TextEditingController(text: widget.draft.description);
+  late int? _projectId = widget.draft.projectId;
+  bool _busy = false;
 
   @override
   void dispose() {
-    for (final c in [
-      _title,
-      _description,
-      _problem,
-      _solution,
-      _tech,
-      _category
-    ]) {
-      c.dispose();
-    }
+    _title.dispose();
+    _description.dispose();
     super.dispose();
   }
 
   ProposalDraft _collect() => ProposalDraft(
         title: _title.text,
         description: _description.text,
-        problemStatement: _problem.text,
-        proposedSolution: _solution.text,
-        technologies: _tech.text,
-        category: _category.text,
         lastSaved: widget.draft.lastSaved,
         memberInitials: widget.draft.memberInitials,
+        projectId: _projectId,
       );
 
-  Future<void> _save() async {
-    await ServiceLocator.projects.saveProposalDraft(_collect());
-    if (mounted) showAppSnack(context, 'Draft saved');
+  String? _validate() {
+    final t = _title.text.trim();
+    final d = _description.text.trim();
+    if (t.length < 3 || t.length > 250) return 'Title must be 3–250 characters.';
+    if (d.length < 10 || d.length > 4000) return 'Description must be 10–4000 characters.';
+    return null;
   }
 
-  Future<void> _review() async {
-    await ServiceLocator.projects.submitProposal(_collect());
-    if (mounted) AppNav.push(context, Routes.approval);
+  Future<void> _run(Future<void> Function() action) async {
+    final error = _validate();
+    if (error != null) {
+      showAppSnack(context, error);
+      return;
+    }
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await action();
+    } on ApiException catch (e) {
+      if (mounted) showAppSnack(context, e.message);
+    } catch (_) {
+      if (mounted) showAppSnack(context, 'Something went wrong. Please try again.');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
+
+  Future<void> _save() => _run(() async {
+        final saved = await ServiceLocator.projects.saveProposalDraft(_collect());
+        _projectId = saved.projectId;
+        if (mounted) showAppSnack(context, 'Draft saved');
+      });
+
+  Future<void> _review() => _run(() async {
+        await ServiceLocator.projects.submitProposal(_collect());
+        if (mounted) AppNav.go(context, Routes.approval);
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -102,70 +132,53 @@ class _ProposalFormState extends State<_ProposalForm> {
                 children: [
                   AppTextField(label: 'Project title', controller: _title),
                   const SizedBox(height: 14),
-                  AppTextField(
-                      label: 'Project description',
-                      textarea: true,
-                      controller: _description),
-                  const SizedBox(height: 14),
-                  AppTextField(
-                      label: 'Problem statement',
-                      textarea: true,
-                      controller: _problem),
-                  const SizedBox(height: 14),
-                  AppTextField(
-                      label: 'Proposed solution',
-                      textarea: true,
-                      controller: _solution),
-                  const SizedBox(height: 14),
-                  AppTextField(label: 'Technologies', controller: _tech),
-                  const SizedBox(height: 14),
-                  AppTextField(
-                      label: 'Project category', controller: _category),
+                  AppTextField(label: 'Project description', textarea: true, controller: _description),
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.line),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Text('TEAM MEMBERS',
-                        style: AppText.s(8,
-                            w: FontWeight.w800, color: AppColors.muted)),
-                    const SizedBox(width: 9),
-                    SizedBox(
-                      height: 25,
-                      width: 25.0 + (members.length - 1) * 19,
-                      child: Stack(
-                        children: [
-                          for (var i = 0; i < members.length; i++)
-                            Positioned(
-                              left: i * 19.0,
-                              child: Container(
-                                width: 25,
-                                height: 25,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: AppColors.navy800,
-                                  shape: BoxShape.circle,
-                                  border:
-                                      Border.all(color: Colors.white, width: 2),
+              if (members.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.line),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Text('TEAM MEMBERS',
+                          style: AppText.s(8, w: FontWeight.w800, color: AppColors.muted)),
+                      const SizedBox(width: 9),
+                      SizedBox(
+                        height: 25,
+                        width: 25.0 + (members.length - 1) * 19,
+                        child: Stack(
+                          children: [
+                            for (var i = 0; i < members.length; i++)
+                              Positioned(
+                                left: i * 19.0,
+                                child: Container(
+                                  width: 25,
+                                  height: 25,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.navy800,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white, width: 2),
+                                  ),
+                                  child: Text(members[i],
+                                      style: AppText.s(7, color: Colors.white)),
                                 ),
-                                child: Text(members[i],
-                                    style: AppText.s(7, color: Colors.white)),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    Text('${members.length} members included',
-                        style: AppText.s(8, color: AppColors.muted)),
-                  ],
+                      const Spacer(),
+                      Text('${members.length} members included',
+                          style: AppText.s(8, color: AppColors.muted)),
+                    ],
+                  ),
                 ),
-              ),
+              Text('Any team member can edit the draft. Only the team leader can submit it.',
+                  style: AppText.s(8.5, color: AppColors.muted, height: 1.5)),
             ],
           ),
         ),
@@ -177,19 +190,13 @@ class _ProposalFormState extends State<_ProposalForm> {
               Expanded(
                 flex: 10,
                 child: AppButton(
-                    label: 'Save draft',
-                    variant: ButtonVariant.outline,
-                    onPressed: _save,
-                    full: true),
+                    label: 'Save draft', variant: ButtonVariant.outline, onPressed: _save, full: true),
               ),
               const SizedBox(width: 8),
               Expanded(
                 flex: 15,
                 child: AppButton(
-                    label: 'Review proposal',
-                    icon: AppIcons.arrow,
-                    onPressed: _review,
-                    full: true),
+                    label: 'Submit proposal', icon: AppIcons.arrow, onPressed: _review, full: true),
               ),
             ],
           ),

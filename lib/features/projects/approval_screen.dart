@@ -8,7 +8,6 @@ import 'package:capnexa/core/widgets/app_button.dart';
 import 'package:capnexa/core/widgets/app_icon.dart';
 import 'package:capnexa/core/widgets/app_scaffold.dart';
 import 'package:capnexa/core/widgets/async_scaffold.dart';
-import 'package:capnexa/core/widgets/dashed_border.dart';
 import 'package:capnexa/core/widgets/info_note.dart';
 import 'package:capnexa/core/widgets/section_heading.dart';
 import 'package:capnexa/core/widgets/status_badge.dart';
@@ -24,8 +23,7 @@ class ApprovalScreen extends StatefulWidget {
 }
 
 class _ApprovalScreenState extends State<ApprovalScreen> {
-  /// Lets reviewers preview the "rejected" state described in the design note.
-  bool _previewRejected = false;
+  
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +33,16 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
       loader: ServiceLocator.projects.getProposalStatus,
       subtitleBuilder: (s) => s.projectTitle,
       builder: (context, info) {
-        final rejected =
-            _previewRejected || info.status == ProposalStatus.rejected;
+      final rejected = info.status == ProposalStatus.rejected;
+      final approved = info.status == ProposalStatus.approved;
         return ScreenBody(
           children: [
-            rejected ? _RejectedHero(info: info) : _ApprovedHero(info: info),
+         if (rejected)
+           _RejectedHero(info: info)
+         else if (approved)
+           _ApprovedHero(info: info)
+         else
+           _PendingHero(info: info),
             if (!rejected) ...[
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,47 +65,21 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                 message:
                     'We’ll notify every team member when a supervisor has been assigned.',
               ),
-              AppButton(
-                label: 'Continue',
-                icon: AppIcons.arrow,
-                full: true,
-                onPressed: () => AppNav.push(context, Routes.supervisor),
-              ),
+            if (approved)
+             AppButton(
+               label: 'Continue',
+               icon: AppIcons.arrow,
+               full: true,
+               onPressed: () => AppNav.push(context, Routes.supervisor),
+             ),
             ] else ...[
               AppButton(
-                label: 'Edit & resubmit proposal',
+                label: 'Create a new proposal',
                 icon: AppIcons.edit,
                 full: true,
                 onPressed: () => AppNav.push(context, Routes.proposal),
               ),
             ],
-            DashedBorder(
-              color: const Color(0xFFE1AEB2),
-              radius: 12,
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const StatusBadge('Rejected state', tone: BadgeTone.red),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 7, 0, 3),
-                    child: Text(
-                      'When rejected, the reason appears here with clear actions to edit and resubmit the proposal.',
-                      style: AppText.p,
-                    ),
-                  ),
-                  AppButton(
-                    label: _previewRejected
-                        ? 'Back to approved state'
-                        : 'Preview rejected state',
-                    icon: AppIcons.edit,
-                    variant: ButtonVariant.text,
-                    onPressed: () =>
-                        setState(() => _previewRejected = !_previewRejected),
-                  ),
-                ],
-              ),
-            ),
           ],
         );
       },
@@ -261,6 +238,62 @@ class _Reference extends StatelessWidget {
           Text(id,
               style:
                   AppText.s(8.5, w: FontWeight.w700, color: AppColors.navy900)),
+        ],
+      ),
+    );
+  }
+}
+
+class _PendingHero extends StatelessWidget {
+  const _PendingHero({required this.info});
+
+  final ProposalStatusInfo info;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(15, 19, 15, 19),
+      decoration: BoxDecoration(
+        color: AppColors.blue50,
+        border: Border.all(color: const Color(0xFFD5E0F8)),
+        borderRadius: BorderRadius.circular(17),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 58,
+            height: 58,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.blue700,
+              borderRadius: BorderRadius.circular(17),
+            ),
+            child: const AppIcon(AppIcons.file, size: 31, color: Colors.white),
+          ),
+          const SizedBox(height: 11),
+          StatusBadge(
+            info.status == ProposalStatus.draft ? 'Draft' : 'Under review',
+            tone: BadgeTone.gray,
+          ),
+          const SizedBox(height: 9),
+          Text(
+            info.status == ProposalStatus.draft
+                ? 'Your proposal is a draft'
+                : 'Your proposal is under review',
+            textAlign: TextAlign.center,
+            style: AppText.s(19, w: FontWeight.w700, color: AppColors.navy900, ls: -.3),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 6, 0, 14),
+            child: Text(
+              info.status == ProposalStatus.draft
+                  ? 'Submit it when it’s ready. Only the team leader can submit.'
+                  : '${info.projectTitle} is waiting for the department’s decision.',
+              textAlign: TextAlign.center,
+              style: AppText.p,
+            ),
+          ),
+          _Reference(id: info.proposalId, borderColor: const Color(0xFFD5E0F8)),
         ],
       ),
     );

@@ -2,12 +2,14 @@ class ProposalDraft {
   const ProposalDraft({
     required this.title,
     required this.description,
-    required this.problemStatement,
-    required this.proposedSolution,
-    required this.technologies,
-    required this.category,
+    this.problemStatement = '',
+    this.proposedSolution = '',
+    this.technologies = '',
+    this.category = '',
     required this.lastSaved,
     required this.memberInitials,
+    this.projectId,
+    this.status = 'New',
   });
 
   final String title;
@@ -19,13 +21,15 @@ class ProposalDraft {
   final String lastSaved;
   final List<String> memberInitials;
 
+  /// null = لسه ما اتحفظش في الباك اند
+  final int? projectId;
+
+  /// New / Draft / PendingReview / Approved
+  final String status;
+
   Map<String, dynamic> toJson() => {
         'title': title,
         'description': description,
-        'problemStatement': problemStatement,
-        'proposedSolution': proposedSolution,
-        'technologies': technologies,
-        'category': category,
       };
 }
 
