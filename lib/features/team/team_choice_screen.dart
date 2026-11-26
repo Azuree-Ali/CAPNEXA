@@ -11,6 +11,7 @@ import 'package:capnexa/core/widgets/app_scaffold.dart';
 import 'package:capnexa/core/widgets/app_text_field.dart';
 import 'package:capnexa/core/widgets/info_note.dart';
 import 'package:capnexa/services/service_locator.dart';
+import 'package:capnexa/core/network/api_exception.dart';
 
 class TeamChoiceScreen extends StatefulWidget {
   const TeamChoiceScreen({super.key});
@@ -21,22 +22,49 @@ class TeamChoiceScreen extends StatefulWidget {
 
 class _TeamChoiceScreenState extends State<TeamChoiceScreen> {
   final _code = TextEditingController();
+  final _name = TextEditingController();
   bool _createSelected = true;
+  bool _busy = false;
 
   @override
   void dispose() {
     _code.dispose();
+    _name.dispose();
     super.dispose();
   }
 
-  Future<void> _join() async {
-    if (_code.text.trim().isEmpty) {
+  Future<void> _run(Future<void> Function() action) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await action();
+      if (!mounted) return;
+      AppNav.go(context, Routes.team);
+    } on ApiException catch (e) {
+      if (mounted) showAppSnack(context, e.message);
+    } catch (_) {
+      if (mounted) showAppSnack(context, 'Something went wrong. Please try again.');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  void _create() {
+    final name = _name.text.trim();
+    if (name.length < 2) {
+      showAppSnack(context, 'Enter a team name (at least 2 characters).');
+      return;
+    }
+    _run(() => ServiceLocator.team.createTeam(name));
+  }
+
+  void _join() {
+    final code = _code.text.trim();
+    if (code.isEmpty) {
       showAppSnack(context, 'Enter the invitation code from your team leader.');
       return;
     }
-    await ServiceLocator.team.joinTeam(_code.text.trim());
-    if (!mounted) return;
-    AppNav.push(context, Routes.team);
+    _run(() => ServiceLocator.team.joinTeam(code));
   }
 
   @override
@@ -82,18 +110,14 @@ class _TeamChoiceScreenState extends State<TeamChoiceScreen> {
             title: 'Create a new team',
             text: 'Set a team name, add your idea, and invite members.',
             cta: 'Start a team',
-            onTap: () {
-              setState(() => _createSelected = true);
-              ServiceLocator.team.createTeam('Team 04');
-              AppNav.push(context, Routes.team);
-            },
+            onTap: () => setState(() => _createSelected = true),
           ),
           _ChoiceCard(
             selected: !_createSelected,
             icon: AppIcons.team,
             pale: true,
             title: 'Join an existing team',
-            text: 'Ask your team leader for their 8-character code.',
+            text: 'Ask your team leader for their invitation code.',
             onTap: () => setState(() => _createSelected = false),
           ),
           Container(
@@ -104,18 +128,22 @@ class _TeamChoiceScreenState extends State<TeamChoiceScreen> {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                AppTextField(
-                    label: 'Invitation code',
-                    hint: 'e.g. GF-24X8Q',
-                    controller: _code),
-                const SizedBox(height: 10),
-                AppButton(
-                    label: 'Join team',
-                    variant: ButtonVariant.outline,
-                    full: true,
-                    onPressed: _join),
-              ],
+              children: _createSelected
+                  ? [
+                      AppTextField(label: 'Team name', hint: 'e.g. Team Alpha', controller: _name),
+                      const SizedBox(height: 10),
+                      AppButton(label: 'Create team', full: true, onPressed: _create),
+                    ]
+                  : [
+                      AppTextField(
+                          label: 'Invitation code', hint: 'e.g. A1B2C3D4E5', controller: _code),
+                      const SizedBox(height: 10),
+                      AppButton(
+                          label: 'Join team',
+                          variant: ButtonVariant.outline,
+                          full: true,
+                          onPressed: _join),
+                    ],
             ),
           ),
           const InfoNote(

@@ -22,6 +22,7 @@ import 'package:capnexa/services/api/api_auth_service.dart';
 import 'package:capnexa/core/routes/app_navigator.dart';
 import 'package:capnexa/services/api/api_home_service.dart';
 import 'package:capnexa/services/api/api_milestone_service.dart';
+import 'package:capnexa/services/api/api_team_service.dart';
 
 /// Minimal service locator (no extra dependency).
 ///
@@ -46,6 +47,7 @@ class ServiceLocator {
   static const bool _mockAuth = true; 
   static const bool _mockHome = false;
   static const bool _mockMilestones = false;
+  static const bool _mockTeam = false;
 
   static late TokenStorage tokenStorage;
   static late ApiClient apiClient;
@@ -59,7 +61,7 @@ class ServiceLocator {
     );
 
     auth = _mockAuth ? MockAuthService() : ApiAuthService(apiClient);
-    team = MockTeamService();
+    team = _mockTeam ? MockTeamService() : ApiTeamService(apiClient);
     projects = MockProjectService();
     milestones = _mockMilestones ? MockMilestoneService() : ApiMilestoneService(apiClient);
     

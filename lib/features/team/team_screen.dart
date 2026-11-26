@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:capnexa/core/network/api_exception.dart';
 import 'package:capnexa/core/routes/app_navigator.dart';
 import 'package:capnexa/core/routes/app_routes.dart';
 import 'package:capnexa/core/theme/app_colors.dart';
@@ -14,6 +15,7 @@ import 'package:capnexa/core/widgets/app_top_bar.dart';
 import 'package:capnexa/core/widgets/async_scaffold.dart';
 import 'package:capnexa/core/widgets/avatar_box.dart';
 import 'package:capnexa/core/widgets/section_heading.dart';
+import 'package:capnexa/core/widgets/state_card.dart';
 import 'package:capnexa/core/widgets/status_badge.dart';
 import 'package:capnexa/models/team.dart';
 import 'package:capnexa/services/service_locator.dart';
@@ -22,11 +24,10 @@ class TeamScreen extends StatelessWidget {
   const TeamScreen({super.key});
 
   Future<void> _invite(BuildContext context, Team team) async {
-    await showAppDialog(
+    final copy = await showAppDialog(
       context,
       title: 'Invite a teammate',
-      message:
-          'Share this code with your classmates so they can join ${team.projectTitle}.',
+      message: 'Share this code with your classmates so they can join ${team.name}.',
       confirmLabel: 'Copy code',
       cancelLabel: 'Close',
       content: Container(
@@ -37,46 +38,68 @@ class TeamScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(11),
         ),
         child: Text(team.inviteCode,
-            style: AppText.s(22,
-                w: FontWeight.w700, color: AppColors.navy900, ls: 1.5)),
+            style: AppText.s(22, w: FontWeight.w700, color: AppColors.navy900, ls: 1.5)),
       ),
-    ).then((copy) async {
-      if (copy) {
-        await Clipboard.setData(ClipboardData(text: team.inviteCode));
-        if (context.mounted) showAppSnack(context, 'Invitation code copied');
-      }
-    });
+    );
+    if (copy) {
+      await Clipboard.setData(ClipboardData(text: team.inviteCode));
+      if (context.mounted) showAppSnack(context, 'Invitation code copied');
+    }
   }
 
   Future<void> _leave(BuildContext context) async {
     final ok = await showAppDialog(
       context,
       title: 'Leave team?',
-      message:
-          'You will lose access to the team workspace and its submissions.',
+      message: 'You will lose access to the team workspace and its submissions.',
       confirmLabel: 'Leave team',
       destructive: true,
     );
-    if (ok && context.mounted) {
+    if (!ok || !context.mounted) return;
+    try {
       await ServiceLocator.team.leaveTeam();
       if (context.mounted) AppNav.go(context, Routes.teamChoice);
+    } on ApiException catch (e) {
+      // مثلًا: القائد مينفعش يغادر (team_leader_cannot_leave)
+      if (context.mounted) showAppSnack(context, e.message);
+    } catch (_) {
+      if (context.mounted) showAppSnack(context, 'Something went wrong. Please try again.');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return AsyncScaffold<Team>(
+    return AsyncScaffold<Team?>(
       title: 'Your team',
       tab: AppTab.team,
       loader: ServiceLocator.team.getTeam,
-      subtitleBuilder: (t) => t.projectTitle,
-      actionBuilder: (context, t) => AppButton(
-        label: 'Invite',
-        icon: AppIcons.plus,
-        variant: ButtonVariant.text,
-        onPressed: () => _invite(context, t),
-      ),
-      builder: (context, team) => ScreenBody(
+      subtitleBuilder: (t) => t?.name ?? '',
+      actionBuilder: (context, t) => t == null
+          ? null
+          : AppButton(
+              label: 'Invite',
+              icon: AppIcons.plus,
+              variant: ButtonVariant.text,
+              onPressed: () => _invite(context, t),
+            ),
+      builder: (context, t) => t == null ? _noTeam(context) : _body(context, t),
+    );
+  }
+
+  Widget _noTeam(BuildContext context) => ScreenBody(
+        children: [
+          StateCard(
+            kind: StateKind.empty,
+            title: 'You’re not in a team yet',
+            message: 'Create a team or join one with an invitation code.',
+            actionLabel: 'Set up team',
+            actionIcon: AppIcons.arrow,
+            onAction: () => AppNav.push(context, Routes.teamChoice),
+          ),
+        ],
+      );
+
+  Widget _body(BuildContext context, Team team) => ScreenBody(
         children: [
           Container(
             padding: const EdgeInsets.all(17),
@@ -95,14 +118,10 @@ class TeamScreen extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 3),
                         child: Text(team.inviteCode,
-                            style: AppText.s(22,
-                                w: FontWeight.w700,
-                                color: Colors.white,
-                                ls: 1.5)),
+                            style: AppText.s(22, w: FontWeight.w700, color: Colors.white, ls: 1.5)),
                       ),
                       Text('Share this code with your classmates',
-                          style:
-                              AppText.s(8.5, color: const Color(0xFF9FB0C8))),
+                          style: AppText.s(8.5, color: const Color(0xFF9FB0C8))),
                     ],
                   ),
                 ),
@@ -115,10 +134,8 @@ class TeamScreen extends StatelessWidget {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(9),
                     onTap: () async {
-                      await Clipboard.setData(
-                          ClipboardData(text: team.inviteCode));
-                      if (context.mounted)
-                        showAppSnack(context, 'Invitation code copied');
+                      await Clipboard.setData(ClipboardData(text: team.inviteCode));
+                      if (context.mounted) showAppSnack(context, 'Invitation code copied');
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(8),
@@ -127,8 +144,7 @@ class TeamScreen extends StatelessWidget {
                         children: [
                           const AppIcon(AppIcons.copy, color: Colors.white),
                           const SizedBox(width: 5),
-                          Text('Copy',
-                              style: AppText.s(9, color: Colors.white)),
+                          Text('Copy', style: AppText.s(9, color: Colors.white)),
                         ],
                       ),
                     ),
@@ -139,15 +155,14 @@ class TeamScreen extends StatelessWidget {
           ),
           _StatRow(stats: [
             ('${team.members.length}', 'Members'),
-            (team.status, 'Team status'),
-            (team.academicYear, 'Academic year'),
+            ('${team.maxMembers}', 'Max members'),
+            ('${team.maxMembers - team.members.length}', 'Open seats'),
           ]),
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SectionHeading('Team members',
-                  trailing:
-                      '${team.members.length} of ${team.maxMembers} seats'),
+                  trailing: '${team.members.length} of ${team.maxMembers} seats'),
               DividedList(
                 children: [
                   for (final m in team.members)
@@ -161,12 +176,9 @@ class TeamScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(m.name,
-                                    style: AppText.s(10, w: FontWeight.w700)),
+                                Text(m.name, style: AppText.s(10, w: FontWeight.w700)),
                                 const SizedBox(height: 2),
-                                Text(m.role,
-                                    style:
-                                        AppText.s(8, color: AppColors.muted)),
+                                Text(m.role, style: AppText.s(8, color: AppColors.muted)),
                               ],
                             ),
                           ),
@@ -195,15 +207,12 @@ class TeamScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Center(
                 child: Text('Leave team',
-                    style: AppText.s(9,
-                        w: FontWeight.w700, color: AppColors.red700)),
+                    style: AppText.s(9, w: FontWeight.w700, color: AppColors.red700)),
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
+      );
 }
 
 /// `.stat-row` – three equal stat cells separated by lines.
@@ -227,22 +236,18 @@ class _StatRow extends StatelessWidget {
             for (var i = 0; i < stats.length; i++) ...[
               Expanded(
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 11),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 11),
                   child: Column(
                     children: [
                       Text(stats[i].$1,
-                          style: AppText.s(11,
-                              w: FontWeight.w700, color: AppColors.navy900)),
+                          style: AppText.s(11, w: FontWeight.w700, color: AppColors.navy900)),
                       const SizedBox(height: 3),
-                      Text(stats[i].$2,
-                          style: AppText.s(7.5, color: AppColors.muted)),
+                      Text(stats[i].$2, style: AppText.s(7.5, color: AppColors.muted)),
                     ],
                   ),
                 ),
               ),
-              if (i < stats.length - 1)
-                const VerticalDivider(width: 1, color: AppColors.line),
+              if (i < stats.length - 1) const VerticalDivider(width: 1, color: AppColors.line),
             ],
           ],
         ),

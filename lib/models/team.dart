@@ -11,12 +11,19 @@ class TeamMember {
   final String role;
   final bool isLeader;
 
-  factory TeamMember.fromJson(Map<String, dynamic> json) => TeamMember(
-        initials: json['initials'] as String,
-        name: json['name'] as String,
-        role: json['role'] as String,
-        isLeader: (json['isLeader'] as bool?) ?? false,
-      );
+  factory TeamMember.fromJson(Map<String, dynamic> json) {
+    final first = (json['firstName'] ?? '').toString();
+    final last = (json['lastName'] ?? '').toString();
+    final leader = json['isLeader'] == true;
+    final number = (json['studentNumber'] ?? '').toString();
+    return TeamMember(
+      initials:
+          '${first.isEmpty ? '' : first[0]}${last.isEmpty ? '' : last[0]}'.toUpperCase(),
+      name: '$first $last'.trim(),
+      role: leader ? 'Team leader · ID $number' : 'Member · ID $number',
+      isLeader: leader,
+    );
+  }
 }
 
 class Team {
@@ -38,14 +45,15 @@ class Team {
   final int maxMembers;
   final List<TeamMember> members;
 
+
   factory Team.fromJson(Map<String, dynamic> json) => Team(
         name: json['name'] as String,
-        projectTitle: json['projectTitle'] as String,
-        inviteCode: json['inviteCode'] as String,
-        academicYear: json['academicYear'] as String,
-        status: json['status'] as String,
-        maxMembers: json['maxMembers'] as int,
-        members: (json['members'] as List)
+        projectTitle: '',
+        inviteCode: json['teamCode'] as String,
+        academicYear: '',
+        status: 'Active',
+        maxMembers: (json['maxMembers'] as num?)?.toInt() ?? 5,
+        members: ((json['members'] as List?) ?? const [])
             .map((e) => TeamMember.fromJson(e as Map<String, dynamic>))
             .toList(),
       );
